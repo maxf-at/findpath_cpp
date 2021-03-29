@@ -1,0 +1,27 @@
+todo: 
+
+# fix 1000
+# concatenate result vectors
+# return G, recursion
+
+# sort 2x
+# redis function caching?
+
+0.01 to 0.1 s per merging
+memory leaks? but no segmentation faults, it runs well with any input.
+
+Slide: modular input -> output. pre/post processing. 
+critical thing: correct input, not the postprocessing or merging operation. recursion comparatively simple. 
+inputs which give us the best shot at recovering the original best path. 
+timing recursively, has to include inheritence. 
+
+Slide indirect paths: function call with move set
+
+example: rb2 / barriers
+
+neighbor function (inbuilt)
+
+indications / observations:
+employ Similar principle: "correct" indirect moves are "dominant"
+
+ increase search width

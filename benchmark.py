@@ -14,9 +14,14 @@ import pathfinder
 
 
 
-# sequence = "AUGAACAGAUGGUACCUCGCGGCGGGGCCUGACCCAUCUACAGUUUGUGCAG"
-# s1 =       "((((((((((((..(((((...)))))......))))))...))))))...."
-# s2 =       ".((..((((..(((((....))..(((.....)))...)))..))))..))."
+sequence = "AUGAACAGAUGGUACCUCGCGGCGGGGCCUGACCCAUCUACAGUUUGUGCAG"
+s1 =       "((((((((((((..(((((...)))))......))))))...))))))...."
+s2 =       ".((..((((..(((((....))..(((.....)))...)))..))))..))."
+
+# sequence = "AACGCCGCGCCGGCCAGGCUGCCAGUUGUCUUAUUGAGUUGGCCAUCUACGUAAUACUUUUGUAGCCGACGACUAUAACG"
+# s1 =       "(((...(((((.....)).)))..)))...((((...((((((....((((.((....))))))))))))....)))).."
+# s2 =       "...((.(((((.....))).))..)).(((.......((((((....((((.........)))))))))))))......."
+
 
 # sequence = "UGGGUCCACGCAAGCCGGCACGCGAAAGGGCGGCUAUGUACAGCUCUUAAAACCACCAGAGGUUUAGUGAUCACUGAGGCUUGUUCGCAAAUCACUGCAAUUAGAUAUGACUCACGAUAUGGGGCACGGUGCAUACAUACAAGAAUUACUUGGCACCCCCGCGGAAAGUAGUCUCCUUGUACGCAUAUCGCUACAAAAUCGGGGAACUUCCAUACAUCCUGUUAUGUGAAAUGCGACGUAGAAGCCACACACUCGUCAUUGACAGAUCUACGAAUUAUGGGUCUACUAAGAAAUUUCACAUUCCGUAGAUUCUUGUACAAGGAUAGUGACUCCGCAAUUAGGACUGAACAAUAACUUGGGCGUAAAGUAAGCGCAGGACUAGAGGAAGGCUGGUGCGCGA"
 # s1 =       ".(.(((((.(..(((((.(.(......)).))))).(((.(((.((((((((((......))))..(((((((((((.((.((.........))..))..))))...))).))))......(((...(((((.......((((.....))))))))))))(((((...((.(.(((((((((((((.((((((((..((..(((....)))....))..))).).)))).))))..((((((..........(((((...))).))))))))......((((((((...(((........))).))))))))..))))))))).).))..)))))..))))))))).)))....).))))).)........(((.(.(((((.......))))).))))."
@@ -28,9 +33,10 @@ import pathfinder
 # s2 =       ".((.(((((((....(((.........)))....)))))))))(((((.((((((...(((((((((((((((.((((((((..((((....((((((((......))))).....))).....))))..))).((((..((((......((((..((......))..)))).......))))))))(((((((...(.((.((((((...........)))))).))).))))))))))))..)))))))))))))))..)))))))))))..((((((.............))).)))"
 
 # 300 nt, 190 bp_dist, 2 sections
+# good example sw_multiplier scaling... too many recursions?
 sequence = "CAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACCAGACCACAAUGCAGGGCGGCACCGUUAGGCAACACAACGAGACUACUCAUGCACAUAAGGAAGGUUAUCGCCAUAGACAUGGCGCGGCAGCGCAGAAUGUUUAAAUCUAAAUCUGGUAUGGGAGGCGUGCCCGUUGGUAUGAAGAAAUUUGCUGGGAGAAAAAGUCUAAGGCCUUGAAUCCGGCGGGUCUUAAUACUUACCUACAAAAUCAUCAGGCUGUACUUCCUGUAUC"
-# s1 =       "......(((((.......((..(((((((.(((.(((....(((((....(((((((((((((((.(((.((((...(((..((((....))))..))).......(((....)))...........((......))....(((((((.((((....))))...)))))))..........)))).))))))))))).....))))))))))))..)))..))))))....))))..)).........)))))(((..........)))...........((((........))))...."
-# s2 =       "....((((((...........(((........)))....(((..(((((((.....(((((((((.(((.((((........(((((.(((...........((..(((....))).))...........)))..))))).(((((((.((((....))))...)))))))..........)))).))))))))))))(((((((..(.(((......(((.(((.......)))..)))))).)..)))))))))))))).....))).............))).)))..........."
+s1 =       "......(((((.......((..(((((((.(((.(((....(((((....(((((((((((((((.(((.((((...(((..((((....))))..))).......(((....)))...........((......))....(((((((.((((....))))...)))))))..........)))).))))))))))).....))))))))))))..)))..))))))....))))..)).........)))))(((..........)))...........((((........))))...."
+s2 =       "....((((((...........(((........)))....(((..(((((((.....(((((((((.(((.((((........(((((.(((...........((..(((....))).))...........)))..))))).(((((((.((((....))))...)))))))..........)))).))))))))))))(((((((..(.(((......(((.(((.......)))..)))))).)..)))))))))))))).....))).............))).)))..........."
 
 
 # 600 nt, 2 sections
@@ -39,18 +45,22 @@ sequence = "CAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACC
 # s2 =       ".....(((((((.((((((((((((((..........))))))))....((((((((((((((..(((......)))......((((...(((((.....((((.(((((....))))).))))..(((((((((....))..))))))))))))...))))........((((((((....(((......))).....((((((((.........((((((.(.............).)))))).........))))))))....))))))))(((((((.........)).))))).)))))..........(((((.............))))).....)))))))))..........(((((((.(((((((..((((((((((.((((.(((((.....((......(((((...........))))).....))...))))).))))..))))........))))))..)))))))...........(((........))).(((.(((....))).))))))))))...............(((((.(((...((((.((.....)))))))))))))))))))).)))))))"
 
 # random 600 nt example
-sequence = "AAAAUAAUGUACCGGACAUUCGCGCACGACCACCAUAUGGCAGAGCAUGUGUCUGUGGACCCACUAUAGCUGGGGCGCUUAACCCCAGAAAAGUAUCUUCGGUCUAUGCCUCACACGCAGCCUCCUAUUAGCAGCUCUCCUGGCCCACAAUUUUAUUAAAAGUCCAAGUUGGACUGACAAAACGCGUGCGGUGUCCUAGGGAUUGGUGGCAUAACCAGCGGUUUAAAAGCUGUGUAUAUCCGCAGCAAAUCACCGGAAAGCGGCGUUAUUAGCACCACAAAUUGAUGGUUGGUACGAGUACAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACCAGACCACAAUGCAGGGCGGCACCGUUAGGCAACACAACGAGACUACUCAUGCACAUAAGGAAGGUUAUCGCCAUAGACAUGGCGCGGCAGCGCAGAAUGUUUAAAUCUAAAUCUGGUAUGGGAGGCGUGCCCGUUGGUAUGAAGAAAUUUGCUGGGAGAAAAAGUCUAAGGCCUUGAAUCCGGCGGGUCUUAAUACUUACCUACAAAAUCAUCAGGCUGUACUUCCUGUAUC"
-s1 =       "........(((((((((((((((((..((((.((.((((((((((...((.((((((((((....(((.((((((.......)))))).....)))....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((...........((((......((((((......)))))).....))))....(((((((((((.(.((((((......))..)))).).)))).....))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..))))..((((((....)))))).....)))).)))))............))))))))((((((((.(((.(.((((.........((((..(((((.....((.((((((((((....))..)))))))))).))).))..)))))))).).))))))..)))))....."
-s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((..((((((.......))))))....))).....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((((.....))..((((......((((((......)))))).....))))....((((((((((((..((((........)))))))))...........))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..)))...((((((....))))))))...)))).))))))))............(((((((((((((.(((.((.(((((.((((..(((((((((.......(((...)))......))))))))))))).))))).))..............)))))..)))))))))))"
+# sequence = "AAAAUAAUGUACCGGACAUUCGCGCACGACCACCAUAUGGCAGAGCAUGUGUCUGUGGACCCACUAUAGCUGGGGCGCUUAACCCCAGAAAAGUAUCUUCGGUCUAUGCCUCACACGCAGCCUCCUAUUAGCAGCUCUCCUGGCCCACAAUUUUAUUAAAAGUCCAAGUUGGACUGACAAAACGCGUGCGGUGUCCUAGGGAUUGGUGGCAUAACCAGCGGUUUAAAAGCUGUGUAUAUCCGCAGCAAAUCACCGGAAAGCGGCGUUAUUAGCACCACAAAUUGAUGGUUGGUACGAGUACAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACCAGACCACAAUGCAGGGCGGCACCGUUAGGCAACACAACGAGACUACUCAUGCACAUAAGGAAGGUUAUCGCCAUAGACAUGGCGCGGCAGCGCAGAAUGUUUAAAUCUAAAUCUGGUAUGGGAGGCGUGCCCGUUGGUAUGAAGAAAUUUGCUGGGAGAAAAAGUCUAAGGCCUUGAAUCCGGCGGGUCUUAAUACUUACCUACAAAAUCAUCAGGCUGUACUUCCUGUAUC"
+# s1 =       "........(((((((((((((((((..((((.((.((((((((((...((.((((((((((....(((.((((((.......)))))).....)))....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((...........((((......((((((......)))))).....))))....(((((((((((.(.((((((......))..)))).).)))).....))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..))))..((((((....)))))).....)))).)))))............))))))))((((((((.(((.(.((((.........((((..(((((.....((.((((((((((....))..)))))))))).))).))..)))))))).).))))))..)))))....."
+# s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((..((((((.......))))))....))).....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((((.....))..((((......((((((......)))))).....))))....((((((((((((..((((........)))))))))...........))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..)))...((((((....))))))))...)))).))))))))............(((((((((((((.(((.((.(((((.((((..(((((((((.......(((...)))......))))))))))))).))))).))..............)))))..)))))))))))"
 
 #100 nt with 2 inner sections
 # sequence = "CGCAUCUCUUUAGGGUAUGAAAUGUUAUAUGCUACGGGAACAAUGCCGACCUUCGGAGACCUAAGGAAUACGUCUUUCGAGCGGAAGGAUUCCUCGUUCA"
 # s1 =       ".(((((((..(((.((((((....)))))).))).))))....)))(((...)))..(((...((((....(((((((.....))))))))))).))).."
 # s2 =       "....((.((.(((.((((((....)))))).))).))))......((((...)))).(((...(((((....((((((.....))))))))))).))).."
 
+# 300 nt fails?
+# sequence = "GUUGGGGUAGGGGCCCGACUAAUAGCAGUUCUUUGACAAUUCUUCUGCGUUAUUCAUUUUGAUAACAAUUAUUAUAUAAGUGCUGGAAAGCCAACCAUAUCGGCCUUAAUCCCCAACAGAAAACCUUCACGAGUGGGGUCGGUUUCGCAAUUCCUUGCGUGAGAGCCGAGGUUGGUUACAUGAGAAUAACCACGCCGAAC"
+# s1 = "(((((((..((((((.((.((((.((((................)))))))).))((((..((((......))))..))))..(((....)))........))))))...))))))).......((.((((...((((..............)))).))))))...((..((.(((((........)))))))..))..."
+# s2 = "((((((((((.((((.........((((................))))((((((......)))))).............(((.(((....)))..)))...)))))))..)))))))......(((........))).((((((((((((....)))))...)))))))(((((((((........)))))).)))...."
 
-
-search_width = RNA.bp_distance(s1, s2)*2
+search_width_multiplier = 4
+search_width = RNA.bp_distance(s1, s2)*search_width_multiplier
 
 # search_width = RNA.bp_distance(s1, s2)*4
 
@@ -67,9 +77,14 @@ search_width = RNA.bp_distance(s1, s2)*2
 # findpath_cmd = "/scratch/maxf/cppfinder/findpath_f_debug"
 # findpath_cmd = "/scratch/maxf/cppfinder/findpath_f_all"
 
-def launch_fp(sequence, s1, s2, search_width, findpath_cmd):
+def launch_fp(sequence, s1, s2, findpath_cmd, search_width=None, search_width_multiplier=None):
     start_findpath = time.time()
-    cmd = f'printf "{sequence}\n{s1}\n{s2}" | {findpath_cmd} -m {search_width} '
+    if search_width:
+        cmd = f'printf "{sequence}\n{s1}\n{s2}" | {findpath_cmd} -m {search_width} '
+    if search_width_multiplier:
+        cmd = f'printf "{sequence}\n{s1}\n{s2}" | {findpath_cmd} -m {search_width_multiplier} '
+
+
     # cmd = f'printf "{sequence}\n{s1}\n{s2}" | {findpath_cmd} -m {search_width} -v'
     result1 = subprocess.check_output(cmd, shell=True, encoding="utf8")
     end_findpath = round(time.time()-start_findpath,4)
@@ -82,7 +97,11 @@ start_c = time.time()
 # with concurrent.futures.ProcessPoolExecutor(max_workers=2) as executor:
 #     result = executor.map(launch_main, [sequence, sequence], [s1, s2], [s2, s1], [search_width, search_width])
 # result = list(result)
-result = launch_fp(sequence, s1, s2, search_width, "./main")
+
+cmd = "./main"
+# cmd = "./fp_multi_test"
+
+result = launch_fp(sequence, s1, s2, cmd, search_width_multiplier)
 end_c = round(time.time()-start_c,4)
 
 # print ("new:", result)

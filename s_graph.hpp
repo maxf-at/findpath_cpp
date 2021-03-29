@@ -72,10 +72,10 @@ struct s_node {
     std::vector<s_edge> in_edges  = {};
     s_node(int id_s) { id = id_s; };  // construct with id
 
-    // ~s_node() { 
+    // ~s_node() {
     //     IC("de");
     //     out_edges.clear();
-    //     in_edges.clear();        
+    //     in_edges.clear();
     //      }
 };
 
@@ -97,9 +97,10 @@ class s_graph
 
    public:
     void reset();
-    void add_paths(const auto& paths); // sorted_paths or merged_paths template function
+    void add_paths(const auto& paths);  // sorted_paths or merged_paths template function
     void add_node(short* p_table, int i, int j);
     void info();
+    void display_path(bool result_only = false);
 
     std::vector<s_node> node_list = {};
 
@@ -227,11 +228,11 @@ void s_graph::info()
     for (auto const& node : node_list) {
         for (auto const& edge : node.out_edges) {
             std::cout << "node: " << node.id;  // << endl;
-            std::cout << " ( " << edge.i << "  / " << edge.j << " )  dest: " << edge.destination <<
-            endl;
+            std::cout << " ( " << edge.i << "  / " << edge.j << " )  dest: " << edge.destination
+                      << endl;
         }
-        if (node.out_edges.size()==0)
-            std::cout << "node: " << node.id << " final node\n" ;  // << endl;
+        if (node.out_edges.size() == 0)
+            std::cout << "node: " << node.id << " final node\n";  // << endl;
     }
 
     auto current_ptable = vrna_ptable_copy(pt_1);  // short*
@@ -269,8 +270,48 @@ void s_graph::info()
     //     // fmt::print("ij: {} / {} \n", m.i, m.j);
     //     current_node = node_list[m.destination];
     // }
-
-
-
 }
 
+void s_graph::display_path(bool result_only)
+{
+    auto current_ptable = vrna_ptable_copy(pt_1);  // short*
+
+    std::string s  = vrna_db_from_ptable(current_ptable);
+    float       en = vrna_eval_structure_pt(fc, current_ptable) / 100.0;
+
+    // random graph traversal
+    int    iter         = 0;
+    s_node current_node = node_list[iter];  // dont copy this
+
+    float max_en = -9999;
+
+    while (current_node.out_edges.size() != 0) {
+        // if (current_node.out_edges.size() == 0) break;
+
+        // fmt::print("nodes: {} \n", current_node.out_edges.size());
+
+        // int next_node = current_node.out_edges.size() - 1;
+        int next_node = 0;
+
+        const auto& m = current_node.out_edges[next_node];
+
+        if (m.j < 0) {
+            /*it's a delete move */
+            current_ptable[-m.i] = 0;
+            current_ptable[-m.j] = 0;
+        } else {
+            current_ptable[m.i] = m.j;
+            current_ptable[m.j] = m.i;
+        }
+        s  = vrna_db_from_ptable(current_ptable);
+        en = vrna_eval_structure_pt(fc, current_ptable) / 100.0;
+        if (en > max_en) { max_en = en; }
+
+        if (not result_only) { fmt::print("{} {:7.2f} ({:4}/{:4})\n", s, en, m.i, m.j); }
+
+        // fmt::print("ij: {} / {} \n", m.i, m.j);
+        current_node = node_list[m.destination];
+    }
+    // fmt::print("S:{:7.2f} best path in G\n", max_en);
+    fmt::print("{:7.2f}\n", max_en);
+}
