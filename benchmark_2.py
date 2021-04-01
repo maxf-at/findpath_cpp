@@ -22,8 +22,8 @@ import merge_composition
 
 
 # o_filename = r"local_min_100_multiple_sections_min10.csv"
-# o_filename = r"local_min_200_multiple_sections_min10.csv"
-o_filename = r"local_min_300_multiple_sections_min10.csv"
+o_filename = r"local_min_200_multiple_sections_min10.csv"
+# o_filename = r"local_min_300_multiple_sections_min10.csv"
 # o_filename = r"local_min_400_multiple_sections_min10.csv"
 # o_filename = r"local_min_500_multiple_sections_min10.csv"
 

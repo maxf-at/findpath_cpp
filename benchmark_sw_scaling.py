@@ -23,8 +23,8 @@ import merge_composition
 
 # o_filename = r"local_min_100_multiple_sections_min10.csv"
 # o_filename = r"local_min_200_multiple_sections_min10.csv"
-o_filename = r"local_min_300_multiple_sections_min10.csv"
-# o_filename = r"local_min_400_multiple_sections_min10.csv"
+# o_filename = r"local_min_300_multiple_sections_min10.csv"
+o_filename = r"local_min_400_multiple_sections_min10.csv"
 # o_filename = r"local_min_500_multiple_sections_min10.csv"
 
 filename = r"./sample_seqs/" + o_filename
@@ -138,10 +138,10 @@ for index, row in df.iterrows():
     # if index != 23:
     #     continue    
 
-    if index>24:
-        break
+    # if index>24:
+    #     break
 
-    if index != 16:
+    if index != 51:
         continue    
     #    
 
@@ -249,6 +249,6 @@ df = pd.DataFrame(data)
 df = df.transpose() 
 df.columns = ["i", "sequence", "s1", "s2", "search_width_multiplier", "single_1_runtimes", "single_1_results", "single_2_runtimes", "single_2_results", "mp_runtimes", "mp_results", "cpp_orig_runtimes", "cpp_orig_results", "new_merge_runtimes", "new_merge_results", "old_merge_runtimes", "old_merge_results", "py_runtimes", "py_results", "bp_dist"] 
 
-savefile = r"./results/" + "16_sw_scaling_" + o_filename
+savefile = r"./results/" + "400_51_sw_scaling_" + o_filename
 df.to_csv(savefile)
 print (df)
