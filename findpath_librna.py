@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 
 
 
-
 def pathfinder(sequence, s1, s2, verbose=False, output=False, search_width = None, section = None):
 
     # prune off sections which will currently not be regarded / later merged
@@ -31,10 +30,6 @@ def pathfinder(sequence, s1, s2, verbose=False, output=False, search_width = Non
             # print (s1)
             # print (s2)
 
-
-
-
-
     start = time.time()
     # Set model details (by Stefan)
     md = RNA.md()
@@ -49,7 +44,6 @@ def pathfinder(sequence, s1, s2, verbose=False, output=False, search_width = Non
     md.noGUclosure = False
     fc = RNA.fold_compound(sequence, md)
     # fc = RNA.fold_compound(sequence)
-
 
     bpd = RNA.bp_distance(s1, s2)
 
@@ -70,37 +64,13 @@ def pathfinder(sequence, s1, s2, verbose=False, output=False, search_width = Non
     s_pos = 0
     en_min = float('inf')  # minimum, assuming we get below E1
 
-
-    current_structure = ""
-
-    # compare changes to previous move
-
-
-    moves_str = []
-    moves_en = []
-    moves_pos = []
-
     for i, step in enumerate(paths):
-
         current_structure = step.s
-
         if step.en > sE:
             sE = step.en
             s_pos = i
 
-
-
-    # dcal_sE = fc.path_findpath_saddle(s1, s2, width = search_width)
-    # sE2 = float(dcal_sE)/100 # saddle energy
-
-    # e1 = round(fc.eval_structure(s1), 2)
-    # e2 = round(fc.eval_structure(s2), 2)
-    # barrier = sE - e1
-
     return sE
-
-
-
 
 
 if __name__ == '__main__':
