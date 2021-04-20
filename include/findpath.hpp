@@ -8,8 +8,8 @@
 #include <postprocessing.hpp>
 
 
-#include <single_findpath.hpp>
-// #include <single_findpath_test.hpp>
+// #include <single_findpath.hpp>
+#include <single_findpath_test.hpp>
 
 #include <merge_findpath.hpp>
 
