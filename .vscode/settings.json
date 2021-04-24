@@ -71,7 +71,8 @@
         "set": "cpp",
         "variant": "cpp",
         "any": "cpp",
-        "codecvt": "cpp"
+        "codecvt": "cpp",
+        "scoped_allocator": "cpp"
     },
     "python.pythonPath": "/usr/bin/python",
     "C_Cpp.intelliSenseEngineFallback": "Disabled"

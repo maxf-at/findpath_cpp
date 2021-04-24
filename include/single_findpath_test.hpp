@@ -2,6 +2,14 @@
 
 // #include <common.hpp>
 
+// #include <foonathan/memory/container.hpp> // vector, list, list_node_size
+// #include <foonathan/memory/memory_pool.hpp> // memory_pool
+// #include <foonathan/memory/smart_ptr.hpp> // allocate_unique
+// #include <foonathan/memory/static_allocator.hpp> // static_allocator_storage,
+// static_block_allocator #include <foonathan/memory/temporary_allocator.hpp> // temporary_allocator
+
+#include <MemoryPool/minipool.hpp>
+
 /*
  #################################
  # PRIVATE FUNCTION DECLARATIONS #
@@ -118,7 +126,7 @@ class single_findpath
                           intermediate_t* next, int dist, int bp_dist, short* temp_pt, short* stack)
         -> int;
     static auto find_path_once(vrna_fold_compound_t* vc, short* pt1, short* pt2,
-                               int current_search_width, int maxE, bool direction,
+                               const int current_search_width, int maxE, bool direction,
                                int final_search_width) -> std::vector<sorted_path>;
     static auto findpath_method(vrna_fold_compound_t* vc, short* pt1, short* pt2, int width,
                                 int maxE, bool init_direction) -> std::vector<sorted_path>;
@@ -159,6 +167,7 @@ inline auto single_findpath::init(vrna_fold_compound_t* fc, short* pt1, short* p
     // fmt::print("{}\n", result[0].max_en);
 
     // fmt::print("test\n");
+
     return result;
 };
 
@@ -286,7 +295,6 @@ auto ptable_from_string(short* pt, char* s, short* stack)
     }
 }
 
-
 inline auto single_findpath::try_moves(vrna_fold_compound_t* vc, intermediate_t c, int maxE,
                                        intermediate_t* next, int dist, int bp_dist, short* temp_pt,
                                        short* stack) -> int
@@ -306,8 +314,6 @@ inline auto single_findpath::try_moves(vrna_fold_compound_t* vc, intermediate_t 
 
     // dont allocate memory here...
     int* loopidx = vrna_loopidx_from_ptable(temp_pt);
-
-
 
     for (mv = c.moves; mv->i != 0; mv++) {
         int i, j;
@@ -388,9 +394,14 @@ inline auto single_findpath::try_moves(vrna_fold_compound_t* vc, intermediate_t 
 // removed global direction, path
 
 inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1, short* pt2,
-                                            int current_search_width, int maxE, bool direction,
-                                            int final_search_width) -> std::vector<sorted_path>
+                                            const int current_search_width, int maxE,
+                                            bool direction, int final_search_width)
+    -> std::vector<sorted_path>
 {
+
+
+    // fmt::print("init: maxE: {} sw: {} dir: {}\n", maxE, current_search_width, direction);
+
     move_t*         mlist;
     int             i, len, d, dist = 0, result;
     short*          pt;
@@ -433,9 +444,14 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
     // fmt::print("input: {}\n", vrna_db_from_ptable(temp_pt));
     // fmt::print("\n");
 
-    current = (intermediate_t*)vrna_alloc(sizeof(intermediate_t) * (current_search_width + 1));
+    // MemoryPool<intermediate_t, bp_d*current_search_width*4> pool;
+    // intermediate_t*            x = pool.allocate();
+    // pool.deallocate(x);
 
-    // current[0].pt = pt;
+
+
+
+    current = (intermediate_t*)vrna_alloc(sizeof(intermediate_t) * (current_search_width + 1));
 
     current[0].s      = vrna_db_from_ptable(pt);
     current[0].length = pt[0];
@@ -595,6 +611,7 @@ inline auto single_findpath::compare_ptable(const void* A, const void* B) -> int
         // if (d != c) { fmt::print("error {} {}\n", c, d); }
 
         // 🤦‍♂️
+        // return c;
         return -c;
     }
     // same structures, c==0

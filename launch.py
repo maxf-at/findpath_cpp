@@ -30,6 +30,7 @@ s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((.
 # sequence = "UGAAGACCCAUUGAGUAACGACACCGCACGGCGCAUGGCGUCAGAGUAGCACUGCCUCGU"
 # s1 =       "....(((((((.(.(...((....)).....).))))).)))((.((......))))..."
 # s2 =       "....(((((((...((..((........))..)))))).))).(((..((...))))).."
+# s2 =       "....(((((((.(.(...((....)).....).))))).))).(((..((...))))).."
 
 # no sections 300
 # sequence = "UCACGACACCCCUCAACUAUAACAACGGUCCGUACAUACUAGCCCUGCAAUGGAACGGGCAGGGCCAGCACAGGUGGGGCGCCCGCUUGGGGGAUCAAAUGUGUGAUCCAGAUACUUUAGACGCGUGCAGAACUUUUUAGAUCGAUCAGUGGGAACAGGCAUUGAUUAUGAAAUCAAUUAGGGGGUUUAGGACCGCACCACAAACUGCGGGAGGGCACGCUUUGGUUCCUGUGUUACGCUAAUCCUCUAGCCACGGAGGGCUUCUUCGUACAAUGAUUGGGUUACCAGGGUUCCAGUGUG"
@@ -56,7 +57,13 @@ s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((.
 
 # sequence = "UGAAGACCCAUUGAGUAAAA"
 # s1       = "(((((((.....)))).)))"
-# s2       = "(((((((.....)))).)))"
+# s2       = "(((((.........)).)))"
+
+
+
+# s1 = '..................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................(.(.((((.........((((..(((((.....((.((((((((((....))..)))))))))).))).))..)))))))).).).................'
+# s2 = '..................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................................(.((.(((((.((((..(((((((((.......(((...)))......))))))))))))).))))).))..............).................'
+
 
 # print (sequence)
 # print (s1)
@@ -77,12 +84,14 @@ bp_dist = RNA.bp_distance(s1, s2)
 
 # print ("bp dist:", bp_dist, len(sequence))
 
+# mp = False
+mp = True
 
-findpath.init_single_findpath(sequence, s1, s2, search_width_multiplier, True)
+findpath.init_single_findpath(sequence, s1, s2, search_width_multiplier, mp)
 
 
 start_findpath = time.time()
-result = findpath.init_single_findpath(sequence, s1, s2, search_width_multiplier, True)
+result = findpath.init_single_findpath(sequence, s1, s2, search_width_multiplier, mp)
 result = result/100.0
 runtime = time.time()-start_findpath
 print ("~~~~~~~~~~~")
@@ -121,8 +130,9 @@ print (f'librna findpath (PYBIND11)')
 print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
 
-start_findpath = time.time()
-for i in range(10):
-    findpath.init_single_findpath(sequence, s1, s2, search_width_multiplier, True)
-runtime = time.time()-start_findpath
-print (f'runtime: {runtime:2.4f} s')
+
+# start_findpath = time.time()
+# for i in range(10):
+#     findpath.init_single_findpath(sequence, s1, s2, search_width_multiplier, mp)
+# runtime = time.time()-start_findpath
+# print (f'runtime: {runtime:2.4f} s')
