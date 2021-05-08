@@ -33,6 +33,11 @@ struct move_t {
     // int E;
 };
 
+struct move_ij {
+    short i; /* i,j>0 insert; i,j<0 delete */
+    short j;
+};
+
 struct intermediate_t {
     short*  pt;      /**<  @brief  pair table */
     int     Sen;     /**<  @brief  saddle energy so far */
@@ -63,7 +68,7 @@ class single_findpath
 
    public:
     auto init(vrna_fold_compound_t* fc, short* pt1, short* pt2, int final_search_width,
-              bool mp = true) -> std::vector<sorted_path>;
+              bool mp = true, int en_limit = INT_MAX - 1) -> std::vector<sorted_path>;
     void test();
     single_findpath(){};
 };
@@ -71,20 +76,26 @@ class single_findpath
 inline void single_findpath::test() {}
 
 inline auto single_findpath::init(vrna_fold_compound_t* fc, short* pt1, short* pt2,
-                                  int final_search_width, bool mp) -> std::vector<sorted_path>
+                                  int final_search_width, bool mp, int en_limit)
+    -> std::vector<sorted_path>
 {
     // fmt::print("{}\n", vrna_db_from_ptable(pt1));
     // fmt::print("{}\n", vrna_db_from_ptable(pt2));
-    // fmt::print("hello fmt\n");
+
+    // mp = false;
+    // char* temp_s = vrna_db_from_ptable(pt1);
+    // short* temp_pt = vrna_ptable_copy(pt1);
+    // encode_pt(temp_pt);
 
     auto result = findpath_method(fc, vrna_ptable_copy(pt1), vrna_ptable_copy(pt2),
-                                  final_search_width, INT_MAX - 1, mp);
+                                  final_search_width, en_limit, mp);
 
     // best path to [0] (lowest max_en)
+
     std::sort(result.begin(), result.end(),
               [](const auto& a, const auto& b) -> bool { return a.max_en < b.max_en; });
 
-    // fmt::print("single findpath\n");
+    // fmt::print("hello fmt\n");
     // fmt::print ("s1 = '{}'\n", vrna_db_from_ptable(pt1));
     // fmt::print ("s2 = '{}'\n", vrna_db_from_ptable(pt2));
     // for (const auto& path : result) {
@@ -93,8 +104,7 @@ inline auto single_findpath::init(vrna_fold_compound_t* fc, short* pt1, short* p
 
     // }
 
-    return result;
-};
+    return result;}
 
 inline auto single_findpath::findpath_method(vrna_fold_compound_t* fc, short* pt1, short* pt2,
                                              int final_search_width, int max_en, bool mp)
@@ -179,6 +189,71 @@ inline auto single_findpath::findpath_method(vrna_fold_compound_t* fc, short* pt
     free(pt2_bwd);
 
     return all_paths;
+}
+
+
+
+// not used here
+
+auto ptable_from_string(short* pt, short* loop, const char* s, short* stack)
+{
+    /*
+    this function combines: (utils/structure_utils.c)
+        vrna_loopidx_from_ptable(const short *pt)
+        vrna_ptable_from_string(structure, VRNA_BRACKETS_***);
+
+    the stack will be overwritten with every call, it needs to be allocated beforehand.
+
+    input:  structure as string (char* s)
+    output: pairing table: short* pt
+            loop table:    short* loop
+    */
+
+    const char*  ptr;
+    unsigned int i, j, n;
+    int          hx = 0;
+    int          l  = 0;
+    int          nl = 0;
+
+    n = (unsigned int)pt[0];
+
+    // reset everything to unpaired
+    memset(pt + 1, 0, sizeof(short) * pt[0]);
+    memset(loop + 1, 0, sizeof(short) * pt[0]);
+    // whatever currently in the stack is does not matter...
+
+    const char open  = '(';
+    const char close = ')';
+
+    // fmt::print("before:{}\n", vrna_db_from_ptable(pt));
+    for (hx = 0, i = 1, ptr = s; (i <= n) && (*ptr != '\0'); ptr++, i++) {
+        if (*ptr == open) {
+            nl++;
+            l           = nl;
+            stack[hx++] = i;
+        }
+
+        loop[i] = l;
+
+        if (*ptr == close) {
+            j = stack[--hx];
+
+            if (hx > 0) {
+                l = loop[stack[hx - 1]]; /* index of enclosing loop   */
+            } else {
+                l = 0; /* external loop has index 0 */
+            }
+            // no time for exception handling...
+            // if (hx < 0) {
+            //     vrna_message_warning(
+            //         "%s\nunbalanced brackets found while extracting base pairs", s);
+            // }
+            pt[i] = j;
+            pt[j] = i;
+        }
+    }
+    pt[0]   = n;
+    loop[0] = nl;
 }
 
 // private functions below

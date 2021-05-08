@@ -75,5 +75,5 @@
         "scoped_allocator": "cpp"
     },
     "python.pythonPath": "/usr/bin/python",
-    "C_Cpp.intelliSenseEngineFallback": "Disabled"
+    "C_Cpp.intelliSenseEngineFallback": "Enabled"
 }

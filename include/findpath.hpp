@@ -1,24 +1,36 @@
 
 
 
-
-
 #include <common.hpp>
 
 #include <postprocessing.hpp>
 
-
 // #include <single_findpath.hpp>
 // #include <single_findpath_test.hpp>
 // #include <single_findpath_pool.hpp>
-#include <single_findpath_s.hpp>
-// #include <single_findpath_s2.hpp>
-// #include <single_findpath_s3.hpp>
 
-#include <merge_findpath.hpp>
+// #include <single_findpath_s.hpp>
+
+// #include <single_findpath_s_old.hpp>
+#include <single_findpath_h.hpp>
+// #include <old/single_findpath_h.hpp>
+
+// #include <single_findpath_hash.hpp>
+
+// #include <single_findpath_s4hash.hpp>
+// 
+
+
+#include <multi_findpath.hpp>
+
+
+// #include <merge_findpath.hpp>
+// #include <merge_findpath_benchmark.hpp>
+// #include <old/merge_findpath.hpp>
+#include <merge_findpath_new.hpp>
+
 
 #include <mfe_preprocessing.hpp>
-
 
 // // emplace back without copy: construct it inplace, how emplace is meant
 // // to be used
@@ -38,8 +50,5 @@
 //  // Add an integer to the beginning and end of the deque
 // d.push_front(13);
 // d.push_back(25);
-
-
-
 
 void testfunc(const char* seq, const char* s1, const char* s2, float search_width_multiplier);

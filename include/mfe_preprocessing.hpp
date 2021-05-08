@@ -1,8 +1,22 @@
 
 
-auto mfe_findpath(vrna_fold_compound_t* fc, short* pt1, short* pt2, float search_width_multiplier)
+auto mfe_findpath(std::string sequence, std::string s1, std::string s2,
+                      float search_width_multiplier, bool mp = true)
 {
     // std::cout << "mfe calculation \n";
+
+
+    const char* c_sequence = sequence.c_str();
+    const char* c_s1       = s1.c_str();
+    const char* c_s2       = s2.c_str();
+
+    vrna_md_t md;
+    set_model_details(&md);
+    vrna_fold_compound_t* fc =
+        vrna_fold_compound(c_sequence, &md, VRNA_OPTION_MFE | VRNA_OPTION_PF);
+    short* pt1 = vrna_ptable(c_s1);
+    short* pt2 = vrna_ptable(c_s2);
+
 
     auto start = std::chrono::system_clock::now();
 
@@ -46,15 +60,18 @@ auto mfe_findpath(vrna_fold_compound_t* fc, short* pt1, short* pt2, float search
     vrna_mfe(fc, mfe_structure);
 
     short* pt_mfe = vrna_ptable(mfe_structure);
+    std::string s_mfe = vrna_db_from_ptable(pt_mfe);
 
     int bp_dist_1 = bp_distance(pt1, pt_mfe);
     int bp_dist_2 = bp_distance(pt_mfe, pt2);
 
+
+
     if (std::min(bp_dist_1, bp_dist_2) == 0) {
         // launch regular merge findpath between s1 ans s2
 
-        auto fp_call = findpath(fc, pt1, pt2, search_width_multiplier);
-        auto result  = fp_call.init();
+        auto fp_call = findpath(sequence, mp);
+        auto result  = fp_call.init(s1, s2, search_width_multiplier);
 
         return result.max_en;
     }
@@ -63,8 +80,8 @@ auto mfe_findpath(vrna_fold_compound_t* fc, short* pt1, short* pt2, float search
     auto elapsed = end - start;
     start        = std::chrono::system_clock::now();
 
-    auto part_1   = findpath(fc, pt1, pt_mfe, search_width_multiplier);
-    auto result_1 = part_1.init();
+    auto part_1   = findpath(sequence, mp);
+    auto result_1 = part_1.init(s1, s_mfe, search_width_multiplier);
 
     end           = std::chrono::system_clock::now();
     auto elapsed2 = end - start;
@@ -75,8 +92,8 @@ auto mfe_findpath(vrna_fold_compound_t* fc, short* pt1, short* pt2, float search
     // std::cout << mfe_structure << " " << result_1.max_en << "\n";
     // std::cout << vrna_db_from_ptable(pt2) << "\n";
 
-    auto part_2   = findpath(fc, pt_mfe, pt2, search_width_multiplier);
-    auto result_2 = part_2.init();
+    auto part_2   = findpath(sequence, mp);
+    auto result_2 = part_2.init(s_mfe, s2, search_width_multiplier);
 
     end           = std::chrono::system_clock::now();
     auto elapsed3 = end - start;

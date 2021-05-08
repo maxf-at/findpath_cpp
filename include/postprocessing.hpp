@@ -4,11 +4,15 @@ struct s_edge {
     int i;
     int j;
     int destination;  // references id from s_node
+    int en;
 };
 
 struct s_node {
     // this is the node object for graph traversal
     int                 id;
+    size_t s_hash;
+    
+
     std::vector<s_edge> out_edges = {};
     std::vector<s_edge> in_edges  = {};
     s_node(int id) : id{id} {};  // construct with id (node_count + 1)
@@ -22,7 +26,7 @@ class s_graph
    private:
     void add_edge(int node1, int node2);
     void add_paths(const auto& paths);  // sorted_paths or merged_paths template function
-    void add_node(short* p_table, int i, int j);
+    void add_node(short* p_table, int i, int j, int en);
 
     // this dictionary is used to populate the node_list vector
     // during the graph initialization, then it is no longer used.
@@ -43,13 +47,22 @@ class s_graph
     int                   bp_dist;
     int                   max_en = -INT_MAX / 2;  // referencing the best path
 
+    int paths_count = 0; // how many individual paths were added to this graph
+
     void reset();
     void info();
     void display_path(bool result_only = false);
 
     // s_graph(); //Constructor of the class
     s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths);
+    s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en);
     s_graph();  // dummy init for empty graph
+
+    ~s_graph() {
+        // free (pt_1);
+        // free (pt_2);
+    }
+
 };
 
 // Constructor
@@ -59,6 +72,15 @@ s_graph::s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist
     // std::cout << "Graph object being created\n";
     add_paths(paths);
 }
+
+// Constructor
+s_graph::s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en)
+        : fc{fc}, pt_1{pt_1}, pt_2{pt_2}, bp_dist{bp_dist}, max_en{max_en}
+{
+    // std::cout << "Graph object being created\n";
+    add_paths(paths);
+}
+
 
 s_graph::s_graph()
 {
@@ -76,12 +98,14 @@ void s_graph::reset()
     node_map.clear();
 }
 
-void s_graph::add_node(short* p_table, int i, int j)
+void s_graph::add_node(short* p_table, int i, int j, int en)
 {
     // generating a unique hashable string, consisting of the structure
     // and the current basepair distance concatenated
     std::string structure = vrna_db_from_ptable(p_table);
     structure += std::to_string(current_bp_dist);
+
+    
 
     int  current_node;
     bool current_existing;
@@ -105,6 +129,9 @@ void s_graph::add_node(short* p_table, int i, int j)
         node_count++;
     }
 
+    node_list[current_node].s_hash = std::hash<std::string_view>()(std::string_view(structure));
+
+
     current_bp_dist++;
 
     // if there's nothing to do...
@@ -115,12 +142,13 @@ void s_graph::add_node(short* p_table, int i, int j)
         last_existing = current_existing;
         return;
     }
+   
 
     // std::cout << "edge " << last_node << " : " << current_node << endl;
 
     // connect our new node with the rest of the graph
-    node_list[last_node].out_edges.push_back({i, j, current_node});   // fwd edges
-    node_list[current_node].in_edges.push_back({-i, -j, last_node});  // bwd edges
+    node_list[last_node].out_edges.push_back({i, j, current_node, en});   // fwd edges
+    node_list[current_node].in_edges.push_back({-i, -j, last_node, en});  // bwd edges
 
     last_node     = current_node;
     last_existing = current_existing;
@@ -132,12 +160,19 @@ void s_graph::add_paths(const auto& paths)
 
     for (auto const& path : paths) {
         current_bp_dist            = 0;
+        paths_count++;
+
         auto const& moves          = path.moves;
         short*      current_ptable = vrna_ptable_copy(pt_1);
+        
+        // fmt::print("S: {} / ({} {})\n", vrna_db_from_ptable(current_ptable), 0,0);
 
-        add_node(current_ptable, 0, 0);  // init graph at S1
+        add_node(current_ptable, 0, 0, 0);  // init graph at S1
 
         for (auto const& move : moves) {
+
+            int en = vrna_eval_move_pt(fc, current_ptable, move.i, move.j);
+            
             if (move.j < 0) {  // delete a basepair
                 current_ptable[-move.i] = 0;
                 current_ptable[-move.j] = 0;
@@ -146,7 +181,9 @@ void s_graph::add_paths(const auto& paths)
                 current_ptable[move.j] = move.i;
             }
 
-            add_node(current_ptable, move.i, move.j);
+            // fmt::print("S: {} / ({} {})\n", vrna_db_from_ptable(current_ptable), move.i, move.j);
+
+            add_node(current_ptable, move.i, move.j, en);
         }
 
         // path_number++;

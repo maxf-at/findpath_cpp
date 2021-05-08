@@ -3,90 +3,115 @@
 class findpath
 {
    private:
-    int       test = 0;
-    void      init_pt();
+    int  test = 0;
+    void init_pt();
+
+    // fp cache
+
+    auto single_findpath_cache(vrna_fold_compound_t* fc, short* pt1, short* pt2, int search_width,
+                               bool mp);
+
     auto      process_ext_loops(ext_loops ext_loops, short* pt_1, short* pt_2) -> s_graph;
     auto      process_int_loops(int_loops current_sections, short* pt_1, short* pt_2) -> s_graph;
     int_loops all_sections{0, 0};
 
-   public:
-    float                 search_width_multiplier;
-    char *                seq, *s1, *s2;
-    short *               pt_1, *pt_2;
-    vrna_fold_compound_t* fc = nullptr;
+    std::unordered_map<size_t, s_graph> G_cache;
+    bool                                cache = true;
 
-    auto init() -> s_graph;
-    auto init_ext() -> s_graph;
+   public:
+    float search_width_multiplier;
+    bool  mp;
+
+    // todo: delete these...
+    // char *                seq, *s1, *s2;
+    // short *               pt_1, *pt_2;
+    vrna_fold_compound_t* fc;
+
+    auto init(std::string s1, std::string s2, float sw = 2) -> s_graph;
+    auto init_python(std::string s1, std::string s2, float sw = 2) -> int;
+
+    auto init_ext(std::string s1, std::string s2, float sw = 2) -> s_graph;
 
     // various constructors (with fold compound or sequence)
-    findpath(vrna_fold_compound_t* init_fc, char* a_s1, char* a_s2, float sw);
-    findpath(char* seq, char* s1, char* s2, float sw);
-    findpath(vrna_fold_compound_t* a_fc, short* a_pt1, short* a_pt2, float sw);
+
+    findpath(std::string sequence, bool mp = true);
+
+    // findpath(vrna_fold_compound_t* init_fc, char* a_s1, char* a_s2, float sw);
+    // findpath(char* seq, char* s1, char* s2, float sw);
+    // findpath(vrna_fold_compound_t* a_fc, short* a_pt1, short* a_pt2, float sw);
 };
 
-// Constructors
-findpath::findpath(vrna_fold_compound_t* a_fc, char* a_s1, char* a_s2, float sw)
+findpath::findpath(std::string sequence, bool mp) : mp{mp}
 {
-    fc                      = a_fc;
-    s1                      = a_s1;
-    s2                      = a_s2;
-    search_width_multiplier = sw;
-    init_pt();
-}
-
-findpath::findpath(vrna_fold_compound_t* a_fc, short* a_pt1, short* a_pt2, float sw)
-{
-    fc                      = a_fc;
-    pt_1                    = a_pt1;
-    pt_2                    = a_pt2;
-    search_width_multiplier = sw;
-    s1                      = vrna_db_from_ptable(pt_1);
-    s2                      = vrna_db_from_ptable(pt_2);
-}
-
-findpath::findpath(char* a_seq, char* a_s1, char* a_s2, float sw)
-{
-    seq                     = a_seq;
-    s1                      = a_s1;
-    s2                      = a_s2;
-    search_width_multiplier = sw;
-
-    // set model parameters
     vrna_md_t md;
     set_model_details(&md);
-    fc = vrna_fold_compound(seq, &md, VRNA_OPTION_EVAL_ONLY);
-    init_pt();
+    fc = vrna_fold_compound(sequence.c_str(), &md, VRNA_OPTION_EVAL_ONLY);
+
+    // s1          = vrna_db_from_ptable(pt_1);
+    // s2          = vrna_db_from_ptable(pt_2);
 }
 
-void findpath::init_pt()
+auto findpath::init_python(std::string s1, std::string s2, float sw) -> int
 {
-    pt_1 = vrna_ptable(s1);
-    pt_2 = vrna_ptable(s2);
-}
+    // s1 = vrna_db_from_ptable(pt_1);
+    // s2 = vrna_db_from_ptable(pt_2);
 
-auto findpath::init() -> s_graph
-{
+    search_width_multiplier = sw;
+    short* pt1              = vrna_ptable(s1.c_str());
+    short* pt2              = vrna_ptable(s2.c_str());
+
     // initialise section structure
     all_sections.start = 1;
-    all_sections.end   = pt_1[0];
+    all_sections.end   = pt1[0];
 
-    all_sections.bp_dist         = vrna_bp_distance(s1, s2);
+    all_sections.bp_dist         = vrna_bp_distance(s1.c_str(), s2.c_str());
     all_sections.nested_sections = find_interior_loops(
-        pt_1, pt_2, 1, pt_1[0]);  // recursively add all nested sections (if available)
+        pt1, pt2, 1, pt1[0]);  // recursively add all nested sections (if available)
 
     // std::cout << "Sections:" << all_sections << "\n";
+    // fmt::print ("s1: {}\n", vrna_db_from_ptable(pt1));
+    // fmt::print ("s2: {}\n", vrna_db_from_ptable(pt2));
 
     // recursively process nested sections
-    auto G = process_int_loops(all_sections, pt_1, pt_2);
+    auto G = process_int_loops(all_sections, pt1, pt2);
+    return G.max_en;
+}
 
+auto findpath::init(std::string s1, std::string s2, float sw) -> s_graph
+{
+    // s1 = vrna_db_from_ptable(pt_1);
+    // s2 = vrna_db_from_ptable(pt_2);
+
+    search_width_multiplier = sw;
+    short* pt1              = vrna_ptable(s1.c_str());
+    short* pt2              = vrna_ptable(s2.c_str());
+
+    // initialise section structure
+    all_sections.start = 1;
+    all_sections.end   = pt1[0];
+
+    all_sections.bp_dist         = vrna_bp_distance(s1.c_str(), s2.c_str());
+    all_sections.nested_sections = find_interior_loops(
+        pt1, pt2, 1, pt1[0]);  // recursively add all nested sections (if available)
+
+    // std::cout << "Sections:" << all_sections << "\n";
+    // fmt::print ("s1: {}\n", vrna_db_from_ptable(pt1));
+    // fmt::print ("s2: {}\n", vrna_db_from_ptable(pt2));
+
+    // recursively process nested sections
+    auto G = process_int_loops(all_sections, pt1, pt2);
     return G;
 }
 
-auto findpath::init_ext() -> s_graph
+auto findpath::init_ext(std::string s1, std::string s2, float sw) -> s_graph
 {
+    search_width_multiplier = sw;
+    short* pt1              = vrna_ptable(s1.c_str());
+    short* pt2              = vrna_ptable(s2.c_str());
+
     // variant with exterior loops
-    auto ext_loops = find_exterior_loops(pt_1, pt_2);
-    auto G         = process_ext_loops(ext_loops, pt_1, pt_2);
+    auto ext_loops = find_exterior_loops(pt1, pt2);
+    auto G         = process_ext_loops(ext_loops, pt1, pt2);
 
     // G.display_path(true);
     return G;
@@ -102,8 +127,16 @@ auto compare_ptable(const void* A, const void* B) -> int
     a = (merge_path*)A;
     b = (merge_path*)B;
 
-    c = memcmp(a->current_ptable, b->current_ptable, a->current_ptable[0] * sizeof(short));
-    if (c != 0) return c;
+    // if both structures are not identical, sort them according to the hash value
+    if (a->s_hash != b->s_hash) {
+        if (a->s_hash > b->s_hash) {
+            return 1;
+        } else {
+            return -1;
+        }
+
+    // c = memcmp(a->current_ptable, b->current_ptable, a->current_ptable[0] * sizeof(short));
+    // if (c != 0) return c;
 
     if ((a->current_s - b->current_s) != 0) return a->current_s - b->current_s;
 
@@ -161,8 +194,9 @@ auto print_moves(const auto& path, vrna_fold_compound_t* fc, const char* s1, boo
     fmt::print("{:6.2f}\n", max_en);
 }
 
-auto available_edges(const auto& input_node, int G1_G2, auto& next_paths, const auto& current_path,
-                     vrna_fold_compound_t* fc, int max_en, bool direction)
+auto available_edges(const s_node& input_node, const s_node& other_node, int G1_G2, std::vector<merge_path>& next_paths, const merge_path& current_path,
+                     vrna_fold_compound_t* fc, int max_en, bool direction,
+                     std::vector<std::vector<short>>& ptable_storage, int pool_offset) -> void
 {
     // this is the try_moves equivalent (regular findpath)
     // given:  an input node (either G1 or G2) + direction
@@ -195,9 +229,16 @@ auto available_edges(const auto& input_node, int G1_G2, auto& next_paths, const 
 
                 new_path.current_en = current_en;
                 new_path.current_s  = std::max(current_en, current_path.current_s);
+
                 // generate new pairing tables
-                new_path.current_ptable = vrna_ptable_copy(current_path.current_ptable);
-                new_path.moves          = current_path.moves;
+                // new_path.current_ptable = vrna_ptable_copy(current_path.current_ptable);
+
+                int n                   = next_paths.size() + 1;
+                new_path.current_ptable = ptable_storage[n + pool_offset].data();
+                memcpy(new_path.current_ptable, current_path.current_ptable,
+                       (current_path.current_ptable[0] + 1) * sizeof(short));
+
+                new_path.moves = current_path.moves;
                 new_path.moves[new_path.current_G1_bp_dist + new_path.current_G2_bp_dist - 1] = {
                     i, j, current_en};
 
@@ -244,8 +285,14 @@ auto available_edges(const auto& input_node, int G1_G2, auto& next_paths, const 
                 new_path.current_en = current_en;
                 new_path.current_s  = std::max(current_en, current_path.current_s);
                 // generate new pairing tables
-                new_path.current_ptable = vrna_ptable_copy(current_path.current_ptable);
-                new_path.moves          = current_path.moves;
+                // new_path.current_ptable = vrna_ptable_copy(current_path.current_ptable);
+
+                int n                   = next_paths.size() + 1;
+                new_path.current_ptable = ptable_storage[n + pool_offset].data();
+                memcpy(new_path.current_ptable, current_path.current_ptable,
+                       (current_path.current_ptable[0] + 1) * sizeof(short));
+
+                new_path.moves = current_path.moves;
                 new_path.moves[new_path.current_G1_bp_dist + new_path.current_G2_bp_dist] = {
                     -i, -j, current_en};
 
@@ -263,13 +310,44 @@ auto available_edges(const auto& input_node, int G1_G2, auto& next_paths, const 
     }
 }
 
-auto merge_once(auto G1, auto G2, short* pt_1, int s1_en, short* pt_2, int s2_en, bool direction,
+
+auto merge_once(s_graph G1, s_graph G2, short* pt_1, int s1_en, short* pt_2, int s2_en, bool direction,
                 int total_bp_dist, int max_en, int merge_search_width, vrna_fold_compound_t* fc)
+    -> std::vector<sorted_path>
 {
     // merge 2 given graphs with a given search width and a given direction
 
     std::vector<merge_path> all_paths;
     merge_path              current_path;
+
+    // merge_search_width = 4;
+    // fmt::print("start merging {} {}\n", G1.bp_dist, G2.bp_dist);
+
+    // std::vector<sorted_move>
+
+    // std::vector<std::vector<char>> structure_storage(2 * current_search_width + 4);
+    // for (auto& col : structure_storage) {
+    //     col.reserve(len + 1);
+    // }  // column space allocation so that we can memcpy into it
+
+    std::vector<std::vector<short>> ptable_storage(2 * total_bp_dist * merge_search_width + 4);
+    for (auto& col : ptable_storage) {
+        col.reserve(pt_1[0] + 1);
+    }  // column space allocation so that we can memcpy into it
+
+    std::vector<std::vector<merge_path>> move_storage(2 * total_bp_dist * merge_search_width + 4);
+    for (auto& col : move_storage) { col.reserve(total_bp_dist + 1); }
+
+    // std::vector<merge_path> current_vec(total_bp_dist + 1);
+    // merge_path*             current = current_vec.data();
+
+    // std::vector<intermediate_t> next_vec(bp_dist * current_search_width + 1);
+    // intermediate_t*             next = next_vec.data();
+
+    std::vector<sorted_move> init_move;
+    init_move.resize(G1.bp_dist + G2.bp_dist);
+    // current_path.moves = init_move.data();
+    current_path.moves = init_move;
 
     // init first path element, depending on direction
     if (direction) {
@@ -280,6 +358,14 @@ auto merge_once(auto G1, auto G2, short* pt_1, int s1_en, short* pt_2, int s2_en
         current_path.current_ptable     = pt_1;
         current_path.current_en         = s1_en;
         current_path.current_s          = s1_en;
+        // current_vec[0].current_G1_node    = 0;
+        // current_vec[0].current_G2_node    = 0;
+        // current_vec[0].current_G1_bp_dist = 0;
+        // current_vec[0].current_G2_bp_dist = 0;
+        // current_vec[0].current_ptable     = pt_1;
+        // current_vec[0].current_en         = s1_en;
+        // current_vec[0].current_s          = s1_en;
+        // current_vec[0].moves = init_move;
     } else {
         current_path.current_G1_node    = G1.bp_dist;
         current_path.current_G2_node    = G2.bp_dist;
@@ -288,10 +374,17 @@ auto merge_once(auto G1, auto G2, short* pt_1, int s1_en, short* pt_2, int s2_en
         current_path.current_ptable     = pt_2;
         current_path.current_en         = s2_en;
         current_path.current_s          = s2_en;
+        // current_vec[0].current_G2_node    = G2.bp_dist;
+        // current_vec[0].current_G1_node    = G1.bp_dist;
+        // current_vec[0].current_G1_bp_dist = G1.bp_dist;
+        // current_vec[0].current_G2_bp_dist = G2.bp_dist;
+        // current_vec[0].current_ptable     = pt_2;
+        // current_vec[0].current_en         = s2_en;
+        // current_vec[0].current_s          = s2_en;
+        // current_vec[0].moves = init_move;
     }
 
-    current_path.moves.resize(G1.bp_dist + G2.bp_dist);  // fill move vector with zero tuples
-
+    // current_path.moves.resize(G1.bp_dist + G2.bp_dist);  // fill move vector with zero tuples
     all_paths.push_back(current_path);
 
     const auto& G1_node = G1.node_list[current_path.current_G1_node];
@@ -302,6 +395,13 @@ auto merge_once(auto G1, auto G2, short* pt_1, int s1_en, short* pt_2, int s2_en
         // iterate over all current paths, the next iteration will be stored in next_paths
         std::vector<merge_path> next_paths;
 
+        // memory pool double buffer offset
+        int pool_offset = 0;
+        if (d % 2 == 0) {
+            pool_offset = total_bp_dist * merge_search_width + 2;
+            // pool_offset = current_search_width + 2;
+        }
+
         for (const auto current_path : all_paths) {
             // fmt::print("cp, direction: {}, {} \n", direction, d);
             // fmt::print("{} \n", vrna_db_from_ptable(current_path.current_ptable));
@@ -310,19 +410,23 @@ auto merge_once(auto G1, auto G2, short* pt_1, int s1_en, short* pt_2, int s2_en
             const auto& G2_node = G2.node_list[current_path.current_G2_node];
 
             // fill up next_paths - either move 1 step on G1 or G2
-            available_edges(G1_node, 1, next_paths, current_path, fc, max_en, direction);
-            available_edges(G2_node, 2, next_paths, current_path, fc, max_en, direction);
+            available_edges(G1_node, G2_node, 1, next_paths, current_path, fc, max_en, direction,
+                            ptable_storage, pool_offset);
+            available_edges(G2_node, G1_node, 2, next_paths, current_path, fc, max_en, direction,
+                            ptable_storage, pool_offset);
         }
 
-        // fmt::print("size before sort: {} \n", next_paths.size());
+        // fmt::print("d: {}, size before sort: {} \n", d, next_paths.size());
 
         if (next_paths.size() == 0) {
             // nothing found below max_en
-            std::vector<merge_path> empty_paths{};
-            merge_path              element;
+
+            merge_path element;
             element.current_s = max_en;
-            empty_paths.push_back(element);
-            return empty_paths;
+
+            all_paths = {element};
+
+            break;
         }
 
         // sort for unique pairing tables
@@ -342,10 +446,34 @@ auto merge_once(auto G1, auto G2, short* pt_1, int s1_en, short* pt_2, int s2_en
         all_paths = next_paths;
     }
 
-    return all_paths;
+    // convert intermediate data structure into findpath paths
+    std::vector<sorted_path> return_paths;
+
+    for (int index = 0; index < all_paths.size(); index++) {
+        // fmt::print ("index {} {} {}\n", index, all_paths.size(), all_paths[index].moves.size());
+
+        // allocate bp_dist elements in current_path vector and set max_en
+        auto& current_path = return_paths.emplace_back(total_bp_dist, all_paths[index].current_s);
+
+        // empty path (nothing found below max_en)
+        if (all_paths[index].moves.size() == 0) {
+            current_path.moves = {};
+            continue;
+        }
+        // current_path.moves = std::move(all_paths[index].moves);
+        current_path.moves = all_paths[index].moves;
+
+        // for (int d = 0; d < total_bp_dist; d++) {
+        //     const int i           = all_paths[index].moves[d].i;
+        //     const int j           = all_paths[index].moves[d].j;
+        //     current_path.moves[d] = {i, j, 0};
+        // }
+    }
+
+    return return_paths;
 }
 
-auto merge_method(auto& G1, auto& G2, short* pt_1, int s1_en, short* pt_2, int s2_en,
+auto merge_method(s_graph& G1, s_graph& G2, short* pt_1, int s1_en, short* pt_2, int s2_en,
                   int total_bp_dist, int max_en, int final_merge_search_width,
                   vrna_fold_compound_t* fc, bool merge_constant_sections)
 {
@@ -388,27 +516,38 @@ auto merge_method(auto& G1, auto& G2, short* pt_1, int s1_en, short* pt_2, int s
     }
 
     // all paths will be stored here...
-    std::vector<merge_path> all_paths{};
+    std::vector<sorted_path> all_paths{};
 
     // iterate search width vector from back to front
     for (std::vector<int>::reverse_iterator it = iterations.rbegin(); it != iterations.rend();
          ++it) {
         current_merge_search_width = *it;
 
-        direction = true;
-        std::vector<merge_path> fwd_paths =
-            merge_once(G1, G2, pt_1, s1_en, pt_2, s2_en, direction, total_bp_dist, max_en,
+        std::vector<sorted_path> fwd_paths =
+            merge_once(G1, G2, pt_1, s1_en, pt_2, s2_en, true, total_bp_dist, max_en,
+                       current_merge_search_width, fc);
+        std::vector<sorted_path> bwd_paths =
+            merge_once(G1, G2, pt_1, s1_en, pt_2, s2_en, false, total_bp_dist, max_en,
                        current_merge_search_width, fc);
 
-        direction = false;
-        std::vector<merge_path> bwd_paths =
-            merge_once(G1, G2, pt_1, s1_en, pt_2, s2_en, direction, total_bp_dist, max_en,
-                       current_merge_search_width, fc);
+
+        // std::future<std::vector<sorted_path>> ret1 =
+        //     std::async(std::launch::async, &merge_once, G1, G2, pt_1, s1_en, pt_2, s2_en, true,
+        //                total_bp_dist, max_en, current_merge_search_width, fc);
+        // auto G1_copy = G1;
+        // auto G2_copy = G2;
+        // std::future<std::vector<sorted_path>> ret2 =
+        //     std::async(std::launch::async, &merge_once, G1_copy, G2_copy, vrna_ptable_copy(pt_1), s1_en, vrna_ptable_copy(pt_2), s2_en, false,
+        //                total_bp_dist, max_en, current_merge_search_width, fc);
+                       
+        // std::vector<sorted_path> fwd_paths = ret1.get();
+        // std::vector<sorted_path> bwd_paths = ret2.get();
+
 
         // IC(current_merge_search_width, fwd_paths[0].current_s, bwd_paths[0].current_s);
 
         // current_merge_search_width = 100;
-        max_en = std::max(fwd_paths[0].current_s, bwd_paths[0].current_s);
+        max_en = std::max(fwd_paths[0].max_en, bwd_paths[0].max_en);
 
         // concatenate result vectors
         std::move(fwd_paths.begin(), fwd_paths.end(), std::back_inserter(all_paths));
@@ -417,11 +556,11 @@ auto merge_method(auto& G1, auto& G2, short* pt_1, int s1_en, short* pt_2, int s
 
     // move best path (lowest saddle energy) to [0]
     std::sort(all_paths.begin(), all_paths.end(),
-              [](const auto& a, const auto& b) -> bool { return a.current_s < b.current_s; });
+              [](const auto& a, const auto& b) -> bool { return a.max_en < b.max_en; });
 
     // postprocessing: transform paths into graph without redundancy
     s_graph G_merged{fc, pt_1, pt_2, total_bp_dist, all_paths};
-    G_merged.max_en = all_paths[0].current_s;
+    G_merged.max_en = all_paths[0].max_en;
 
     return G_merged;
 }
@@ -549,6 +688,43 @@ s_graph findpath::process_int_loops(int_loops current_sections, short* pt_1, sho
 {
     // recursive processing of sections - findpath and merge calls below
 
+    int bp_dist = 0;
+
+    size_t moves_hash = 0;
+
+    std::vector<move_ij> move_list{};
+
+    for (int i = 1; i <= pt_1[0]; i++) {
+        if (pt_1[i] != pt_2[i]) {
+            if (i < pt_1[i]) {  // need to delete this pair
+                move_list.push_back({static_cast<short>(-i), static_cast<short>(-pt_1[i])});
+
+                size_t current_hash = int_hash(-i);
+                current_hash *= (-pt_1[i]);
+                current_hash += (-pt_1[i]) * 13;
+                moves_hash += current_hash;
+                bp_dist++;
+            }
+            if (i < pt_2[i]) {  // need to insert this pair
+                move_list.push_back({static_cast<short>(i), static_cast<short>(pt_2[i])});
+
+                size_t current_hash = int_hash(i);
+                current_hash *= (pt_2[i]);
+                current_hash += (pt_2[i]) * 13;
+                moves_hash += current_hash;
+                bp_dist++;
+            }
+        }
+    }
+    move_list.push_back({0, 0});
+
+    if (bp_dist != 0 and G_cache.contains(moves_hash)) {
+        fmt::print("G avail: {} / {}\n", moves_hash, bp_dist);
+        return G_cache[moves_hash];
+    }
+
+    // continue with recursive processing of sections...
+
     bool Verbose = false;
     // bool Verbose = true;
 
@@ -561,8 +737,8 @@ s_graph findpath::process_int_loops(int_loops current_sections, short* pt_1, sho
 
         const int search_width = current_sections.bp_dist * search_width_multiplier;
 
-        single_findpath test;
-        auto            result = test.init(fc, pt_1, pt_2, search_width, true);
+        single_findpath fp_call;
+        auto            result = fp_call.init(fc, pt_1, pt_2, search_width, true);
 
         // postprocess paths into graph
         s_graph G_inner{fc, pt_1, pt_2, current_sections.bp_dist, result};
@@ -570,6 +746,8 @@ s_graph findpath::process_int_loops(int_loops current_sections, short* pt_1, sho
 
         // G_inner.info();
         if (Verbose) print_moves(result[0], fc, vrna_db_from_ptable(pt_1), true);
+
+        if (cache) { G_cache[moves_hash] = G_inner; }
         return G_inner;
     }
 
@@ -601,17 +779,46 @@ s_graph findpath::process_int_loops(int_loops current_sections, short* pt_1, sho
         }
     }
 
+    // fmt::print ("s1: {}\n", vrna_db_from_ptable(outer_pt_1));
+    // fmt::print ("s2: {}\n", vrna_db_from_ptable(outer_pt_2));
+
     // findpath call for outer section
     const int search_width = outer_bp_dist * search_width_multiplier;
-    single_findpath fp_call;
-    auto            result = fp_call.init(fc, outer_pt_1, outer_pt_2, search_width, true);
 
-    // postprocessing: outer paths into graph
-    s_graph G_outer{fc, outer_pt_1, outer_pt_2, outer_bp_dist, result};
- 
+    // intermission:
+
+    size_t moves_hash_outer = 0;
+    for (int i = 1; i <= outer_pt_1[0]; i++) {
+        if (outer_pt_1[i] != pt_2[i]) {
+            if (i < outer_pt_1[i]) {  // need to delete this pair
+                size_t current_hash = int_hash(-i);
+                current_hash *= (-outer_pt_1[i]);
+                current_hash += (-outer_pt_1[i]) * 13;
+                moves_hash_outer += current_hash;
+            }
+            if (i < outer_pt_2[i]) {  // need to insert this pair
+                size_t current_hash = int_hash(i);
+                current_hash *= (outer_pt_2[i]);
+                current_hash += (outer_pt_2[i]) * 13;
+                moves_hash_outer += current_hash;
+            }
+        }
+    }
+
+    s_graph G_outer;
+
+    if (cache and G_cache.contains(moves_hash_outer)) {
+        // fmt::print ("G avail: {} \n", moves_hash_outer);
+        G_outer = G_cache[moves_hash_outer];
+    } else {
+        single_findpath fp_call;
+        auto            result = fp_call.init(fc, outer_pt_1, outer_pt_2, search_width, true);
+        // postprocessing: outer paths into graph
+        s_graph G_temp{fc, outer_pt_1, outer_pt_2, outer_bp_dist, result};
+        G_outer = G_temp;
+        if (Verbose) print_moves(result[0], fc, vrna_db_from_ptable(outer_pt_1), true);
+    }
     // G_outer.info();
-    if (Verbose) print_moves(result[0], fc, vrna_db_from_ptable(outer_pt_1), true);
-
 
     // iterate over nested inner sections and merge them one by one into the outer section
     for (const auto& nested_section : current_sections.nested_sections) {
@@ -655,7 +862,7 @@ s_graph findpath::process_int_loops(int_loops current_sections, short* pt_1, sho
 
         int total_bp_dist = G_inner.bp_dist + G_outer.bp_dist;
 
-        int max_en = INT_MAX;
+        int max_en             = INT_MAX;
         int merge_search_width = total_bp_dist * merge_search_width_multiplier;
 
         auto start = std::chrono::high_resolution_clock::now();
@@ -670,19 +877,22 @@ s_graph findpath::process_int_loops(int_loops current_sections, short* pt_1, sho
 
         auto                          finish  = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = finish - start;
-        
+
         // fmt::print("merged: {} \n", G_merged.max_en);
 
-        // adjustments to merge the next inner section into the outer section + current inner section
+        // adjustments to merge the next inner section into the outer section + current inner
+        // section
         outer_bp_dist += G_inner.bp_dist;
         outer_pt_1 = merged_pt_1;
         outer_pt_2 = merged_pt_2;
-        G_outer = G_merged;
+        G_outer    = G_merged;
 
         // if (Verbose) print_moves(all_paths[0], fc, vrna_db_from_ptable(merged_pt_1), true);
         // print_moves(all_paths[0], fc, vrna_db_from_ptable(merged_pt_1), false);
     }
 
     if (Verbose) { G_outer.display_path(); }
+
+    if (cache) { G_cache[moves_hash] = G_outer; }
     return G_outer;
 }

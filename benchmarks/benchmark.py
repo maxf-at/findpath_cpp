@@ -24,11 +24,12 @@ import findpath
 
 # o_filename = r"local_min_100_multiple_sections_min10.csv"
 # o_filename = r"local_min_200_multiple_sections_min10.csv"
-o_filename = r"local_min_300_multiple_sections_min10.csv"
+# o_filename = r"local_min_300_multiple_sections_min10.csv"
 # o_filename = r"local_min_400_multiple_sections_min10.csv"
 # o_filename = r"local_min_500_multiple_sections_min10.csv"
-# o_filename = r"local_min_600_multiple_sections_min10.csv"
+o_filename = r"local_min_600_multiple_sections_min10.csv"
 # o_filename = r"local_min_800_multiple_sections_min10.csv"
+# o_filename = r"local_min_1000_multiple_sections_min10.csv"
 
 filename = r"./sample_seqs/" + o_filename
 
@@ -67,15 +68,19 @@ def launch_new_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
     result = findpath.init_single_findpath(sequence, s1, s2, swm, mp)
     end_findpath = round(time.time()-start_findpath, 4)
-    result = result/100.0
+    result = round(result/100.0,2)
     return end_findpath, result
 
 
 def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
-    result = findpath.init_merge_findpath(sequence, s1, s2, swm, mp)
+    
+    fp = findpath.findpath_class(sequence, mp)
+    result = fp.init(s1, s2, swm)
+    # result = findpath.init_merge_findpath(sequence, s1, s2, swm, mp)
+    
     end_findpath = round(time.time()-start_findpath, 4)
-    result = result/100.0
+    result = round(result/100.0,2)
     return end_findpath, result
 
 
@@ -83,7 +88,7 @@ def launch_new_merge_ext_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
     result = findpath.init_merge_ext_findpath(sequence, s1, s2, swm, mp)
     end_findpath = round(time.time()-start_findpath, 4)
-    result = result/100.0
+    result = round(result/100.0,2)
     return end_findpath, result
 
 
@@ -91,7 +96,7 @@ def launch_new_merge_mfe_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
     result = findpath.init_mfe_findpath(sequence, s1, s2, swm, mp)
     end_findpath = round(time.time()-start_findpath, 4)
-    result = result/100.0
+    result = round(result/100.0,2)
     return end_findpath, result
 
 
@@ -133,7 +138,8 @@ for index, row in df.iterrows():
 
     # search width scaling
     # sws = [1,1.5,2,3,4,6,8,10] #,12,14,16,18,20,30,40]
-    sws = [2]
+    # sws = [2]
+    sws = [1]
 
     for search_width_multiplier in sws:
 
@@ -151,29 +157,29 @@ for index, row in df.iterrows():
         time_fp, result = launch_new_fp(
             sequence, s2, s1, swm=search_width_multiplier, mp=True)
         new_fp_runtimes.append(time_fp)
-        new_fp_results.append(result-s1_eval)
+        new_fp_results.append(round(result-s1_eval,2))
 
         time_fp, result = launch_new_merge_fp(
             sequence, s1, s2, swm=search_width_multiplier, mp=True)
         new_merge_runtimes.append(time_fp)
-        new_merge_results.append(result-s1_eval)
+        new_merge_results.append(round(result-s1_eval,2))
 
         time_fp, result = launch_new_merge_ext_fp(
             sequence, s1, s2, swm=search_width_multiplier, mp=True)
         new_merge_ext_runtimes.append(time_fp)
-        new_merge_ext_results.append(result-s1_eval)
+        new_merge_ext_results.append(round(result-s1_eval,2))
 
         time_fp, result = launch_new_merge_mfe_fp(
             sequence, s1, s2, swm=search_width_multiplier, mp=True)
         new_merge_mfe_runtimes.append(time_fp)
-        new_merge_mfe_results.append(result-s1_eval)
+        new_merge_mfe_results.append(round(result-s1_eval,2))
 
         start_findpath3 = time.time()
         result = findpath_librna.pathfinder(
             sequence, s1, s2, search_width=search_width, verbose=False)
         time_fp = round(time.time()-start_findpath3, 4)
         py_runtimes.append(time_fp)
-        py_results.append(result-s1_eval)
+        py_results.append(round(result-s1_eval,2))
 
 
 # new_fp_mp_runtimes = []
@@ -191,13 +197,18 @@ data = [indices, sequences, s1s, s2s, seq_lengths, search_width_multipliers, bp_
 
 df = pd.DataFrame(data)
 df = df.transpose()
-df.columns = ["i", "sequence", "s1", "s2", "seq_length", "search_width_multiplier", "bp_dist", "new_fp_runtimes", "new_fp_resultsS",
+df.columns = ["i", "sequence", "s1", "s2", "seq_length", "search_width_multiplier", "bp_dist", "new_fp_runtimes", "new_fp_results",
         "py_runtimes", "py_results", "new_merge_runtimes", "new_merge_results", "new_merge_ext_runtimes",
         "new_merge_ext_results", "new_merge_mfe_runtimes", "new_merge_mfe_results"]
 
 prefix = ""
-prefix = "b_"
+prefix = "h_"
 
 savefile = r"./results/" + prefix + o_filename
 df.to_csv(savefile)
 print(df)
+
+# print ("new fp")
+# print (new_fp_results)
+# print ("merge")
+# print (new_merge_results)
