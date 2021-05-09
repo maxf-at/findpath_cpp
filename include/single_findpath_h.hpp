@@ -717,7 +717,15 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
          * if this becomes a bottleneck we can use a hash instead */
         std::qsort(next, num_next, sizeof(intermediate_t), compare_ptable);
 
+        // std::sort(next, next + num_next, [](const auto& a, const auto& b) -> bool {
+        //     //  return a.max_en < b.max_en;
+        //     if (a.s_hash != b.s_hash) {
+        //         return a.s_hash > b.s_hash;
+        //     }
+        //     if (a.saddle_en != b.saddle_en) return a.saddle_en < b.saddle_en;
 
+        //     return a.curr_en < b.curr_en;
+        // });
 
         bool flag = true;
 

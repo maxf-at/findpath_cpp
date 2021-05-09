@@ -89,10 +89,11 @@ struct merge_path {
     int current_G1_node;
     int current_G2_node;
 
-    int last_G1_node;
-    int last_G2_node;
-    int last_i_move;
-    int last_j_move;
+    int last_index;
+    // int last_G1_node;
+    // int last_G2_node;
+    int i_move;
+    int j_move;
 
     // struct initializer, preallocate vector
     // sorted_path(int i2) {
@@ -107,6 +108,8 @@ struct merge_path {
             return false;
         }
         return true;
+
+        // return current.s_hash == this->s_hash;
     }
 
 

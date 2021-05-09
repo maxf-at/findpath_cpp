@@ -717,6 +717,8 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
          * if this becomes a bottleneck we can use a hash instead */
         std::qsort(next, num_next, sizeof(intermediate_t), compare_ptable);
 
+
+
         // this shrinks the next array which makes the following sorting step faster
         for (u = 0, c = 1; c < num_next; c++) {
             // if (memcmp(next[u].s, next[c].s, sizeof(char) * len) != 0) {

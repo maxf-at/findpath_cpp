@@ -58,6 +58,7 @@ class s_graph
     s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en);
     s_graph();  // dummy init for empty graph
 
+
     ~s_graph() {
         // free (pt_1);
         // free (pt_2);

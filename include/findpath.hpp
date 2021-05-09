@@ -24,10 +24,9 @@
 #include <multi_findpath.hpp>
 
 
-// #include <merge_findpath.hpp>
+#include <merge_findpath.hpp>
+// #include <merge_findpath_hash.hpp>
 // #include <merge_findpath_benchmark.hpp>
-// #include <old/merge_findpath.hpp>
-#include <merge_findpath_new.hpp>
 
 
 #include <mfe_preprocessing.hpp>
