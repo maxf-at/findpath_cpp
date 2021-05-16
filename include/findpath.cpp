@@ -13,8 +13,6 @@ int init_single_findpath(std::string sequence, std::string s1, std::string s2,
     const char* c_s1       = s1.c_str();
     const char* c_s2       = s2.c_str();
 
-    // testfunc(c_sequence, c_s1, c_s2, search_width_multiplier);
-
     vrna_md_t md;
     set_model_details(&md);
     vrna_fold_compound_t* fc = vrna_fold_compound(c_sequence, &md, VRNA_OPTION_EVAL_ONLY);
@@ -25,7 +23,6 @@ int init_single_findpath(std::string sequence, std::string s1, std::string s2,
     int bp_dist            = vrna_bp_distance(c_s1, c_s2);
     int final_search_width = bp_dist * search_width_multiplier;
 
-    // std::cout << "start" << final_search_width << "\n";
 
     if (final_search_width < 2) { final_search_width = 2; }
 
@@ -41,6 +38,42 @@ int init_single_findpath(std::string sequence, std::string s1, std::string s2,
         return INT_MAX - 1;
     }
 }
+
+// indirect single
+int init_single_findpath_i(std::string sequence, std::string s1, std::string s2,
+                         float search_width_multiplier, std::vector<int> add_moves = {}, bool mp = true, int en_limit = INT_MAX - 1, bool Verbose = false)
+{
+    const char* c_sequence = sequence.c_str();
+    const char* c_s1       = s1.c_str();
+    const char* c_s2       = s2.c_str();
+
+    vrna_md_t md;
+    set_model_details(&md);
+    vrna_fold_compound_t* fc = vrna_fold_compound(c_sequence, &md, VRNA_OPTION_EVAL_ONLY);
+
+    short* pt_1 = vrna_ptable(c_s1);
+    short* pt_2 = vrna_ptable(c_s2);
+
+    int bp_dist            = vrna_bp_distance(c_s1, c_s2);
+    int final_search_width = bp_dist * search_width_multiplier;
+
+
+    if (final_search_width < 2) { final_search_width = 2; }
+
+    single_findpath_i test;
+    auto            result = test.init(fc, pt_1, pt_2, add_moves, final_search_width, mp, en_limit, Verbose);
+
+    // s_graph G_inner{fc, pt_1, pt_2, bp_dist, result};
+    // G_inner.display_path();
+    if (result.size() > 0) {
+        return result[0].max_en;
+    }
+    else {
+        return INT_MAX - 1;
+    }
+}
+
+
 
 int init_multi_findpath(std::string sequence, std::string s, std::vector<std::string> destinations,
                         float search_width_multiplier, int en_limit, bool mp = true)
@@ -129,6 +162,9 @@ PYBIND11_MODULE(findpath, m)
 
     m.def("init_single_findpath", &init_single_findpath, "single_findpath", py::arg("sequence"),
           py::arg("s1"), py::arg("s2"), py::arg("sw"), py::arg("mp")=true, py::arg("en_limit")=INT_MAX-1);
+
+    m.def("init_single_findpath_i", &init_single_findpath_i, "single_findpath_i", py::arg("sequence"),
+          py::arg("s1"), py::arg("s2"), py::arg("sw"), py::arg("add_moves")=std::vector<int> {}, py::arg("mp")=true, py::arg("en_limit")=INT_MAX-1, py::arg("Verbose")=false);
 
     m.def("init_multi_findpath", &init_multi_findpath, "multi_findpath");
 

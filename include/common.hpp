@@ -111,8 +111,6 @@ struct merge_path {
 
         // return current.s_hash == this->s_hash;
     }
-
-
 };
 
 // interior loop data structure
@@ -345,6 +343,54 @@ auto merge_pairing_table(short* pt_1, short* pt_2) -> short*
         if (pt_1[i] == 0 and pt_2 != 0) { pt_1[i] = pt_2[i]; }
     }
     return pt_1;
+}
+
+auto print_moves(const auto& path, vrna_fold_compound_t* fc, const short* pt1, bool show_path = true)
+{
+    // this print path function is unused (?)
+    auto const& moves = path.moves;
+
+    short* pt= vrna_ptable_copy(pt1);
+
+    char* s1 = vrna_db_from_ptable(pt);
+
+    // short* pt;
+    // pt = vrna_ptable(s1);
+
+    float en     = vrna_eval_structure_pt(fc, pt) / 100.0;
+    float max_en = float(-INT_MAX);
+
+    if (show_path) fmt::print("{} {:7.2f} ({:4}/{:4})\n", s1, en, 0, 0);
+
+    for (auto const& move : moves) {
+        std::string insert1, insert2;
+
+        if (move.i == 0) { continue; }  // unused indirect move
+
+        if (move.j < 0) {
+            /*it's a delete move */
+            pt[-move.i] = 0;
+            pt[-move.j] = 0;
+            insert1 = insert2 = fmt::format(fmt::emphasis::bold | fg(fmt::color::red), ".");
+
+        } else {
+            pt[move.i] = move.j;
+            pt[move.j] = move.i;
+            insert1 = insert2 = "#";
+        }
+
+        const char* s = vrna_db_from_ptable(pt);
+        en            = vrna_eval_structure_pt(fc, pt) / 100.0;
+        if (en > max_en) { max_en = en; }
+
+        if (show_path) fmt::print("{} {:7.2f} ({:4}/{:4})\n", s, en, move.i, move.j);
+
+    }
+
+    fmt::print("S: {:6.2f} kcal/mol\n", max_en);
+
+    free(pt);
+    free(s1);
 }
 
 // Robert Jenkins' 32 bit integer hash function

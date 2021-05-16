@@ -325,7 +325,7 @@ inline auto multi_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1,
                                            const int current_search_width, int maxE, bool direction,
                                            int final_search_width) -> std::vector<sorted_path>
 {
-    move_t* mlist;
+
 
     int i, d;
 

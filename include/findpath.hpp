@@ -18,7 +18,7 @@
 // #include <single_findpath_hash.hpp>
 
 // #include <single_findpath_s4hash.hpp>
-// 
+#include <single_findpath_i.hpp>
 
 
 #include <multi_findpath.hpp>

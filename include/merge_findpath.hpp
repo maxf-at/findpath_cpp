@@ -690,7 +690,7 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
     move_list.push_back({0, 0});
 
     if (bp_dist != 0 and G_cache.contains(moves_hash)) {
-        fmt::print("G avail: {} / {}\n", moves_hash, bp_dist);
+        // fmt::print("G avail: {} / {}\n", moves_hash, bp_dist);
         
         s_graph temp = G_cache[moves_hash];
         temp.pt_1 = pt_1;
