@@ -23,7 +23,6 @@ int init_single_findpath(std::string sequence, std::string s1, std::string s2,
     int bp_dist            = vrna_bp_distance(c_s1, c_s2);
     int final_search_width = bp_dist * search_width_multiplier;
 
-
     if (final_search_width < 2) { final_search_width = 2; }
 
     single_findpath test;
@@ -33,16 +32,22 @@ int init_single_findpath(std::string sequence, std::string s1, std::string s2,
     // G_inner.display_path();
     if (result.size() > 0) {
         return result[0].max_en;
-    }
-    else {
+    } else {
         return INT_MAX - 1;
     }
 }
 
+#include <pybind11/iostream.h>
+
 // indirect single
 int init_single_findpath_i(std::string sequence, std::string s1, std::string s2,
-                         float search_width_multiplier, std::vector<int> add_moves = {}, bool mp = true, int en_limit = INT_MAX - 1, bool Verbose = false)
+                           float search_width_multiplier, std::vector<int> add_moves = {},
+                           bool mp = true, int en_limit = INT_MAX - 1, bool Verbose = false)
 {
+    py::scoped_ostream_redirect stream(std::cout,                                 // std::ostream&
+                                       py::module_::import("sys").attr("stdout")  // Python output
+    );
+
     const char* c_sequence = sequence.c_str();
     const char* c_s1       = s1.c_str();
     const char* c_s2       = s2.c_str();
@@ -57,23 +62,19 @@ int init_single_findpath_i(std::string sequence, std::string s1, std::string s2,
     int bp_dist            = vrna_bp_distance(c_s1, c_s2);
     int final_search_width = bp_dist * search_width_multiplier;
 
-
     if (final_search_width < 2) { final_search_width = 2; }
 
     single_findpath_i test;
-    auto            result = test.init(fc, pt_1, pt_2, add_moves, final_search_width, mp, en_limit, Verbose);
+    auto result = test.init(fc, pt_1, pt_2, add_moves, final_search_width, mp, en_limit, Verbose);
 
     // s_graph G_inner{fc, pt_1, pt_2, bp_dist, result};
     // G_inner.display_path();
     if (result.size() > 0) {
         return result[0].max_en;
-    }
-    else {
+    } else {
         return INT_MAX - 1;
     }
 }
-
-
 
 int init_multi_findpath(std::string sequence, std::string s, std::vector<std::string> destinations,
                         float search_width_multiplier, int en_limit, bool mp = true)
@@ -99,7 +100,6 @@ int init_multi_findpath(std::string sequence, std::string s, std::vector<std::st
 int init_merge_findpath(std::string sequence, std::string s1, std::string s2,
                         float search_width_multiplier, bool mp = true)
 {
-
     auto test   = findpath(sequence, mp);
     auto result = test.init(s1, s2, search_width_multiplier);
 
@@ -110,8 +110,7 @@ int init_merge_findpath(std::string sequence, std::string s1, std::string s2,
 int init_merge_ext_findpath(std::string sequence, std::string s1, std::string s2,
                             float search_width_multiplier, bool mp = true)
 {
-
-    auto test = findpath(sequence, mp);
+    auto test   = findpath(sequence, mp);
     auto result = test.init_ext(s1, s2, search_width_multiplier);
 
     // if (display_path) { result.display_path(); }
@@ -121,8 +120,6 @@ int init_merge_ext_findpath(std::string sequence, std::string s1, std::string s2
 int init_mfe_findpath(std::string sequence, std::string s1, std::string s2,
                       float search_width_multiplier, bool mp = true)
 {
-
-
     auto result = mfe_findpath(sequence, s1, s2, search_width_multiplier, mp);
 
     return result;
@@ -147,24 +144,24 @@ int init_vrna_findpath(std::string sequence, std::string s1, std::string s2,
     return result;
 }
 
-
 PYBIND11_MODULE(findpath, m)
 {
     m.doc() = "pybind11 findpath";  // optional module docstring
 
-
     py::class_<findpath>(m, "findpath_class")
         .def(py::init<std::string, bool>())
         .def("init", &findpath::init_python);
-        // .def("init_ext", &findpath::init_ext);
-        // .def("getName", &Pet::getName);
-
+    // .def("init_ext", &findpath::init_ext);
+    // .def("getName", &Pet::getName);
 
     m.def("init_single_findpath", &init_single_findpath, "single_findpath", py::arg("sequence"),
-          py::arg("s1"), py::arg("s2"), py::arg("sw"), py::arg("mp")=true, py::arg("en_limit")=INT_MAX-1);
+          py::arg("s1"), py::arg("s2"), py::arg("sw"), py::arg("mp") = true,
+          py::arg("en_limit") = INT_MAX - 1);
 
-    m.def("init_single_findpath_i", &init_single_findpath_i, "single_findpath_i", py::arg("sequence"),
-          py::arg("s1"), py::arg("s2"), py::arg("sw"), py::arg("add_moves")=std::vector<int> {}, py::arg("mp")=true, py::arg("en_limit")=INT_MAX-1, py::arg("Verbose")=false);
+    m.def("init_single_findpath_i", &init_single_findpath_i, "single_findpath_i",
+          py::arg("sequence"), py::arg("s1"), py::arg("s2"), py::arg("sw"),
+          py::arg("add_moves") = std::vector<int>{}, py::arg("mp") = true,
+          py::arg("en_limit") = INT_MAX - 1, py::arg("Verbose") = false);
 
     m.def("init_multi_findpath", &init_multi_findpath, "multi_findpath");
 

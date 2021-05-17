@@ -1,99 +1,5 @@
 // this includes the basic elementary findpath algorithm
 
-// #include <common.hpp>
-
-// #include <foonathan/memory/container.hpp> // vector, list, list_node_size
-// #include <foonathan/memory/memory_pool.hpp> // memory_pool
-// #include <foonathan/memory/smart_ptr.hpp> // allocate_unique
-// #include <foonathan/memory/static_allocator.hpp> // static_allocator_storage,
-// static_block_allocator #include <foonathan/memory/temporary_allocator.hpp> // temporary_allocator
-
-/*
- #################################
- # PRIVATE FUNCTION DECLARATIONS #
- #################################
- */
-
-// move_t* copy_moves(move_t* mvs, int bp_dist);
-
-// int compare_ptable(const void* A, const void* B);
-
-// int compare_energy(const void* A, const void* B);
-
-// int compare_moves_when(const void* A, const void* B);
-
-// void free_intermediate(intermediate_t* i);
-
-// auto find_path_once(vrna_fold_compound_t* vc, short* pt1, short* pt2, int current_search_width,
-//                     int maxE, bool direction, int search_width) -> std::vector<sorted_path>;
-
-// int try_moves(vrna_fold_compound_t* fc, intermediate_t c, int maxE, intermediate_t* next, int
-// dist,
-//               int bp_dist);
-
-auto encode_pt(short* pt)
-{
-    char* temp_s = vrna_db_from_ptable(pt);
-
-    fmt::print("{}\n", temp_s);
-
-    const int sections = pt[0] / 8;
-    // int sections = 0;
-
-    uint16_t* encoded_s = new uint16_t[sections];
-
-    for (int current_section = 0; current_section <= sections; current_section++) {
-        int i = current_section * 8 + 8;
-        // fmt::print("{} {}\n", current_section, i);
-        // int output = 0;
-        // int output = encoded_s[current_section];
-        if (pt[i] > 0 and i < pt[i]) {  // opening bracket
-            encoded_s[current_section] = 0b01;
-        } else if (pt[i] > 0 and i > pt[i]) {  // closing bracket
-            encoded_s[current_section] = 0b10;
-        } else {
-            encoded_s[current_section] = 0;
-        }
-
-        fmt::print("{} {} ({}) -> {}\n", current_section, i, pt[i], encoded_s[current_section]);
-        i--;
-
-        for (; i != current_section * 8; i--) {
-            // for (; (i - 1) % 8 == 0; i--) {
-            encoded_s[current_section] = encoded_s[current_section] << 2;
-
-            if (pt[i] > 0 and i < pt[i]) {  // opening bracket
-                encoded_s[current_section] |= 0b01;
-            } else if (pt[i] > 0 and i > pt[i]) {  // closing bracket
-                encoded_s[current_section] |= 0b10;
-            }
-
-            fmt::print("{} {} ({}) -> {}\n", current_section, i, pt[i], encoded_s[current_section]);
-        }
-        // fmt::print("{} {} -> {}\n", current_section, i, encoded_s[current_section]);
-    }
-
-    std::string s = "";
-    for (int current_section = 0; current_section <= sections; current_section++) {
-        uint16_t c = encoded_s[current_section];
-
-        for (int i = 0; i <= 8; i++) {
-            if (c & 1) {
-                s += "(";
-
-            } else if (c & 2) {
-                s += ")";
-            } else {
-                s += ".";
-            }
-            c = c >> 2;
-        }
-        // current = (intermediate_t*)vrna_alloc(sizeof(intermediate_t) * (current_search_width +
-        // 1));
-    }
-
-    fmt::print("{}\n", s);
-}
 
 // basic findpath structs
 struct move_t {
@@ -119,7 +25,16 @@ struct intermediate_t {
     int    curr_en;   /**<  @brief  current energy */
 
 
-    // move_t* moves;     /**<  @brief  remaining moves to target */
+
+
+    int last_id;
+    int move_id;  // which move will take next turn
+
+    int move_delete;
+    int move_i;
+    int move_j;
+
+
 };
 
 class single_findpath
@@ -347,17 +262,7 @@ inline auto single_findpath::try_moves(vrna_fold_compound_t* vc, intermediate_t 
 
 
 
-// Robert Jenkins' 32 bit integer hash function
-uint32_t int_hash(uint32_t a)
-{
-    a = (a + 0x7ed55d16) + (a << 12);
-    a = (a ^ 0xc761c23c) ^ (a >> 19);
-    a = (a + 0x165667b1) + (a << 5);
-    a = (a + 0xd3a2646c) ^ (a << 9);
-    a = (a + 0xfd7046c5) + (a << 3);
-    a = (a ^ 0xb55a4f09) ^ (a >> 16);
-    return a;
-}
+
 
 inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1, short* pt2,
                                             const int current_search_width, int maxE,
@@ -772,7 +677,6 @@ inline auto single_findpath::compare_ptable(const void* A, const void* B) -> int
 
     // if both structures are not identical, sort them according to the hash value
     if (a->s_hash != b->s_hash) {       
-
         if (a->s_hash > b->s_hash) {
             return 1;
         }
@@ -780,15 +684,14 @@ inline auto single_findpath::compare_ptable(const void* A, const void* B) -> int
             return -1;
         }
     }
+
     // c = memcmp(a->s, b->s, a->length * sizeof(char));
     // if (c != 0) {
-    //     // if (d != c) { fmt::print("error {} {}\n", c, d); }
     //     return -c;
     // }
 
-
     // same structures, c==0
-    // if (memcmp(a->s, b->s, 299 * sizeof(char)) != 0) { fmt::print("error\n"); }
+    if (memcmp(a->s, b->s,  a->length * sizeof(char)) != 0) { fmt::print("error\n"); }
 
     if ((a->saddle_en - b->saddle_en) != 0) return a->saddle_en - b->saddle_en;
 

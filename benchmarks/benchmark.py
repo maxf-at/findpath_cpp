@@ -77,7 +77,6 @@ def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
     
     fp = findpath.findpath_class(sequence, mp)
     result = fp.init(s1, s2, swm)
-    # result = findpath.init_merge_findpath(sequence, s1, s2, swm, mp)
     
     end_findpath = round(time.time()-start_findpath, 4)
     result = round(result/100.0,2)
@@ -104,10 +103,8 @@ for index, row in df.iterrows():
 
     # if index!=5:
     #     continue
-
     # if index>2:
     #     break
-
     # if index != 16:
     #     continue
     #
@@ -125,25 +122,21 @@ for index, row in df.iterrows():
     s1 = row.s1
     s2 = row.s2
 
-    # sequence = "CAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACCAGACCACAAUGCAGGGCGGCACCGUUAGGCAACACAACGAGACUACUCAUGCACAUAAGGAAGGUUAUCGCCAUAGACAUGGCGCGGCAGCGCAGAAUGUUUAAAUCUAAAUCUGGUAUGGGAGGCGUGCCCGUUGGUAUGAAGAAAUUUGCUGGGAGAAAAAGUCUAAGGCCUUGAAUCCGGCGGGUCUUAAUACUUACCUACAAAAUCAUCAGGCUGUACUUCCUGUAUC"
-    # s1 =       "......(((((.......((..(((((((.(((.(((....(((((....(((((((((((((((.(((.((((...(((..((((....))))..))).......(((....)))...........((......))....(((((((.((((....))))...)))))))..........)))).))))))))))).....))))))))))))..)))..))))))....))))..)).........)))))(((..........)))...........((((........))))...."
-    # s2 =       "....((((((...........(((........)))....(((..(((((((.....(((((((((.(((.((((........(((((.(((...........((..(((....))).))...........)))..))))).(((((((.((((....))))...)))))))..........)))).))))))))))))(((((((..(.(((......(((.(((.......)))..)))))).)..)))))))))))))).....))).............))).)))..........."
-
-    print(f"sequence = \"{sequence}\"")
-    print(f"s1 = \"{s1}\"")
-    print(f"s2 = \"{s2}\"")
+    # print(f"sequence = \"{sequence}\"")
+    # print(f"s1 = \"{s1}\"")
+    # print(f"s2 = \"{s2}\"")
 
     fc = RNA.fold_compound(sequence)
     s1_eval = round(fc.eval_structure(s1), 2)
 
     # search width scaling
     # sws = [1,1.5,2,3,4,6,8,10] #,12,14,16,18,20,30,40]
-    # sws = [2]
-    sws = [1]
+    sws = [2]
+    # sws = [1]
 
     for search_width_multiplier in sws:
 
-        print(index, "current sw:", search_width_multiplier)
+        # print(index, "current sw:", search_width_multiplier)
 
         indices.append(index)
         sequences.append(sequence)
@@ -201,8 +194,7 @@ df.columns = ["i", "sequence", "s1", "s2", "seq_length", "search_width_multiplie
         "py_runtimes", "py_results", "new_merge_runtimes", "new_merge_results", "new_merge_ext_runtimes",
         "new_merge_ext_results", "new_merge_mfe_runtimes", "new_merge_mfe_results"]
 
-prefix = ""
-prefix = "h_"
+prefix = "n_"
 
 savefile = r"./results/" + prefix + o_filename
 df.to_csv(savefile)

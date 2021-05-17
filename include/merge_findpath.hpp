@@ -555,9 +555,9 @@ auto findpath::process_ext_loops(ext_loops ext_loops, short* pt_1, short* pt_2) 
     for (int i = 0; i < ext_loops.size(); i++) {
         const auto& current_ext_loop = ext_loops[i];
 
-        std::cout << "current ext loop:" << current_ext_loop << " / "
-                  << "\n";
-        fmt::print("process ext loops {}\n", i);
+        // std::cout << "current ext loop:" << current_ext_loop << " / "
+        //           << "\n";
+        // fmt::print("process ext loops {}\n", i);
 
         short* current_pt_1 = vrna_ptable_copy(pt_1);
         short* current_pt_2 = vrna_ptable_copy(pt_2);
