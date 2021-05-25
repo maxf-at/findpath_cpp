@@ -462,16 +462,12 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
                         current[c].s[source_2 - 1] = ')';
                     }
 
-                    // size_t move_hash;
-                    // move_hash = int_hash(source_1);
-                    // move_hash *= source_2;
-                    // move_hash += source_2 * 13;
-                    // next[num_next].s_hash = current[c].s_hash + move_hash;
+                    // precalculated hash values
                     next[num_next].s_hash = current[c].s_hash + h_list[a];
 
                     // with hash calculation for every string
                     // next[num_next].s_hash      = hash_cstr(current[c].s, len-1);
-                    // next[num_next].s_hash = fasthash64(current[c].s, sizeof(char)*(len-1), 42);
+
 
                     next[num_next].move_delete = dest_1;
                     next[num_next].move_i      = source_1;
@@ -515,7 +511,7 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
         bool flag = true;
 
         // dont delete duplicates at the end
-        if (d == bp_dist && current_search_width >= final_search_width) {
+        if (d == bp_dist and current_search_width >= final_search_width) {
             flag = false;
             for (u = 0, c = 1; c < num_next; c++) { next[++u] = next[c]; }
             num_next = u + 1;

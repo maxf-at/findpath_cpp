@@ -676,22 +676,22 @@ inline auto single_findpath::compare_ptable(const void* A, const void* B) -> int
 
 
     // if both structures are not identical, sort them according to the hash value
-    if (a->s_hash != b->s_hash) {       
-        if (a->s_hash > b->s_hash) {
-            return 1;
-        }
-        else{
-            return -1;
-        }
-    }
-
-    // c = memcmp(a->s, b->s, a->length * sizeof(char));
-    // if (c != 0) {
-    //     return -c;
+    // if (a->s_hash != b->s_hash) {       
+    //     if (a->s_hash > b->s_hash) {
+    //         return 1;
+    //     }
+    //     else{
+    //         return -1;
+    //     }
     // }
 
+    c = memcmp(a->s, b->s, a->length * sizeof(char));
+    if (c != 0) {
+        return -c;
+    }
+
     // same structures, c==0
-    if (memcmp(a->s, b->s,  a->length * sizeof(char)) != 0) { fmt::print("error\n"); }
+    // if (memcmp(a->s, b->s,  a->length * sizeof(char)) != 0) { fmt::print("error\n"); }
 
     if ((a->saddle_en - b->saddle_en) != 0) return a->saddle_en - b->saddle_en;
 
