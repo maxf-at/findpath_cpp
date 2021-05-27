@@ -10,8 +10,11 @@
 // #include <single_findpath_s_old.hpp>
 // #include <old/single_findpath_h.hpp>
 // #include <single_findpath_hash.hpp>
-#include <single_findpath_s4hash.hpp>
+// #include <single_findpath_s4hash.hpp>
 // #include <single_findpath_h.hpp>
+// #include <single_findpath_h2.hpp>
+
+#include <single_findpath_h2_bench.hpp>
 
 
 #include <single_findpath_i.hpp>
@@ -25,5 +28,5 @@
 
 #include <mfe_preprocessing.hpp>
 
-// unused
-void testfunc(const char* seq, const char* s1, const char* s2, float search_width_multiplier);
+
+int testfunc(std::string, std::string s1, std::string s2, float search_width_multiplier);

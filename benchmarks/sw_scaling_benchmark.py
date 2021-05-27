@@ -46,41 +46,14 @@ o_filename = "5000x_100-20.csv"
 
 
 filename = r"./sample_seqs/" + o_filename
-
-sequences = []
-s1s = []
-s2s = []
-search_width_multipliers = []
-indices = []
-seq_lengths = []
-
-new_fp_runtimes = []
-new_fp_results = []
-
-py_runtimes = []
-py_results = []
-
-new_merge_runtimes = []
-new_merge_results = []
-new_merge_ext_runtimes = []
-new_merge_ext_results = []
-new_merge_mfe_runtimes = []
-new_merge_mfe_results = []
-
-bp_dist = []
-
-all_barriers_max_en = []
-all_moves = []
-all_indirect_moves = []
-
-old_merge_results = []
-
-
 df = pd.read_csv(filename)
 elements = len(df.index)
-
-
 print("processing:", filename)
+
+
+
+
+
 
 
 def launch_new_fp(sequence, s1, s2, swm=None, mp=True):
@@ -89,7 +62,6 @@ def launch_new_fp(sequence, s1, s2, swm=None, mp=True):
     end_findpath = round(time.time()-start_findpath, 4)
     result = round(result/100.0,2)
     return end_findpath, result
-
 
 def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
@@ -101,14 +73,12 @@ def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
     result = round(result/100.0,2)
     return end_findpath, result
 
-
 def launch_new_merge_ext_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
     result = findpath.init_merge_ext_findpath(sequence, s1, s2, swm, mp)
     end_findpath = round(time.time()-start_findpath, 4)
     result = round(result/100.0,2)
     return end_findpath, result
-
 
 def launch_new_merge_mfe_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
@@ -119,6 +89,28 @@ def launch_new_merge_mfe_fp(sequence, s1, s2, swm=None, mp=True):
 
 
 for index, row in df.iterrows():
+
+    sequences = []
+    s1s = []
+    s2s = []
+    search_width_multipliers = []
+    indices = []
+    seq_lengths = []
+    new_fp_runtimes = []
+    new_fp_results = []
+    py_runtimes = []
+    py_results = []
+    new_merge_runtimes = []
+    new_merge_results = []
+    new_merge_ext_runtimes = []
+    new_merge_ext_results = []
+    new_merge_mfe_runtimes = []
+    new_merge_mfe_results = []
+    bp_dist = []
+    all_barriers_max_en = []
+    all_moves = []
+    all_indirect_moves = []
+    old_merge_results = []
 
     percent_complete = 100-(elements-index)/elements*100
     bar_length = 20
@@ -188,20 +180,22 @@ for index, row in df.iterrows():
         new_fp_runtimes.append(time_fp)
         new_fp_results.append(round(result,2))
 
-        time_fp, result = launch_new_merge_fp(
-            sequence, s1, s2, swm=search_width_multiplier, mp=True)
-        new_merge_runtimes.append(time_fp)
-        new_merge_results.append(round(result,2))
+        # interior loop merge
+        # time_fp, result = launch_new_merge_fp(
+        #     sequence, s1, s2, swm=search_width_multiplier, mp=True)
+        # new_merge_runtimes.append(time_fp)
+        # new_merge_results.append(round(result,2))
 
         # time_fp, result = launch_new_merge_ext_fp(
         #     sequence, s1, s2, swm=search_width_multiplier, mp=True)
         # new_merge_ext_runtimes.append(time_fp)
         # new_merge_ext_results.append(round(result-s1_eval,2))
 
-        time_fp, result = launch_new_merge_mfe_fp(
-            sequence, s1, s2, swm=search_width_multiplier, mp=True)
-        new_merge_mfe_runtimes.append(time_fp)
-        new_merge_mfe_results.append(round(result,2))
+        # mfe
+        # time_fp, result = launch_new_merge_mfe_fp(
+        #     sequence, s1, s2, swm=search_width_multiplier, mp=True)
+        # new_merge_mfe_runtimes.append(time_fp)
+        # new_merge_mfe_results.append(round(result,2))
 
         # start_findpath3 = time.time()
         # result = findpath_librna.pathfinder(
@@ -211,32 +205,33 @@ for index, row in df.iterrows():
         # py_results.append(round(result,2))
 
         # old merge findpath
-        try:
-            old_result = merge_recursive.recursive_merge(sequence, s1, s2, sections, search_width=1, search_width_multiplier=search_width_multiplier,
-                        Verbose=False, Debug=False, plot_graph=False, new=True,
-                        print_sections=True, max_rec_depth=99).max_en
-        except:
-            old_result = 0        
-        # old_result = 0
+        # try:
+        #     old_result = merge_recursive.recursive_merge(sequence, s1, s2, sections, search_width=1, search_width_multiplier=search_width_multiplier,
+        #                 Verbose=False, Debug=False, plot_graph=False, new=True,
+        #                 print_sections=True, max_rec_depth=99).max_en
+        # except:
+        #     old_result = 0        
+        old_result = 0
 
         old_merge_results.append(old_result)
 
 
-data = [indices, sequences, s1s, s2s, seq_lengths, search_width_multipliers, bp_dist, new_fp_runtimes, new_fp_results,
-        py_runtimes, py_results, new_merge_runtimes, new_merge_results, new_merge_ext_runtimes,
-        new_merge_ext_results, new_merge_mfe_runtimes, new_merge_mfe_results,
-        all_barriers_max_en, all_moves, all_indirect_moves, old_merge_results]
 
-df = pd.DataFrame(data)
-df = df.transpose()
-df.columns = ["i", "sequence", "s1", "s2", "seq_length", "search_width_multiplier", "bp_dist", "new_fp_runtimes", "new_fp_results",
-        "py_runtimes", "py_results", "new_merge_runtimes", "new_merge_results", "new_merge_ext_runtimes",
-        "new_merge_ext_results", "new_merge_mfe_runtimes", "new_merge_mfe_results",
-        "barriers_max_en", "moves", "indirect_moves", "old_merge_results"]
+    data = [indices, sequences, s1s, s2s, seq_lengths, search_width_multipliers, bp_dist, new_fp_runtimes, new_fp_results,
+            py_runtimes, py_results, new_merge_runtimes, new_merge_results, new_merge_ext_runtimes,
+            new_merge_ext_results, new_merge_mfe_runtimes, new_merge_mfe_results,
+            all_barriers_max_en, all_moves, all_indirect_moves, old_merge_results]
 
-# prefix = "sw_scaling_fasthash_"
-prefix = "sw_scaling_"
+    df_save = pd.DataFrame(data)
+    df_save = df_save.transpose()
+    df_save.columns = ["i", "sequence", "s1", "s2", "seq_length", "search_width_multiplier", "bp_dist", "new_fp_runtimes", "new_fp_results",
+            "py_runtimes", "py_results", "new_merge_runtimes", "new_merge_results", "new_merge_ext_runtimes",
+            "new_merge_ext_results", "new_merge_mfe_runtimes", "new_merge_mfe_results",
+            "barriers_max_en", "moves", "indirect_moves", "old_merge_results"]
 
-savefile = r"./results/" + prefix + o_filename
-df.to_csv(savefile)
-print(df)
+    # prefix = "sw_scaling_fasthash_"
+    prefix = "sw_scaling_"
+
+    savefile = r"./results/" + prefix + o_filename
+    # df_save.to_csv(savefile)
+    print(df_save)

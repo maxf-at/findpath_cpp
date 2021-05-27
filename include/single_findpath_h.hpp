@@ -648,12 +648,7 @@ inline auto single_findpath::compare_ptable(const void* A, const void* B) -> int
             return -1;
         }
 
-        return a->s_hash < b->s_hash;
-
-        return a->s_hash - b->s_hash;
     }
-    // same structures, c==0
-    // if (memcmp(a->s, b->s, 299 * sizeof(char)) != 0) { fmt::print("error\n"); }
 
     if ((a->saddle_en - b->saddle_en) != 0) return a->saddle_en - b->saddle_en;
 

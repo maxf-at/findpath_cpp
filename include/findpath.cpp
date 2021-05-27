@@ -30,6 +30,11 @@ int init_single_findpath(std::string sequence, std::string s1, std::string s2,
 
     // s_graph G_inner{fc, pt_1, pt_2, bp_dist, result};
     // G_inner.display_path();
+
+    vrna_fold_compound_free(fc);
+    free(pt_1);
+    free(pt_2);
+
     if (result.size() > 0) {
         return result[0].max_en;
     } else {
@@ -172,21 +177,21 @@ PYBIND11_MODULE(findpath, m)
 }
 
 // main func
-void testfunc(const char* seq, const char* s1, const char* s2, float search_width_multiplier)
+int testfunc(std::string seq, std::string s1, std::string s2, float search_width_multiplier)
 {
     // set model params
-    vrna_md_t md;
-    set_model_details(&md);
-    vrna_fold_compound_t* fc = vrna_fold_compound(seq, &md, VRNA_OPTION_EVAL_ONLY);
+    // vrna_md_t md;
+    // set_model_details(&md);
+    // vrna_fold_compound_t* fc = vrna_fold_compound(seq, &md, VRNA_OPTION_EVAL_ONLY);
 
-    short* pt_1 = vrna_ptable(s1);
-    short* pt_2 = vrna_ptable(s2);
+    // short* pt_1 = vrna_ptable(s1);
+    // short* pt_2 = vrna_ptable(s2);
 
-    int bp_dist            = vrna_bp_distance(s1, s2);
-    int final_search_width = bp_dist * search_width_multiplier;
+    // int bp_dist            = vrna_bp_distance(s1, s2);
+    // int final_search_width = bp_dist * search_width_multiplier;
 
-    single_findpath test;
-    test.init(fc, pt_1, pt_2, final_search_width);
+    // single_findpath test;
+    // test.init(fc, pt_1, pt_2, final_search_width);
 
-    return;
+    return 0;
 }

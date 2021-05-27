@@ -1,29 +1,35 @@
-//
-// Created by Konstantin Gredeskoul on 10/7/18.
-//
 
-// #include <division.h>
-#include <iostream>
+// #include <iostream>
+// #define FMT_HEADER_ONLY
+// #include <fmt/color.h>
+// #include <fmt/format.h>
 
-// #ifndef PROJECT_MAIN_H
-// #define PROJECT_MAIN_H
+// #include <findpath.hpp>
 
-// static const char *const HEADER = "\nDivider © 2018 Monkey Claps Inc.\n\n";
-// static const char *const USAGE = "Usage:\n\tdivider <numerator>
-// <denominator>\n\nDescription:\n\tComputes the result of a fractional division,\n\tand reports
-// both the result and the remainder.\n";
-
-// #endif //PROJECT_MAIN_H
+#include <common.hpp>
 
 
-// #include <cxxopts.hpp>
+#include <postprocessing.hpp>
+
+// #include <single_findpath.hpp>
+// #include <single_findpath_test.hpp>
+// #include <single_findpath_pool.hpp>
+// #include <single_findpath_s.hpp>
+// #include <single_findpath_s_old.hpp>
+// #include <old/single_findpath_h.hpp>
+// #include <single_findpath_hash.hpp>
+// #include <single_findpath_s4hash.hpp>
+// #include <single_findpath_h.hpp>
+#include <single_findpath_h2.hpp>
+
+#include <single_findpath_i.hpp>
 
 
+#include <multi_findpath.hpp>
 
+#include <merge_findpath.hpp>
+// #include <merge_findpath_hash.hpp>
+// #include <merge_findpath_benchmark.hpp>
 
-#define FMT_HEADER_ONLY
-#include <fmt/color.h>
-#include <fmt/format.h>
-
-#include <findpath.hpp>
+#include <mfe_preprocessing.hpp>
 

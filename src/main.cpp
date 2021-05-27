@@ -1,7 +1,63 @@
 
 #include "main.h"
 
-auto main(int argc, const char** argv) -> int
+
+
+int testfunc(std::string sequence, std::string s1, std::string s2, float search_width_multiplier)
+{
+
+    bool mp = true;
+    int en_limit = INT_MAX - 1;
+
+
+    const char* c_sequence = sequence.c_str();
+    const char* c_s1       = s1.c_str();
+    const char* c_s2       = s2.c_str();
+
+    vrna_md_t md;
+    set_model_details(&md);
+    vrna_fold_compound_t* fc = vrna_fold_compound(c_sequence, &md, VRNA_OPTION_EVAL_ONLY);
+
+    short* pt_1 = vrna_ptable(c_s1);
+    short* pt_2 = vrna_ptable(c_s2);
+
+    int bp_dist            = vrna_bp_distance(c_s1, c_s2);
+    int final_search_width = bp_dist * search_width_multiplier;
+
+    if (final_search_width < 2) { final_search_width = 2; }
+
+    single_findpath test;
+    auto            result = test.init(fc, pt_1, pt_2, final_search_width, mp, en_limit);
+
+    // s_graph G_inner{fc, pt_1, pt_2, bp_dist, result};
+    // G_inner.display_path();
+
+    vrna_fold_compound_free(fc);
+    free(pt_1);
+    free(pt_2);
+
+    if (result.size() > 0) {
+        return result[0].max_en;
+    } else {
+        return INT_MAX - 1;
+    }
+
+
+    // free (fc);
+    // free (md);
+
+    // vrna_fold_compound_free(fc);
+    // free(pt_1);
+    // free(pt_2);
+
+    // free(c_sequence);
+    // free(c_s1);
+    // free(c_s2);
+
+    return 0;
+}
+
+int main(int argc, const char** argv)
 {
 
 
@@ -38,48 +94,21 @@ auto main(int argc, const char** argv) -> int
     // float search_width_multiplier = arguments["search_width_multiplier"].as<float>();
 
 
+    // debug sample seqs
 
+    std::string sequence = "AAAAUAAUGUACCGGACAUUCGCGCACGACCACCAUAUGGCAGAGCAUGUGUCUGUGGACCCACUAUAGCUGGGGCGCUUAACCCCAGAAAAGUAUCUUCGGUCUAUGCCUCACACGCAGCCUCCUAUUAGCAGCUCUCCUGGCCCACAAUUUUAUUAAAAGUCCAAGUUGGACUGACAAAACGCGUGCGGUGUCCUAGGGAUUGGUGGCAUAACCAGCGGUUUAAAAGCUGUGUAUAUCCGCAGCAAAUCACCGGAAAGCGGCGUUAUUAGCACCACAAAUUGAUGGUUGGUACGAGUACAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACCAGACCACAAUGCAGGGCGGCACCGUUAGGCAACACAACGAGACUACUCAUGCACAUAAGGAAGGUUAUCGCCAUAGACAUGGCGCGGCAGCGCAGAAUGUUUAAAUCUAAAUCUGGUAUGGGAGGCGUGCCCGUUGGUAUGAAGAAAUUUGCUGGGAGAAAAAGUCUAAGGCCUUGAAUCCGGCGGGUCUUAAUACUUACCUACAAAAUCAUCAGGCUGUACUUCCUGUAUC";
+    std::string s1 =       "........(((((((((((((((((..((((.((.((((((((((...((.((((((((((....(((.((((((.......)))))).....)))....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((...........((((......((((((......)))))).....))))....(((((((((((.(.((((((......))..)))).).)))).....))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..))))..((((((....)))))).....)))).)))))............))))))))((((((((.(((.(.((((.........((((..(((((.....((.((((((((((....))..)))))))))).))).))..)))))))).).))))))..))))).....";
+    std::string s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((..((((((.......))))))....))).....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((((.....))..((((......((((((......)))))).....))))....((((((((((((..((((........)))))))))...........))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..)))...((((((....))))))))...)))).))))))))............(((((((((((((.(((.((.(((((.((((..(((((((((.......(((...)))......))))))))))))).))))).))..............)))))..)))))))))))";
 
-    int          buffer = 81;
-    char         line[1000];
-    char *       seq, *s1, *s2;
-    int          E, maxkeep = 1000;
-    int          verbose = 0, i;
-    vrna_path_t *route, *r;
-
+   
     float search_width_multiplier = 2;
 
-    for (i = 1; i < argc; i++) {
-        switch (argv[i][1]) {
-            case 'm':
-                if (strcmp(argv[i], "-m") == 0) sscanf(argv[++i], "%f", &search_width_multiplier);
+    // auto en = init_single_findpath(sequence, s1, s2, search_width_multiplier);
+    auto en = testfunc(sequence, s1, s2, search_width_multiplier);
 
-                break;
-            case 'v': verbose = !strcmp(argv[i], "-v"); break;
-            case 'd':
-                if (strcmp(argv[i], "-d") == 0) sscanf(argv[++i], "%d", &dangles);
-
-                break;
-                // default: usage();
-        }
-    }
-
-    cut_point = -1;
-
-    fgets(line, 1000, stdin);
-    strtok(line, "\n");
-    seq = vrna_cut_point_remove(line, &cut_point);
-
-    fgets(line, 1000, stdin);
-    strtok(line, "\n");
-    s1 = vrna_cut_point_remove(line, &cut_point);
-
-    fgets(line, 1000, stdin);
-    strtok(line, "\n");
-    s2 = vrna_cut_point_remove(line, &cut_point);
+    fmt::print ("result: {}\n", en);
 
 
-    testfunc(seq, s1, s2, search_width_multiplier);
 
     exit(0);
 }
