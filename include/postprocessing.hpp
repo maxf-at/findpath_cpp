@@ -130,6 +130,7 @@ void s_graph::add_node(short* p_table, int i, int j, int en)
         node_count++;
     }
 
+    // precompute structure hash for merging step
     node_list[current_node].s_hash = std::hash<std::string_view>()(std::string_view(structure));
 
 
@@ -186,6 +187,8 @@ void s_graph::add_paths(const auto& paths)
 
             add_node(current_ptable, move.i, move.j, en);
         }
+
+        free(current_ptable);
 
         // path_number++;
     }

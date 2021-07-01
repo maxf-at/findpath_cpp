@@ -36,9 +36,9 @@ class findpath
 
     findpath(std::string sequence, bool mp = true);
 
-    // findpath(vrna_fold_compound_t* init_fc, char* a_s1, char* a_s2, float sw);
-    // findpath(char* seq, char* s1, char* s2, float sw);
-    // findpath(vrna_fold_compound_t* a_fc, short* a_pt1, short* a_pt2, float sw);
+    ~findpath() {
+        vrna_fold_compound_free(fc);
+    }
 };
 
 findpath::findpath(std::string sequence, bool mp) : mp{mp}
@@ -74,6 +74,10 @@ auto findpath::init_python(std::string s1, std::string s2, float sw) -> int
 
     // recursively process nested sections
     auto G = process_int_loops(all_sections, pt1, pt2);
+
+    free(pt1);
+    free(pt2);
+
     return G.max_en;
 }
 
@@ -712,7 +716,12 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
     if (current_sections.nested_sections.size() == 0) {
         // we're at the top of the recursion tree - findpath for a single section with start and end
 
-        const int search_width = current_sections.bp_dist * search_width_multiplier;
+        int search_width = current_sections.bp_dist * search_width_multiplier;
+
+        // std::cout << "init " << search_width << "\n";
+        if (search_width == 0) {
+            search_width = 1;
+        }
 
         single_findpath fp_call;
         auto            result = fp_call.init(fc, pt_1, pt_2, search_width, true);
@@ -760,7 +769,7 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
     // fmt::print ("s2: {}\n", vrna_db_from_ptable(outer_pt_2));
 
     // findpath call for outer section
-    const int search_width = outer_bp_dist * search_width_multiplier;
+    int search_width = outer_bp_dist * search_width_multiplier;
 
     // intermission:
 
@@ -782,12 +791,19 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
         }
     }
 
+    // std::cout << "init outer " << search_width << "\n";
+
     s_graph G_outer;
 
     if (cache and G_cache.contains(moves_hash_outer)) {
         // fmt::print ("G avail: {} \n", moves_hash_outer);
         G_outer = G_cache[moves_hash_outer];
     } else {
+
+        if (search_width == 0) {
+            search_width = 1;
+        }
+
         single_findpath fp_call;
         auto            result = fp_call.init(fc, outer_pt_1, outer_pt_2, search_width, true);
         // postprocessing: outer paths into graph
@@ -857,6 +873,12 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
 
         // fmt::print("merged: {} \n", G_merged.max_en);
 
+
+        free(inner_pt_1);
+        free(inner_pt_2);
+        free(outer_pt_1);
+        free(outer_pt_2);
+
         // adjustments to merge the next inner section into the outer section + current inner
         // section
         outer_bp_dist += G_inner.bp_dist;
@@ -866,7 +888,10 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
 
         // if (Verbose) print_moves(all_paths[0], fc, vrna_db_from_ptable(merged_pt_1), true);
         // print_moves(all_paths[0], fc, vrna_db_from_ptable(merged_pt_1), false);
+
+
     }
+
 
     if (Verbose) { G_outer.display_path(); }
 

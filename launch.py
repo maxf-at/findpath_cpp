@@ -45,8 +45,16 @@ s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((.
 # s1       = "(((((((.....)))).)))"
 # s2       = "(((((.........)).)))"
 
+# sequence = "AAGAAGACCUCAAUCGAAUCACGGGCAAGUCCGACGAGGAACGCCUAGGCGAGGUGAUCGGCCCGAUCUUAAUGUAGGAUCCCCGGAGUCGCAUGACGACAGCUUAAUGUUCGUCCAGGGGGCAUACCCUUGGUGACUGUAAGCCGUGCCUGGUCCUUUUCUCGAAUGAGUCCACAGAUUAGCAAAUUUAAAAAGUGCGG"
+# s1 = ".....((.((((.((((....(((......)))..(((((....(((((((.(((.(((((((((((((((...)))))))...)).)))).)).))....(((((..((.((.(((((((.....)))))))))))..)))))).))))))))))))...)))).)))))).........(((...........))).."
+# s2 = ".....((.((((.((((....(((......)))..((((...(((.(((((.(((...(((...(((((((...))))))).))).((((((..(((((((......))).))))((((((.....))))))))))))....))).))))))))))))...)))).)))))).........(((..((....)).))).."
+
+# sequence = "UAAAAUGAUCACGGUUUCAGCUUUGGACAGGGCGUUCCACUAAACUCCUGGUGACAUAGAUAUAUUGGAUUGCAACUACUCGUCGGUCCGGUUGGCGUUCAACCCGCGAUAAGUUGGCGCUUGUCCCACUCCGUAAACCUGUGUCUCUCAGGCGGUUACCCGAUAGAAGGCAGUAGGAUGUAUCACCCCCCACCGACUCC"
+# s1 = ".....(((........))).....(((..(((.(((......))))))(((((.....((((((((..(((((..((..(((((((...(((((.....)))))...(((((((....))))))).......((.((((...((((...))))))))))))))).)))))))))..))))))))......)))))..)))"
+# s2 = ".....(((........)))...((((...(((.((((((((.(((((((((.(((((((.......(((((((........).))))))(((((.....)))))...(((((((....))))))).............))))))).).)))).))))..((.......)).))).)))......)))))...))))...."
 
 
+# 4
 search_width_multiplier = 4
 # mp = False
 mp = True
@@ -85,13 +93,13 @@ print ("~~~~~~~~~~~")
 print (f'merge findpath')
 print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
-# start_findpath = time.time()
-# result = findpath.init_mfe_findpath(sequence, s1, s2, search_width_multiplier, True)
-# result = result/100.0
-# runtime = time.time()-start_findpath
-# print ("~~~~~~~~~~~")
-# print (f'merge findpath (+MFE)')
-# print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+start_findpath = time.time()
+result = findpath.init_mfe_findpath(sequence, s1, s2, search_width_multiplier, True)
+result = result/100.0
+runtime = time.time()-start_findpath
+print ("~~~~~~~~~~~")
+print (f'merge findpath (+MFE)')
+print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
 # start_findpath = time.time()
 # result = findpath.init_merge_ext_findpath(sequence, s1, s2, search_width_multiplier, True)

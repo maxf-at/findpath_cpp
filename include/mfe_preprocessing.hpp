@@ -70,11 +70,21 @@ auto mfe_findpath(std::string sequence, std::string s1, std::string s2,
     if (std::min(bp_dist_1, bp_dist_2) == 0) {
         // launch regular merge findpath between s1 ans s2
 
+        // std::cout << "launch regular merge fp \n";
+
+        delete[] mfe_structure;
+        vrna_fold_compound_free(fc);
+        free(pt1);
+        free(pt2);
+        free(pt_mfe);
+
         auto fp_call = findpath(sequence, mp);
         auto result  = fp_call.init(s1, s2, search_width_multiplier);
 
         return result.max_en;
     }
+
+    // std::cout << "launch part 1 \n";
 
     auto end     = std::chrono::system_clock::now();
     auto elapsed = end - start;
@@ -103,11 +113,17 @@ auto mfe_findpath(std::string sequence, std::string s1, std::string s2,
     // std::cout << vrna_db_from_ptable(pt1) << "\n";
     // std::cout << mfe_structure << " " << result_2.max_en << "\n";
     // std::cout << vrna_db_from_ptable(pt2) << "\n";
+
+
     // std::cout << "elapsed: " << elapsed.count() / 1000.0 << "/" << elapsed2.count() / 1000.0 <<
     // "/"
     //           << elapsed3.count() / 1000.0 << "\n";
 
     delete[] mfe_structure;
+    vrna_fold_compound_free(fc);
+    free(pt1);
+    free(pt2);
+    free(pt_mfe);
 
     return std::max(result_1.max_en, result_2.max_en);
 }

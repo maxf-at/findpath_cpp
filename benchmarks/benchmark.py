@@ -194,7 +194,7 @@ df.columns = ["i", "sequence", "s1", "s2", "seq_length", "search_width_multiplie
         "py_runtimes", "py_results", "new_merge_runtimes", "new_merge_results", "new_merge_ext_runtimes",
         "new_merge_ext_results", "new_merge_mfe_runtimes", "new_merge_mfe_results"]
 
-prefix = "n_"
+prefix = "h2_"
 
 savefile = r"./results/" + prefix + o_filename
 df.to_csv(savefile)

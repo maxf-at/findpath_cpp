@@ -104,7 +104,11 @@ int main(int argc, const char** argv)
     float search_width_multiplier = 2;
 
     // auto en = init_single_findpath(sequence, s1, s2, search_width_multiplier);
-    auto en = testfunc(sequence, s1, s2, search_width_multiplier);
+    // auto en = testfunc(sequence, s1, s2, search_width_multiplier);
+
+    auto test   = findpath(sequence, true);
+    auto result = test.init(s1, s2, search_width_multiplier);
+    auto en = result.max_en;
 
     fmt::print ("result: {}\n", en);
 

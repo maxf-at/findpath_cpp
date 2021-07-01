@@ -1,0 +1,398 @@
+==10272== Memcheck, a memory error detector
+==10272== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==10272== Using Valgrind-3.16.1 and LibVEX; rerun with -h for copyright info
+==10272== Command: ./main
+==10272== 
+result: -15400
+==10272== 
+==10272== HEAP SUMMARY:
+==10272==     in use at exit: 3,035,755 bytes in 8,145 blocks
+==10272==   total heap usage: 157,846 allocs, 149,701 frees, 94,610,662 bytes allocated
+==10272== 
+==10272== 1,202 bytes in 2 blocks are definitely lost in loss record 28 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272== 
+==10272== 1,204 bytes in 1 blocks are definitely lost in loss record 38 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7F72: vrna_ptable_from_string (structure_utils.c:395)
+==10272==    by 0x114A1A: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:86)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 1,204 bytes in 1 blocks are definitely lost in loss record 39 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7F72: vrna_ptable_from_string (structure_utils.c:395)
+==10272==    by 0x114A32: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:87)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 1,204 bytes in 1 blocks are definitely lost in loss record 40 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7BE3: vrna_ptable_copy (structure_utils.c:188)
+==10272==    by 0x116AE0: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:817)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 1,204 bytes in 1 blocks are definitely lost in loss record 41 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7BE3: vrna_ptable_copy (structure_utils.c:188)
+==10272==    by 0x116AF6: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:818)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 1,204 bytes in 1 blocks are definitely lost in loss record 42 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7BE3: vrna_ptable_copy (structure_utils.c:188)
+==10272==    by 0x116AE0: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:817)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 1,204 bytes in 1 blocks are definitely lost in loss record 43 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7BE3: vrna_ptable_copy (structure_utils.c:188)
+==10272==    by 0x116AF6: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:818)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 2,404 bytes in 4 blocks are definitely lost in loss record 48 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 2,404 bytes in 4 blocks are definitely lost in loss record 49 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1414FB: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 2,404 bytes in 4 blocks are definitely lost in loss record 50 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 2,404 bytes in 4 blocks are definitely lost in loss record 51 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272== 
+==10272== 2,404 bytes in 4 blocks are definitely lost in loss record 52 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x140E5C: void s_graph::add_paths<std::vector<merge_path, std::allocator<merge_path> > >(std::vector<merge_path, std::allocator<merge_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x1349C6: s_graph::s_graph<std::vector<merge_path, std::allocator<merge_path> > >(vrna_fc_s*, short*, short*, int, std::vector<merge_path, std::allocator<merge_path> > const&, int) (postprocessing.hpp:82)
+==10272==    by 0x129D0C: auto merge_method<s_graph, s_graph>(s_graph&, s_graph&, short*, int, short*, int, int, int, int, vrna_fc_s*, bool) (merge_findpath.hpp:534)
+==10272==    by 0x116D3D: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:853)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272== 
+==10272== 2,404 bytes in 4 blocks are definitely lost in loss record 53 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x140E5C: void s_graph::add_paths<std::vector<merge_path, std::allocator<merge_path> > >(std::vector<merge_path, std::allocator<merge_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x1349C6: s_graph::s_graph<std::vector<merge_path, std::allocator<merge_path> > >(vrna_fc_s*, short*, short*, int, std::vector<merge_path, std::allocator<merge_path> > const&, int) (postprocessing.hpp:82)
+==10272==    by 0x129D0C: auto merge_method<s_graph, s_graph>(s_graph&, s_graph&, short*, int, short*, int, int, int, int, vrna_fc_s*, bool) (merge_findpath.hpp:534)
+==10272==    by 0x116D3D: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:853)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 3,606 bytes in 6 blocks are definitely lost in loss record 60 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 3,606 bytes in 6 blocks are definitely lost in loss record 61 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1162F6: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:721)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272== 
+==10272== 4,207 bytes in 7 blocks are definitely lost in loss record 63 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 4,207 bytes in 7 blocks are definitely lost in loss record 64 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1162F6: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:721)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272== 
+==10272== 4,808 bytes in 8 blocks are definitely lost in loss record 67 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1414FB: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272== 
+==10272== 6,010 bytes in 10 blocks are definitely lost in loss record 69 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x140E5C: void s_graph::add_paths<std::vector<merge_path, std::allocator<merge_path> > >(std::vector<merge_path, std::allocator<merge_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x1349C6: s_graph::s_graph<std::vector<merge_path, std::allocator<merge_path> > >(vrna_fc_s*, short*, short*, int, std::vector<merge_path, std::allocator<merge_path> > const&, int) (postprocessing.hpp:82)
+==10272==    by 0x129D0C: auto merge_method<s_graph, s_graph>(s_graph&, s_graph&, short*, int, short*, int, int, int, int, vrna_fc_s*, bool) (merge_findpath.hpp:534)
+==10272==    by 0x116D3D: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:853)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 7,212 bytes in 12 blocks are definitely lost in loss record 70 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1414FB: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 8,414 bytes in 14 blocks are definitely lost in loss record 71 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x140E5C: void s_graph::add_paths<std::vector<merge_path, std::allocator<merge_path> > >(std::vector<merge_path, std::allocator<merge_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x1349C6: s_graph::s_graph<std::vector<merge_path, std::allocator<merge_path> > >(vrna_fc_s*, short*, short*, int, std::vector<merge_path, std::allocator<merge_path> > const&, int) (postprocessing.hpp:82)
+==10272==    by 0x129D0C: auto merge_method<s_graph, s_graph>(s_graph&, s_graph&, short*, int, short*, int, int, int, int, vrna_fc_s*, bool) (merge_findpath.hpp:534)
+==10272==    by 0x116D3D: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:853)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 9,616 bytes in 16 blocks are definitely lost in loss record 73 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1413DE: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:172)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1162F6: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:721)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 21,636 bytes in 36 blocks are definitely lost in loss record 81 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1414FB: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1162F6: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:721)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272== 
+==10272== 52,888 bytes in 88 blocks are definitely lost in loss record 84 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x140F79: void s_graph::add_paths<std::vector<merge_path, std::allocator<merge_path> > >(std::vector<merge_path, std::allocator<merge_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x1349C6: s_graph::s_graph<std::vector<merge_path, std::allocator<merge_path> > >(vrna_fc_s*, short*, short*, int, std::vector<merge_path, std::allocator<merge_path> > const&, int) (postprocessing.hpp:82)
+==10272==    by 0x129D0C: auto merge_method<s_graph, s_graph>(s_graph&, s_graph&, short*, int, short*, int, int, int, int, vrna_fc_s*, bool) (merge_findpath.hpp:534)
+==10272==    by 0x116D3D: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:853)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272== 
+==10272== 67,312 bytes in 112 blocks are definitely lost in loss record 85 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1414FB: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1168CE: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:794)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 74,524 bytes in 124 blocks are definitely lost in loss record 86 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x140F79: void s_graph::add_paths<std::vector<merge_path, std::allocator<merge_path> > >(std::vector<merge_path, std::allocator<merge_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x1349C6: s_graph::s_graph<std::vector<merge_path, std::allocator<merge_path> > >(vrna_fc_s*, short*, short*, int, std::vector<merge_path, std::allocator<merge_path> > const&, int) (postprocessing.hpp:82)
+==10272==    by 0x129D0C: auto merge_method<s_graph, s_graph>(s_graph&, s_graph&, short*, int, short*, int, int, int, int, vrna_fc_s*, bool) (merge_findpath.hpp:534)
+==10272==    by 0x116D3D: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:853)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 84,140 bytes in 140 blocks are definitely lost in loss record 87 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1414FB: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1162F6: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:721)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272== 
+==10272== 251,218 bytes in 418 blocks are definitely lost in loss record 90 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x140F79: void s_graph::add_paths<std::vector<merge_path, std::allocator<merge_path> > >(std::vector<merge_path, std::allocator<merge_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x1349C6: s_graph::s_graph<std::vector<merge_path, std::allocator<merge_path> > >(vrna_fc_s*, short*, short*, int, std::vector<merge_path, std::allocator<merge_path> > const&, int) (postprocessing.hpp:82)
+==10272==    by 0x129D0C: auto merge_method<s_graph, s_graph>(s_graph&, s_graph&, short*, int, short*, int, int, int, int, vrna_fc_s*, bool) (merge_findpath.hpp:534)
+==10272==    by 0x116D3D: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:853)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 471,184 bytes in 784 blocks are definitely lost in loss record 91 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x1414FB: void s_graph::add_paths<std::vector<sorted_path, std::allocator<sorted_path> > >(std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x134BC3: s_graph::s_graph<std::vector<sorted_path, std::allocator<sorted_path> > >(vrna_fc_s*, short*, short*, int, std::vector<sorted_path, std::allocator<sorted_path> > const&) (postprocessing.hpp:74)
+==10272==    by 0x1162F6: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:721)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x116AC2: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:814)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== 712,786 bytes in 1,186 blocks are definitely lost in loss record 93 of 93
+==10272==    at 0x483ED99: calloc (in /usr/lib/x86_64-linux-gnu/valgrind/vgpreload_memcheck-amd64-linux.so)
+==10272==    by 0x1DEAD7: vrna_alloc (utils.c:87)
+==10272==    by 0x1D7D25: vrna_db_from_ptable (structure_utils.c:320)
+==10272==    by 0x1129DD: s_graph::add_node(short*, int, int, int) (postprocessing.hpp:106)
+==10272==    by 0x140F79: void s_graph::add_paths<std::vector<merge_path, std::allocator<merge_path> > >(std::vector<merge_path, std::allocator<merge_path> > const&) (postprocessing.hpp:188)
+==10272==    by 0x1349C6: s_graph::s_graph<std::vector<merge_path, std::allocator<merge_path> > >(vrna_fc_s*, short*, short*, int, std::vector<merge_path, std::allocator<merge_path> > const&, int) (postprocessing.hpp:82)
+==10272==    by 0x129D0C: auto merge_method<s_graph, s_graph>(s_graph&, s_graph&, short*, int, short*, int, int, int, int, vrna_fc_s*, bool) (merge_findpath.hpp:534)
+==10272==    by 0x116D3D: findpath::process_int_loops(int_loops, short*, short*) (merge_findpath.hpp:853)
+==10272==    by 0x114AFF: findpath::init(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, float) (merge_findpath.hpp:102)
+==10272==    by 0x117EBD: main (main.cpp:110)
+==10272== 
+==10272== LEAK SUMMARY:
+==10272==    definitely lost: 1,810,224 bytes in 3,006 blocks
+==10272==    indirectly lost: 0 bytes in 0 blocks
+==10272==      possibly lost: 0 bytes in 0 blocks
+==10272==    still reachable: 1,225,531 bytes in 5,139 blocks
+==10272==         suppressed: 0 bytes in 0 blocks
+==10272== Reachable blocks (those to which a pointer was found) are not shown.
+==10272== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==10272== 
+==10272== For lists of detected and suppressed errors, rerun with: -s
+==10272== ERROR SUMMARY: 30 errors from 30 contexts (suppressed: 0 from 0)

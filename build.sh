@@ -4,7 +4,7 @@
 # g++ ./src/main.cpp ./include/findpath.cpp -o3 -std=c++20 -o main -lRNA -lm -I./include/ -I/usr/include/python3.8 -I./usr/lib/ViennaRNA/ -DEBUG_FINDPATH -fno-lto -pthread -march=native
 
 # with valgrind
-# g++ ./src/main.cpp  -ggdb3 -std=c++20 -o main -lRNA -lm -I./include/ -I/usr/include/python3.8 -I./usr/lib/ViennaRNA/ -DEBUG_FINDPATH -fno-lto -pthread -march=native
+g++ ./src/main.cpp  -ggdb3 -std=c++20 -o main -lRNA -lm -I./include/ -I/usr/include/python3.8 -I./usr/lib/ViennaRNA/ -DEBUG_FINDPATH -fno-lto -pthread -march=native
 
 
 # pybind11 compile 
