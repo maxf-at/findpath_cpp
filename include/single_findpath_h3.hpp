@@ -400,8 +400,6 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
             pool_offset = current_search_width + 2;
         }
 
-        // fmt::print("d: {} \n", d);
-
         // find valid moves (extracted from original try moves function)
         for (c = 0; current[c].s != nullptr; c++) {
             int en;
@@ -411,6 +409,7 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
             ptable_from_string(temp_pt, temp_loop, current[c].s, stack);
             // int* loopidx = vrna_loopidx_from_ptable(temp_pt);
 
+            // fmt::print("try moves: d: {} c: {} s: {}\n", d, c, current[c].s_hash);
             // fmt::print("d: {}, c: {}, s: {}\n", d, c, current[c].s);
 
             for (int a = 0; a < move_list.size(); a++) {
@@ -518,10 +517,15 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
 
         int start = 0;
 
-        // int end = (int)current_search_width * 1.1;
-        int end = current_search_width;
-        end   = std::min(end, num_next);
+        bool verbose = false;
+        // bool verbose = true;
 
+
+        // Initial sort A -> current search width, entries from current search width to num_next
+        // (total number of entries) are partitioned, but not sorted
+
+        int end      = current_search_width;
+        end          = std::min(end, num_next);
         int max_sort = std::min(current_search_width, num_next);
 
         std::nth_element(next + start, next + end, next + num_next,
@@ -529,39 +533,41 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
                              // return a.saddle_en < b.saddle_en;
                              if (a.saddle_en < b.saddle_en) { return true; }
                              if (a.saddle_en > b.saddle_en) { return false; }
-                            //  if (a.s_hash < b.s_hash) { return true; }
-                            //  if (a.s_hash > b.s_hash) { return false; }
                              if (a.curr_en < b.curr_en) { return true; }
                              return false;
                          });
+
+        if (verbose)
+            for (int a = start; a < end; a++) {
+                fmt::print(
+                    "before: start: {}, end: {}, a1: {} / saddle_en: {} / current_en: {} / hash: "
+                    "{}\n",
+                    start, end, a, next[a].saddle_en, next[a].curr_en, next[a].s_hash);
+            }
+
         std::stable_sort(next + start, next + end, [](const auto& a, const auto& b) -> bool {
             if (a.saddle_en < b.saddle_en) { return true; }
             if (a.saddle_en > b.saddle_en) { return false; }
-            // if (a.s_hash < b.s_hash) { return true; }
-            // if (a.s_hash > b.s_hash) { return false; }
             if (a.curr_en < b.curr_en) { return true; }
             return false;
         });
 
-        // max_sort = num_next;
+        if (verbose)
+            for (int a = start; a < end; a++) {
+                fmt::print(
+                    "after:  start: {}, end: {}, a2: {} / saddle_en: {} / current_en: {} / hash: "
+                    "{}\n",
+                    start, end, a, next[a].saddle_en, next[a].curr_en, next[a].s_hash);
+            }
 
-        // std::partial_sort(next + start, next + end, next + num_next,
-        //     [](const auto& a, const auto& b) -> bool {
-        //         // return a.saddle_en < b.saddle_en;
-        //         if (a.saddle_en < b.saddle_en) { return true; }
-        //         if (a.saddle_en > b.saddle_en) { return false; }
-        //         if (a.s_hash < b.s_hash) { return true; }
-        //         if (a.s_hash > b.s_hash) { return false; }
-        //         if (a.curr_en < b.curr_en) { return true; }
-        //         return false;
-        //     });
-
-        // std::qsort(next, num_next, sizeof(intermediate_t), compare_energy);
-
-        robin_hood::unordered_set<u_int64_t> duplicates{};
-        int                 duplicates_found = 0;
+        // robin_hood::unordered_set<u_int64_t> duplicates{};
+        robin_hood::unordered_map<u_int64_t, int> duplicates{};
+        int                                       duplicates_found = 0;
 
         bool flag = true;
+
+
+
         // dont delete duplicates at the end
         if (d == bp_dist and current_search_width >= final_search_width) {
             flag = false;
@@ -569,43 +575,67 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
             num_next = u + 1;
         }
 
-        // this deletes duplicates and shrinks the next array which makes the following sorting step
-        // faster
-
         int candidates = num_next;
 
         if (d <= bp_dist and flag) {
-            // for (u = 0, c = 1; c < num_next; c++) {
+            // check how many duplicates are found from the beginning to current search width
 
-            // end = num_next;
-            u      = 0;  // verified candidates without duplicates
-            c      = 1;  // processed vandidates
+            u      = -1;  // verified candidates without duplicates
+            c      = 0;   // 1? processed candidates
             int in = 0;
             while (true) {
                 in++;
                 int start_u = u;
+
+                duplicates_found = 0;
+
                 for (; c < end; c++) {
-                    // fmt::print ("d: {}, c: {}, hash: {}, en1: {}, en2: {}\n", d, c,
-                    // next[c].s_hash, next[c].saddle_en, next[c].curr_en);
-
-                    const uint64_t current_s_hash = next[c].s_hash * next[c].curr_en;
-
-                    // current_s_hash = (current_s_hash >> 31) * std::abs(next[c].curr_en);
+                    // const uint64_t current_s_hash = next[c].s_hash * next[c].curr_en;
+                    const uint64_t current_s_hash = next[c].s_hash;
 
                     if (duplicates.contains(current_s_hash)) {
-                        // free_intermediate(next + c);
                         duplicates_found++;
+                        int b = duplicates[current_s_hash];
+
+                        // this case can never occur, later found similar structures have to be
+                        // worse.
+                        if (next[c].saddle_en < next[b].saddle_en) {
+                            duplicates[current_s_hash] = c;
+
+                            if (next[b].saddle_en == 9999) {
+                                next[c].saddle_en = 9999;
+                                // break;
+                            }
+                            // replace b with c
+                            // fmt::print("replace {} {} -> {} {}\n", b, next[b].saddle_en, c,
+                            // next[c].saddle_en);
+
+                            next[b] = next[c];
+                        }
+                        // kill c for following sort
+                        next[c].saddle_en = 9999;
 
                     } else {
-                        duplicates.insert(current_s_hash);
+                        // new unique structure
+
+                        duplicates[current_s_hash] = c;
+                        // duplicates.insert(current_s_hash);
+
+                        // debug this!
                         next[++u] = next[c];
+                        // next[u] = next[c];
+                        // u++;
                     }
                 }
 
-                // if (in < 100) py::print("d:", d, "i_iter:", in - 1, "u:", u,
-                // next[start_u].saddle_en,
-                //           next[u].saddle_en, "start:", start, "end", end, "max:", num_next,
-                //           "duplicates:", duplicates_found);
+                // we now have e.g. 10 duplicates in the first search iteration, means
+                // we need to sort 10 more entries with partial sort
+                // repeat until we have current_search_width entries without duplicates, or
+                // alternitively, we sorted the whole list of candidates
+
+                if (verbose)
+                    fmt::print("u: {} / c: {} / goal {} / duplicates: {}\n", u, c,
+                               current_search_width, duplicates_found);
 
                 if (duplicates_found == 0 or u >= current_search_width or c == candidates) {
                     break;
@@ -613,167 +643,87 @@ inline auto single_findpath::find_path_once(vrna_fold_compound_t* vc, short* pt1
 
                 start = end;  // begin where we left off
 
-                int modifier = (int) duplicates_found + 1;
+                // int modifier = (int)duplicates_found + 1;
+                int modifier = (int)duplicates_found;
 
-                end   = std::min(end + modifier, num_next);
-
-                // std::partial_sort(next + start, next + end, next + num_next,
-                //     [](const auto& a, const auto& b) -> bool {
-                //         // return a.saddle_en < b.saddle_en;
-                //         if (a.saddle_en < b.saddle_en) { return true; }
-                //         if (a.saddle_en > b.saddle_en) { return false; }
-                //         if (a.s_hash < b.s_hash) { return true; }
-                //         if (a.s_hash > b.s_hash) { return false; }
-                //         if (a.curr_en < b.curr_en) { return true; }
-                //         return false;
-                //     });
+                end = std::min(end + modifier, num_next);
 
                 std::nth_element(next + start, next + end, next + num_next,
                                  [](const auto& a, const auto& b) -> bool {
-                                     // return a.saddle_en < b.saddle_en;
                                      if (a.saddle_en < b.saddle_en) { return true; }
                                      if (a.saddle_en > b.saddle_en) { return false; }
-                                    //  if (a.s_hash < b.s_hash) { return true; }
-                                    //  if (a.s_hash > b.s_hash) { return false; }
                                      if (a.curr_en < b.curr_en) { return true; }
                                      return false;
                                  });
+
+                if (verbose)
+                    for (int a = start; a < end; a++) {
+                        fmt::print(
+                            "before: start: {}, end: {}, b1: {} / saddle_en: {} / current_en: {} / "
+                            "hash: {}\n",
+                            start, end, a, next[a].saddle_en, next[a].curr_en, next[a].s_hash);
+                    }
+
                 std::stable_sort(next + start, next + end,
                                  [](const auto& a, const auto& b) -> bool {
                                      if (a.saddle_en < b.saddle_en) { return true; }
                                      if (a.saddle_en > b.saddle_en) { return false; }
-                                    //  if (a.s_hash < b.s_hash) { return true; }
-                                    //  if (a.s_hash > b.s_hash) { return false; }
                                      if (a.curr_en < b.curr_en) { return true; }
                                      return false;
                                  });
 
+                if (verbose)
+                    for (int a = start; a < end; a++) {
+                        fmt::print(
+                            "after:  start: {}, end: {}, b2: {} / saddle_en: {} / current_en: {} / "
+                            "hash: {}\n",
+                            start, end, a, next[a].saddle_en, next[a].curr_en, next[a].s_hash);
+                    }
+
                 // break;
             }
 
-            // py::print("dupes:", duplicates_found, "\tcurrent width", current_search_width,
-            // "\tprocessed:", u+1, "\tnum_next", num_next);
-
-            // if (u < current_search_width and num_next > current_search_width) {
-            //     // c--;
-            //     auto extra_elems = duplicates_found;
-            //     auto start = next+current_search_width;
-            //     auto end   = std::min(current_search_width+extra_elems, num_next);
-
-            //     // auto max_sort = std::min(current_search_width + 1, num_next);
-            //     std::nth_element(start, start + end, next + num_next,
-            //                     [](const auto& a, const auto& b) -> bool {
-            //                         // return a.saddle_en < b.saddle_en;
-            //                         if (a.saddle_en < b.saddle_en) { return true; }
-            //                         if (a.saddle_en > b.saddle_en) { return false; }
-            //                         if (a.curr_en < b.curr_en) { return true; }
-            //                         return false;
-            //                     });
-            //     // std::stable_sort(start, start + end, [](const auto& a, const auto& b) -> bool
-            //     {
-            //     //     if (a.saddle_en < b.saddle_en) { return true; }
-            //     //     if (a.saddle_en > b.saddle_en) { return false; }
-            //     //     if (a.curr_en < b.curr_en) { return true; }
-            //     //     return false;
-            //     // });
-            //     std::stable_sort(next, next+num_next, [](const auto& a, const auto& b) -> bool {
-            //         if (a.saddle_en < b.saddle_en) { return true; }
-            //         if (a.saddle_en > b.saddle_en) { return false; }
-            //         if (a.curr_en < b.curr_en) { return true; }
-            //         return false;
-            //     });
-            //     // py::print ("c", c, "end:", end);
-            //     for (; c < end or c < num_next; c++) {
-
-            //     //     // py::print ("c", c, "end:", end, "num_next", num_next);
-
-            //         if (duplicates.contains(next[c].s_hash)) {
-            //             duplicates_found++;
-            //         } else {
-            //             duplicates.insert(next[c].s_hash);
-            //             // py::print ("add", next[u].saddle_en, next[u].s_hash);
-            //             next[++u] = next[c];
-            //         }
-            //     }
-            //     // u--;
-            //     // free_intermediate(next + u);
-            //     // py::print ("extra processed", u+1, c, num_next);
-            // }
-
             free_intermediate(next + c);
             num_next = u + 1;
+            // num_next = u;
+
+            // fmt::print ("free {} / num_next: {}\n", c, num_next);
         }
 
-        // py::print("d:", d, "/", bp_dist, "C:", u, "/", c, sizeof(intermediate_t));
-        // fmt::print ("C: {} / {}\n", u, c);
-
-        // if (d <= bp_dist and flag) {
-        //     auto last_hash  = next[1].s_hash;
-        //     int  best_en    = next[1].saddle_en;
-        //     int  best_index = 1;
-
-        //     for (u = 0, c = 1; c < num_next; c++) {
-        //         if (next[c].s_hash != last_hash) {
-        //             // we now now the best structure
-        //             next[u] = next[best_index];
-        //             u++;
-
-        //             // reset for next structure
-        //             last_hash  = next[c].s_hash;
-        //             best_en    = next[c].saddle_en;
-        //             best_index = c;
-
-        //         } else {
-        //             // we have 2+ consecutive structures with potentially different energies
-        //             if (next[c].saddle_en < best_en) {
-        //                 best_en    = next[c].saddle_en;
-        //                 best_index = c;
-        //             }
-        //         }
-        //     }
+        // for (int a = 0; a < end; a++) {
+        //     fmt::print("c: {} / saddle_en: {} / current_en: {} / hash: {}\n", a,
+        //     next[a].saddle_en,
+        //                next[a].curr_en, next[a].s_hash);
         // }
 
+        // for (const auto& [x, s] : duplicates) { std::cout << x << " -> " << s << "\n"; }
+
         num_next = u + 1;
-        // std::qsort(next, num_next, sizeof(intermediate_t), compare_energy);
 
-        // std::stable_sort(next, next + num_next, [](const auto& a, const auto& b) -> bool {
+
+        // std::stable_sort(next, next + end, [](const auto& a, const auto& b) -> bool {
+        //     // if (a.s_hash < b.s_hash) { return true; }
+        //     // if (a.s_hash > b.s_hash) { return false; }
+
         //     if (a.saddle_en < b.saddle_en) { return true; }
         //     if (a.saddle_en > b.saddle_en) { return false; }
         //     if (a.curr_en < b.curr_en) { return true; }
         //     return false;
         // });
 
-        // std::nth_element(next, next + current_search_width + 1, next + num_next,
-        //                  [](const auto& a, const auto& b) -> bool {
-        //                      // return a.saddle_en < b.saddle_en;
-        //                      if (a.saddle_en < b.saddle_en) { return true; }
-        //                      if (a.saddle_en > b.saddle_en) { return false; }
-        //                      if (a.curr_en < b.curr_en) { return true; }
-        //                      return false;
-        //                  });
 
-        // max_sort = std::min(current_search_width + 1, num_next);
-        // std::stable_sort(next, next + max_sort, [](const auto& a, const auto& b) -> bool {
-        //     if (a.saddle_en < b.saddle_en) { return true; }
-        //     if (a.saddle_en > b.saddle_en) { return false; }
-        //     if (a.curr_en < b.curr_en) { return true; }
-        //     return false;
-        // });
 
-        // auto max_sort = std::min(current_search_width+1, num_next);
-        // std::partial_sort(next, next+max_sort, next + num_next, [](const auto& a, const auto& b)
-        // -> bool {
-        //     // return a.saddle_en < b.saddle_en;
-        //     if (a.saddle_en < b.saddle_en) { return true; }
-        //     if (a.saddle_en > b.saddle_en) { return false; }
-        //     if (a.curr_en < b.curr_en) { return true; }
-        //     return false;
-        // });
+
+        // for (int a = 0; a < end; a++) {
+        //     fmt::print("b: {} / saddle_en: {} / current_en: {} / hash: {}\n", a,
+        //     next[a].saddle_en, next[a].curr_en, next[a].s_hash);
+        // }
 
         // update moves & structures for next iteration
         for (u = 0; u < current_search_width and u < num_next; u++) {
-            // fmt::print ("d: {}/{}, u: {}/{}, hash: {}, en1: {}, en2: {}\n", d, bp_dist, u,
-            // num_next, next[u].s_hash, next[u].saddle_en, next[u].curr_en);
+            if (verbose)
+                fmt::print("accept: {} / saddle_en: {} / current_en: {} / hash: {}\n", u,
+                           next[u].saddle_en, next[u].curr_en, next[u].s_hash);
 
             auto last_id = next[u].last_id;
             auto move_id = next[u].move_id;

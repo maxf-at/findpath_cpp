@@ -155,6 +155,8 @@ PYBIND11_MODULE(findpath, m)
 
     py::class_<findpath>(m, "findpath_class")
         .def(py::init<std::string, bool>())
+        .def("return_path", &findpath::return_path)
+        .def("return_sections", &findpath::return_sections)
         .def("init", &findpath::init_python);
     // .def("init_ext", &findpath::init_ext);
     // .def("getName", &Pet::getName);

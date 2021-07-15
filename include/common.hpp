@@ -103,13 +103,13 @@ struct merge_path {
     bool operator==(const merge_path& current) const
     {
         // this vs. current
-        if (memcmp(current.current_ptable, this->current_ptable,
-                   sizeof(short) * (this->current_ptable[0] + 1))) {
-            return false;
-        }
-        return true;
+        // if (memcmp(current.current_ptable, this->current_ptable,
+        //            sizeof(short) * (this->current_ptable[0] + 1))) {
+        //     return false;
+        // }
+        // return true;
 
-        // return current.s_hash == this->s_hash;
+        return current.s_hash == this->s_hash;
     }
 };
 

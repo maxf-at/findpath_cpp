@@ -47,7 +47,7 @@ if o_filename == "local_min_300_multiple_sections_min10.csv":
 reference_merge_mfe_results = []
 
 
-
+start = time.time()
 
 
 def launch_new_fp(sequence, s1, s2, swm=None, mp=True):
@@ -120,7 +120,9 @@ for index, row in df.iterrows():
     #     break
     all_offset_values += offset
 
-print ("all deviations:", all_offset_values)
+end = round(time.time()-start, 4)
+
+print ("all deviations:", all_offset_values, "time:", end)
 
 
 

@@ -7,6 +7,8 @@ import RNA
 import findpath
 import findpath_librna
 
+from pretty_print_path import print_moves
+
 # random 600 nt example
 sequence = "AAAAUAAUGUACCGGACAUUCGCGCACGACCACCAUAUGGCAGAGCAUGUGUCUGUGGACCCACUAUAGCUGGGGCGCUUAACCCCAGAAAAGUAUCUUCGGUCUAUGCCUCACACGCAGCCUCCUAUUAGCAGCUCUCCUGGCCCACAAUUUUAUUAAAAGUCCAAGUUGGACUGACAAAACGCGUGCGGUGUCCUAGGGAUUGGUGGCAUAACCAGCGGUUUAAAAGCUGUGUAUAUCCGCAGCAAAUCACCGGAAAGCGGCGUUAUUAGCACCACAAAUUGAUGGUUGGUACGAGUACAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACCAGACCACAAUGCAGGGCGGCACCGUUAGGCAACACAACGAGACUACUCAUGCACAUAAGGAAGGUUAUCGCCAUAGACAUGGCGCGGCAGCGCAGAAUGUUUAAAUCUAAAUCUGGUAUGGGAGGCGUGCCCGUUGGUAUGAAGAAAUUUGCUGGGAGAAAAAGUCUAAGGCCUUGAAUCCGGCGGGUCUUAAUACUUACCUACAAAAUCAUCAGGCUGUACUUCCUGUAUC"
 s1 =       "........(((((((((((((((((..((((.((.((((((((((...((.((((((((((....(((.((((((.......)))))).....)))....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((...........((((......((((((......)))))).....))))....(((((((((((.(.((((((......))..)))).).)))).....))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..))))..((((((....)))))).....)))).)))))............))))))))((((((((.(((.(.((((.........((((..(((((.....((.((((((((((....))..)))))))))).))).))..)))))))).).))))))..)))))....."
@@ -27,9 +29,9 @@ s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((.
 
 # this example requires suboptimal paths for merging
 # S: -2.50, barrier: 1.90, runtime: 0.0023 s
-# sequence = "UGAAGACCCAUUGAGUAACGACACCGCACGGCGCAUGGCGUCAGAGUAGCACUGCCUCGU"
-# s1 =       "....(((((((.(.(...((....)).....).))))).)))((.((......))))..."
-# s2 =       "....(((((((...((..((........))..)))))).))).(((..((...))))).."
+sequence = "UGAAGACCCAUUGAGUAACGACACCGCACGGCGCAUGGCGUCAGAGUAGCACUGCCUCGU"
+s1 =       "....(((((((.(.(...((....)).....).))))).)))((.((......))))..."
+s2 =       "....(((((((...((..((........))..)))))).))).(((..((...))))).."
 
 # no sections 300
 # sequence = "UCACGACACCCCUCAACUAUAACAACGGUCCGUACAUACUAGCCCUGCAAUGGAACGGGCAGGGCCAGCACAGGUGGGGCGCCCGCUUGGGGGAUCAAAUGUGUGAUCCAGAUACUUUAGACGCGUGCAGAACUUUUUAGAUCGAUCAGUGGGAACAGGCAUUGAUUAUGAAAUCAAUUAGGGGGUUUAGGACCGCACCACAAACUGCGGGAGGGCACGCUUUGGUUCCUGUGUUACGCUAAUCCUCUAGCCACGGAGGGCUUCUUCGUACAAUGAUUGGGUUACCAGGGUUCCAGUGUG"
@@ -93,13 +95,18 @@ print ("~~~~~~~~~~~")
 print (f'merge findpath')
 print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
-start_findpath = time.time()
-result = findpath.init_mfe_findpath(sequence, s1, s2, search_width_multiplier, True)
-result = result/100.0
-runtime = time.time()-start_findpath
-print ("~~~~~~~~~~~")
-print (f'merge findpath (+MFE)')
-print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+path = fp.return_path()
+print (path) 
+print_moves(sequence, s1, s2, path, convert_to_float=True)
+fp.return_sections()
+
+# start_findpath = time.time()
+# result = findpath.init_mfe_findpath(sequence, s1, s2, search_width_multiplier, True)
+# result = result/100.0
+# runtime = time.time()-start_findpath
+# print ("~~~~~~~~~~~")
+# print (f'merge findpath (+MFE)')
+# print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
 # start_findpath = time.time()
 # result = findpath.init_merge_ext_findpath(sequence, s1, s2, search_width_multiplier, True)

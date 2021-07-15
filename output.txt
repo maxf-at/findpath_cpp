@@ -1,0 +1,7 @@
+search width: 68 bp_dist: 17 seq_length: 60
+~~~~~~~~~~~
+single section
+S: -2.80, barrier: 1.60, runtime: 0.0197 s
+~~~~~~~~~~~
+librna findpath (orig SWIG bindings)
+S: -2.80, barrier: 1.60, runtime: 0.0023 s

@@ -13,7 +13,8 @@
 // #include <single_findpath_s4hash.hpp>
 // #include <single_findpath_h.hpp>
 // #include <single_findpath_h2.hpp>
-#include <single_findpath_h3.hpp>
+#include <single_findpath_h25.hpp>
+// #include <single_findpath_h3.hpp>
 
 // #include <single_findpath_h2_bench.hpp>
 
@@ -23,8 +24,8 @@
 
 #include <multi_findpath.hpp>
 
-#include <merge_findpath.hpp>
-// #include <merge_findpath_hash.hpp>
+// #include <merge_findpath.hpp>
+#include <merge_findpath_hash.hpp>
 // #include <merge_findpath_benchmark.hpp>
 
 #include <mfe_preprocessing.hpp>

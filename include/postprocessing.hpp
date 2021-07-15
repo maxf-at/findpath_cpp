@@ -49,9 +49,11 @@ class s_graph
 
     int paths_count = 0; // how many individual paths were added to this graph
 
+    // member functions
     void reset();
     void info();
     void display_path(bool result_only = false);
+    auto return_path() -> std::vector<std::tuple<int,int, int>>;
 
     // s_graph(); //Constructor of the class
     s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths);
@@ -255,6 +257,43 @@ void s_graph::display_path(bool result_only)
 
     free(current_ptable);
 }
+
+auto s_graph::return_path() -> std::vector<std::tuple<int,int, int>>
+{
+    // graph traversal
+
+    std::vector<std::tuple<int,int, int>> result;
+
+    auto current_ptable = vrna_ptable_copy(pt_1);
+    int       en = vrna_eval_structure_pt(fc, current_ptable);
+    int    iter         = 0;
+    s_node current_node = node_list[iter];
+
+    while (current_node.out_edges.size() != 0) {
+        // the first edge always leads to the best result since we added them sorted to the graph
+        const auto& m = current_node.out_edges[0];
+        if (m.j < 0) {
+            current_ptable[-m.i] = 0;
+            current_ptable[-m.j] = 0;
+        } else {
+            current_ptable[m.i] = m.j;
+            current_ptable[m.j] = m.i;
+        }
+
+
+        en = vrna_eval_structure_pt(fc, current_ptable);
+
+        result.push_back({m.i, m.j, en});
+
+        current_node = node_list[m.destination];
+    }
+
+    return result;
+
+}
+
+
+
 
 // unused below
 
