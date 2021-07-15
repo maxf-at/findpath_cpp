@@ -266,6 +266,8 @@ auto s_graph::return_path() -> std::vector<std::tuple<int,int, int>>
 
     auto current_ptable = vrna_ptable_copy(pt_1);
     int       en = vrna_eval_structure_pt(fc, current_ptable);
+    result.push_back({0, 0, en});
+
     int    iter         = 0;
     s_node current_node = node_list[iter];
 
