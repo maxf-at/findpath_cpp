@@ -14,6 +14,14 @@ int init_single_findpath(std::string sequence, std::string s1, std::string s2,
     const char* c_s2       = s2.c_str();
 
     vrna_md_t md;
+
+    // md.temperature = 32; // args.temp FLOAT
+    // md.dangles = 2; // args.dangles
+    // md.special_hp = // not args.noTetra
+    // md.noGU = args.noGU
+    // md.noGUclosure = args.noClosingGU
+
+
     set_model_details(&md);
     vrna_fold_compound_t* fc = vrna_fold_compound(c_sequence, &md, VRNA_OPTION_EVAL_ONLY);
 

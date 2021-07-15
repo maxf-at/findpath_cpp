@@ -814,7 +814,10 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
         auto            result = fp_call.init(fc, pt_1, pt_2, search_width, true);
 
         // postprocess paths into graph
-        s_graph G_inner{fc, pt_1, pt_2, current_sections.bp_dist, result};
+        // s_graph G_inner{fc, pt_1, pt_2, current_sections.bp_dist, result};
+        s_graph G_inner{fc, vrna_ptable_copy(pt_1), vrna_ptable_copy(pt_2), current_sections.bp_dist, result};
+        
+        
         G_inner.max_en = result[0].max_en;
 
         // G_inner.info();

@@ -152,6 +152,8 @@ static double distortion_default(int i, int j, int k, int l, unsigned char decom
 
 
     result = 0.;
+
+    // vorfaktoren etc. adjust
     for (size_t r = 0; r < num_refs; r++) {
         result += distortions[r] * (double)distance[r];
     }

@@ -58,12 +58,14 @@ compute_distancies(int              i,
   referenceBPs  = d->ref_bps;
   idx           = d->idx;
 
+  // mapping 2d in ein 1d array / upper triangular dp
   ij  = idx[i] - j;
   kl  = idx[k] - l;
 
 
   // base_dx?
   // referenceBPs?
+  // an der stelle i und j Anzahl bp von i bis j
 
   // idx?
 

@@ -218,6 +218,8 @@ void s_graph::info()
 
 void s_graph::display_path(bool result_only)
 {
+    
+        
     // prints the best path
     auto current_ptable = vrna_ptable_copy(pt_1);
 
@@ -262,11 +264,20 @@ auto s_graph::return_path() -> std::vector<std::tuple<int,int, int>>
 {
     // graph traversal
 
+    // info();
+
     std::vector<std::tuple<int,int, int>> result;
+
 
     auto current_ptable = vrna_ptable_copy(pt_1);
     int       en = vrna_eval_structure_pt(fc, current_ptable);
     result.push_back({0, 0, en});
+
+
+    // fmt::print("{} {} {} {}\n", pt_1[0], pt_1[1], pt_1[2], pt_1[3]); 
+
+    // std::string s  = vrna_db_from_ptable(current_ptable);
+    // fmt::print("{} {:7.2f} ({:4}/{:4})\n", s, en, 0, 0); 
 
     int    iter         = 0;
     s_node current_node = node_list[iter];
