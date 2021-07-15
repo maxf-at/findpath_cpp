@@ -143,6 +143,13 @@ static double distortion_default(int i, int j, int k, int l, unsigned char decom
     num_refs    = d->ref_num; // =2
     
 
+    int pt1[] = {120, 0, 0, 0, 0, 0, 0, 0, 0, 35, 34, 33, 32, 31, 30, 29, 28, 27, 26, 0, 0, 0, 0, 0, 0, 0, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 0, 0, 0, 0, 0, 0, 80, 79, 78, 77, 76, 0, 75, 74, 0, 72, 70, 69, 68, 67, 66, 0, 65, 64, 0, 0, 0, 0, 59, 58, 56, 55, 54, 53, 52, 0, 51, 0, 49, 48, 46, 45, 44, 43, 42, 0, 0, 95, 94, 93, 92, 0, 0, 0, 0, 0, 86, 85, 84, 83, 0, 0, 0, 0, 0, 0, 0, 119, 118, 117, 115, 114, 113, 0, 0, 0, 0, 108, 107, 106, 0, 105, 104, 103, 0};
+    int pt2[] = {120, 0, 0, 0, 0, 0, 0, 0, 0, 35, 34, 33, 32, 31, 30, 28, 27, 26, 25, 0, 0, 0, 0, 0, 0, 18, 17, 16, 15, 0, 14, 13, 12, 11, 10, 9, 86, 85, 84, 0, 0, 0, 80, 79, 0, 78, 77, 76, 75, 74, 0, 72, 71, 69, 68, 67, 66, 0, 65, 64, 0, 0, 0, 0, 59, 58, 56, 55, 54, 53, 0, 52, 51, 0, 49, 48, 47, 46, 45, 43, 42, 0, 0, 0, 38, 37, 36, 0, 120, 119, 118, 116, 115, 0, 114, 113, 112, 111, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 98, 97, 96, 95, 94, 92, 91, 0, 90, 89, 88};
+
+
+    // printf("i: %d j: %d / %d %d\n", i,j, k,l);
+
+
 
     result = 0.;
     for (size_t r = 0; r < num_refs; r++) {
@@ -152,6 +159,15 @@ static double distortion_default(int i, int j, int k, int l, unsigned char decom
     // printf("%d %d %d %d / %d / d0: %d / d1: %d\n", i, j, k, l, num_refs, distance[0], distance[1]);
 
     result = result * 100.;
+    
+    
+    if ((int)pt1[i] == j || (int)pt2[i] == j) {   
+        // printf("i: %d j: %d / %d %d\n", i,j, k,l);
+        // printf("%d %d %d %d / %d / d0: %d / d1: %d / result: %f\n", i, j, k, l, num_refs, distance[0], distance[1], result);
+
+        result = result/50;
+    }
+    
     return result;
 }
 
@@ -246,7 +262,7 @@ int main()
     double mfe = (double)vrna_mfe(fc, structure);
 
     /* print seqeunce, structure and MFE */
-    printf("%s\n%s [ %6.2f ]\n", seq, structure, mfe);
+    printf("%s\n%s [ %6.2f ] <-- MFE\n", seq, structure, mfe);
 
     fc->params->model_details.compute_bpp = 0; /* deactivate base pair probability computation */
     fc->params->model_details.uniq_ML     = 1; /* required for Boltzmann sampling */
@@ -267,14 +283,19 @@ int main()
         "........((((((((((......)))).))))))(((...((.(((((.((((((.((....)))))).)).)))))))...))).((("
         "((.(((((...........))))))).)))";
 
+    printf("--------------------------------\n");
+
     /* print both structures */
-    printf("%s\n%s\n", samples[0], samples[1]);
+    printf("%s <-- S1\n%s <-- S2\n", samples[0], samples[1]);
+
+    printf("--------------------------------\n");
+
 
     /* now, perform distortion of energies according to both references */
     double distortions[2];
 
-    distortions[0] = 0.1;
-    distortions[1] = 0.1;
+    distortions[0] = 0.5; // original value: 0.1
+    distortions[1] = 0.5;
 
     sc_dist_class_t* data = init_sc(fc, (const char**)samples, 2, (const double*)distortions);
 
@@ -305,7 +326,7 @@ int main()
 
     /* sample 50 structures from distorted landscape */
     // char** d_samples = vrna_pbacktrack_num(fc, 50, VRNA_PBACKTRACK_NON_REDUNDANT);
-    char** d_samples = vrna_pbacktrack_num(fc, 1, VRNA_PBACKTRACK_NON_REDUNDANT);
+    char** d_samples = vrna_pbacktrack_num(fc, 10, VRNA_PBACKTRACK_NON_REDUNDANT);
 
     for (size_t i = 0; d_samples[i]; i++) {
         printf("%s - d_sample %u\n", d_samples[i], i + 1);

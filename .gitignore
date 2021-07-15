@@ -1,3 +1,8 @@
+# Python ignorelist
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+
 # Compiled Object files
 **/.DS_Store
 *.slo
