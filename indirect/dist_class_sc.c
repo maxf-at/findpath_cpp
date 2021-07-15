@@ -53,8 +53,8 @@ compute_distancies(int              i,
   int           ij, kl, *base_dx, *idx;
   short         **references_pt;
 
-  references_pt = d->ref_pts;
-  numberOfRefs  = d->ref_num;
+  references_pt = d->ref_pts; // pairing tables 1 and 2
+  numberOfRefs  = d->ref_num; 
   referenceBPs  = d->ref_bps;
   idx           = d->idx;
 
@@ -73,10 +73,17 @@ compute_distancies(int              i,
   for (r = 0; r < numberOfRefs; r++)
     base_dx[r] = ((int)references_pt[r][i] != j) ? 1 : -1;
 
-  printf("ij: %d kl: %d / %d %d\n", ij, kl, idx[i], j);
-  printf("base_dx: %d %d\n", base_dx[0], base_dx[0]);
-  printf("ref0: %d %d %d %d %d\n", references_pt[0][0], references_pt[0][1], references_pt[0][2], references_pt[0][3], references_pt[0][4]);
+  // printf("ij: %d kl: %d / %d %d\n", ij, kl, idx[i], j);
+  // printf("base_dx: %d %d\n", base_dx[0], base_dx[0]);
+  // printf("ref0: %d %d %d %d %d\n", references_pt[0][0], references_pt[0][1], references_pt[0][2], references_pt[0][3], references_pt[0][4]);
   
+  // printf("ref bp: %d %d %d %d %d\n", referenceBPs[r][ij], referenceBPs[r][kl], 0,0, 0);
+  
+  if ((int)references_pt[0][i] == j || (int)references_pt[1][i] == j) {   
+    // printf("i: %d j: %d / %d %d\n", i,j, ij, kl);
+  }
+
+
   switch (decomp) {
     /* cases where we actually introduce a base pair */
     case VRNA_DECOMP_PAIR_HP:
@@ -197,9 +204,22 @@ compute_distancies(int              i,
 
   free(base_dx);
 
-  printf("compute_distancies: i:%d k:%d l:%d j:%d / %c / dist0: %d / dist1: %d\n", i, k, l, j, decomp, dist[0], dist[1]);
+  // printf("compute_distancies: i:%d k:%d l:%d j:%d / %c / dist0: %d / dist1: %d\n", i, k, l, j, decomp, dist[0], dist[1]);
+
+  // return dist;
+
+  if ((int)references_pt[0][i] == j || (int)references_pt[1][i] == j) {   
+    return dist;
+    // printf("i: %d j: %d / %d %d\n", i,j, ij, kl);
+    // printf("ij: %d kl: %d / %d %d\n", ij, kl, idx[i], j);
+  }
+
+  dist[0] = 0;
+  dist[1] = 0;
+  
 
   return dist;
+
 }
 
 // Energie evaluation, wir an RNAfold weiterreichen
