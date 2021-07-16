@@ -12,10 +12,11 @@ class findpath
                                bool mp);
 
     auto      process_ext_loops(ext_loops ext_loops, short* pt_1, short* pt_2) -> s_graph;
-    auto      process_int_loops(int_loops current_sections, short* pt_1, short* pt_2) -> s_graph;
+    auto      process_int_loops(int_loops current_sections, std::vector<short> pt1,
+                                std::vector<short> pt2) -> s_graph;
     int_loops all_sections{0, 0};
 
-    s_graph G; // result graph
+    s_graph                             G;  // result graph
     std::unordered_map<size_t, s_graph> G_cache;
     bool                                cache = true;
 
@@ -30,7 +31,7 @@ class findpath
 
     auto init(std::string s1, std::string s2, float sw = 2) -> s_graph;
     auto init_python(std::string s1, std::string s2, float sw = 2) -> int;
-    auto return_path() -> std::vector<std::tuple<int,int,int>>;
+    auto return_path() -> std::vector<std::tuple<int, int, int>>;
     auto return_sections() -> void;
 
     auto init_ext(std::string s1, std::string s2, float sw = 2) -> s_graph;
@@ -57,84 +58,71 @@ auto findpath::init_python(std::string s1, std::string s2, float sw) -> int
     // class member function, exported to Python
 
     search_width_multiplier = sw;
-    short* pt1              = vrna_ptable(s1.c_str());
-    short* pt2              = vrna_ptable(s2.c_str());
+    std::vector<short> pt1  = ptable_from_string(s1);
+    std::vector<short> pt2  = ptable_from_string(s2);
 
     // initialise section structure
     all_sections.start = 1;
     all_sections.end   = pt1[0];
 
-    all_sections.bp_dist         = vrna_bp_distance(s1.c_str(), s2.c_str());
-    all_sections.nested_sections = find_interior_loops(
-        pt1, pt2, 1, pt1[0]);  // recursively add all nested sections (if available)
+    all_sections.bp_dist = vrna_bp_distance(s1.c_str(), s2.c_str());
+    // recursively add all nested sections (if available)
+    all_sections.nested_sections = find_interior_loops(pt1, pt2, 1, pt1[0]);
 
-    // std::cout << "Sections:" << all_sections << "\n";
-    // fmt::print ("s1: {}\n", vrna_db_from_ptable(pt1));
-    // fmt::print ("s2: {}\n", vrna_db_from_ptable(pt2));
+    // short* pt_1 = pt1.data();
+    // short* pt_2 = pt2.data();
 
     // recursively process nested sections
     G = process_int_loops(all_sections, pt1, pt2);
 
-    free(pt1);
-    free(pt2);
-
     return G.max_en;
 }
 
-auto findpath::return_path() -> std::vector<std::tuple<int,int, int>>
+auto findpath::return_path() -> std::vector<std::tuple<int, int, int>>
 {
-    std::vector<std::tuple<int,int, int>> path = G.return_path();
+    std::vector<std::tuple<int, int, int>> path = G.return_path();
 
     return path;
     // class member function, exported to Python
 }
 
-auto findpath::return_sections() -> void
-{
-
-    std::cout << all_sections << "\n";
-
-
-}
-
+auto findpath::return_sections() -> void { std::cout << all_sections << "\n"; }
 
 auto findpath::init(std::string s1, std::string s2, float sw) -> s_graph
 {
-    // s1 = vrna_db_from_ptable(pt_1);
-    // s2 = vrna_db_from_ptable(pt_2);
+    // class member function, exported to Python
 
     search_width_multiplier = sw;
-    short* pt1              = vrna_ptable(s1.c_str());
-    short* pt2              = vrna_ptable(s2.c_str());
+    std::vector<short> pt1  = ptable_from_string(s1);
+    std::vector<short> pt2  = ptable_from_string(s2);
 
     // initialise section structure
     all_sections.start = 1;
     all_sections.end   = pt1[0];
 
-    all_sections.bp_dist         = vrna_bp_distance(s1.c_str(), s2.c_str());
-    all_sections.nested_sections = find_interior_loops(
-        pt1, pt2, 1, pt1[0]);  // recursively add all nested sections (if available)
+    all_sections.bp_dist = vrna_bp_distance(s1.c_str(), s2.c_str());
+    // recursively add all nested sections (if available)
+    all_sections.nested_sections = find_interior_loops(pt1, pt2, 1, pt1[0]);
 
-    // std::cout << "Sections:" << all_sections << "\n";
-    // fmt::print ("s1: {}\n", vrna_db_from_ptable(pt1));
-    // fmt::print ("s2: {}\n", vrna_db_from_ptable(pt2));
+    // short* pt_1 = pt1.data();
+    // short* pt_2 = pt2.data();
 
     // recursively process nested sections
     G = process_int_loops(all_sections, pt1, pt2);
+
     return G;
 }
 
 auto findpath::init_ext(std::string s1, std::string s2, float sw) -> s_graph
 {
     search_width_multiplier = sw;
-    short* pt1              = vrna_ptable(s1.c_str());
-    short* pt2              = vrna_ptable(s2.c_str());
-
+    std::vector<short> pt1  = ptable_from_string(s1);
+    std::vector<short> pt2  = ptable_from_string(s2);
     // variant with exterior loops
-    auto ext_loops = find_exterior_loops(pt1, pt2);
-    auto G         = process_ext_loops(ext_loops, pt1, pt2);
-
-    // G.display_path(true);
+    auto   ext_loops = find_exterior_loops(pt1, pt2);
+    short* pt_1      = pt1.data();
+    short* pt_2      = pt2.data();
+    auto   G         = process_ext_loops(ext_loops, pt_1, pt_2);
     return G;
 }
 
@@ -625,152 +613,157 @@ auto findpath::process_ext_loops(ext_loops ext_loops, short* pt_1, short* pt_2) 
 {
     // this needs some work...
 
-    bool Verbose = false;
-    // bool Verbose                       = true;
-    int merge_search_width_multiplier = 1;
+    s_graph test;
+    return test;
 
-    bool    first_run = true;
-    s_graph last_G;
-    short*  last_pt_1;
-    short*  last_pt_2;
-    int     last_bp_dist = -1;
+    // bool Verbose = false;
+    // // bool Verbose                       = true;
+    // int merge_search_width_multiplier = 1;
 
-    // iterate over available ext loops
+    // bool    first_run = true;
+    // s_graph last_G;
+    // short*  last_pt_1;
+    // short*  last_pt_2;
+    // int     last_bp_dist = -1;
 
-    for (int i = 0; i < ext_loops.size(); i++) {
-        const auto& current_ext_loop = ext_loops[i];
+    // // iterate over available ext loops
 
-        // std::cout << "current ext loop:" << current_ext_loop << " / "
-        //           << "\n";
-        // fmt::print("process ext loops {}\n", i);
+    // for (int i = 0; i < ext_loops.size(); i++) {
+    //     const auto& current_ext_loop = ext_loops[i];
 
-        short* current_pt_1 = vrna_ptable_copy(pt_1);
-        short* current_pt_2 = vrna_ptable_copy(pt_2);
+    //     // std::cout << "current ext loop:" << current_ext_loop << " / "
+    //     //           << "\n";
+    //     // fmt::print("process ext loops {}\n", i);
 
-        // fmt::print("s1 {}\n", vrna_db_from_ptable(pt_1));
-        // fmt::print("s2 {}\n", vrna_db_from_ptable(pt_2));
+    //     short* current_pt_1 = vrna_ptable_copy(pt_1);
+    //     short* current_pt_2 = vrna_ptable_copy(pt_2);
 
-        // adjust pairing table
-        for (int i = 1; i <= pt_1[0]; i++) {
-            if (i < current_ext_loop.start or i > current_ext_loop.end) {
-                current_pt_1[i] = 0;
-                current_pt_2[i] = 0;
-            }
-        }
-        int current_bp_dist = bp_distance(current_pt_1, current_pt_2);
-        // current_G.bp_dist = current_bp_dist;
+    //     // fmt::print("s1 {}\n", vrna_db_from_ptable(pt_1));
+    //     // fmt::print("s2 {}\n", vrna_db_from_ptable(pt_2));
 
-        // fmt::print("s1 {}\n", vrna_db_from_ptable(current_pt_1));
-        // fmt::print("s2 {}\n", vrna_db_from_ptable(current_pt_2));
+    //     // adjust pairing table
+    //     for (int i = 1; i <= pt_1[0]; i++) {
+    //         if (i < current_ext_loop.start or i > current_ext_loop.end) {
+    //             current_pt_1[i] = 0;
+    //             current_pt_2[i] = 0;
+    //         }
+    //     }
+    //     int current_bp_dist = bp_distance(current_pt_1, current_pt_2);
+    //     // current_G.bp_dist = current_bp_dist;
 
-        // ext loops without further interior loop recursion
-        // const int search_width = current_bp_dist * search_width_multiplier;
-        // single_findpath test;
-        // auto            result = test.init(fc, current_pt_1, current_pt_2, search_width, true);
-        // s_graph current_G {fc, current_pt_1, current_pt_2, current_bp_dist, result};
-        // current_G.max_en = result[0].max_en;
+    //     // fmt::print("s1 {}\n", vrna_db_from_ptable(current_pt_1));
+    //     // fmt::print("s2 {}\n", vrna_db_from_ptable(current_pt_2));
 
-        s_graph current_G = process_int_loops(current_ext_loop, current_pt_1, current_pt_2);
-        current_G.bp_dist = current_bp_dist;
+    //     // ext loops without further interior loop recursion
+    //     // const int search_width = current_bp_dist * search_width_multiplier;
+    //     // single_findpath test;
+    //     // auto            result = test.init(fc, current_pt_1, current_pt_2, search_width,
+    //     true);
+    //     // s_graph current_G {fc, current_pt_1, current_pt_2, current_bp_dist, result};
+    //     // current_G.max_en = result[0].max_en;
 
-        // fmt::print("ext: current bp dist: {}\n", current_bp_dist);
+    //     s_graph current_G = process_int_loops(current_ext_loop, current_pt_1, current_pt_2);
+    //     current_G.bp_dist = current_bp_dist;
 
-        if (first_run) {
-            last_G       = current_G;
-            last_pt_1    = current_pt_1;
-            last_pt_2    = current_pt_2;
-            first_run    = false;
-            last_bp_dist = current_bp_dist;
-            continue;
-        }
+    //     // fmt::print("ext: current bp dist: {}\n", current_bp_dist);
 
-        int merge_bp_dist      = last_G.bp_dist + current_G.bp_dist;
-        int max_en             = INT_MAX;
-        int merge_search_width = merge_bp_dist * merge_search_width_multiplier;
+    //     if (first_run) {
+    //         last_G       = current_G;
+    //         last_pt_1    = current_pt_1;
+    //         last_pt_2    = current_pt_2;
+    //         first_run    = false;
+    //         last_bp_dist = current_bp_dist;
+    //         continue;
+    //     }
 
-        // merge pairing tables (outer and current inner)
-        short* merged_pt_1 = vrna_ptable_copy(current_pt_1);
-        short* merged_pt_2 = vrna_ptable_copy(current_pt_2);
+    //     int merge_bp_dist      = last_G.bp_dist + current_G.bp_dist;
+    //     int max_en             = INT_MAX;
+    //     int merge_search_width = merge_bp_dist * merge_search_width_multiplier;
 
-        for (int i = 1; i <= merged_pt_1[0]; i++) {
-            // fmt::print("i {}\n", i);
-            if ((merged_pt_1[i] == 0 and last_pt_1 != 0) or
-                (merged_pt_1[i] != 0 and last_pt_1 == 0)) {
-                merged_pt_1[i] = last_pt_1[i];
-            }
-            if ((merged_pt_2[i] == 0 and last_pt_2 != 0) or
-                (merged_pt_2[i] != 0 and last_pt_2 == 0)) {
-                merged_pt_2[i] = last_pt_2[i];
-            }
-        }
+    //     // merge pairing tables (outer and current inner)
+    //     short* merged_pt_1 = vrna_ptable_copy(current_pt_1);
+    //     short* merged_pt_2 = vrna_ptable_copy(current_pt_2);
 
-        // current_G.display_path();
-        // current_G.info();
-        // last_G.display_path();
-        // last_G.info();
+    //     for (int i = 1; i <= merged_pt_1[0]; i++) {
+    //         // fmt::print("i {}\n", i);
+    //         if ((merged_pt_1[i] == 0 and last_pt_1 != 0) or
+    //             (merged_pt_1[i] != 0 and last_pt_1 == 0)) {
+    //             merged_pt_1[i] = last_pt_1[i];
+    //         }
+    //         if ((merged_pt_2[i] == 0 and last_pt_2 != 0) or
+    //             (merged_pt_2[i] != 0 and last_pt_2 == 0)) {
+    //             merged_pt_2[i] = last_pt_2[i];
+    //         }
+    //     }
 
-        int s1_en = vrna_eval_structure_pt(fc, merged_pt_1);
-        int s2_en = vrna_eval_structure_pt(fc, merged_pt_2);
+    //     // current_G.display_path();
+    //     // current_G.info();
+    //     // last_G.display_path();
+    //     // last_G.info();
 
-        auto start = std::chrono::high_resolution_clock::now();
+    //     int s1_en = vrna_eval_structure_pt(fc, merged_pt_1);
+    //     int s2_en = vrna_eval_structure_pt(fc, merged_pt_2);
 
-        auto G_merged = merge_method(current_G, last_G, merged_pt_1, s1_en, merged_pt_2, s2_en,
-                                     merge_bp_dist, max_en, merge_search_width, fc, false);
+    //     auto start = std::chrono::high_resolution_clock::now();
 
-        auto                          finish  = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double> elapsed = finish - start;
-        // IC(elapsed.count());
+    //     auto G_merged = merge_method(current_G, last_G, merged_pt_1, s1_en, merged_pt_2, s2_en,
+    //                                  merge_bp_dist, max_en, merge_search_width, fc, false);
 
-        // fmt::print("s1 {}\n", vrna_db_from_ptable(merged_pt_1));
-        // fmt::print("s2 {}\n", vrna_db_from_ptable(merged_pt_2));
-        // fmt::print("s1 {}\n", vrna_db_from_ptable(G_merged.pt_1));
-        // fmt::print("s2 {}\n", vrna_db_from_ptable(G_merged.pt_2));
-        // fmt::print("merge time: {} \n", elapsed.count());
+    //     auto                          finish  = std::chrono::high_resolution_clock::now();
+    //     std::chrono::duration<double> elapsed = finish - start;
+    //     // IC(elapsed.count());
 
-        last_pt_1    = merged_pt_1;
-        last_pt_2    = merged_pt_2;
-        last_bp_dist = current_bp_dist;
-        last_G       = G_merged;
-        // fmt::print("display merged path:\n");
-        // last_G.display_path();
-        // fmt::print("merged: {} {}\n", all_paths.size(), all_paths[0].current_s);
-        // G_outer.info();
-    }
+    //     // fmt::print("s1 {}\n", vrna_db_from_ptable(merged_pt_1));
+    //     // fmt::print("s2 {}\n", vrna_db_from_ptable(merged_pt_2));
+    //     // fmt::print("s1 {}\n", vrna_db_from_ptable(G_merged.pt_1));
+    //     // fmt::print("s2 {}\n", vrna_db_from_ptable(G_merged.pt_2));
+    //     // fmt::print("merge time: {} \n", elapsed.count());
 
-    return last_G;
+    //     last_pt_1    = merged_pt_1;
+    //     last_pt_2    = merged_pt_2;
+    //     last_bp_dist = current_bp_dist;
+    //     last_G       = G_merged;
+    //     // fmt::print("display merged path:\n");
+    //     // last_G.display_path();
+    //     // fmt::print("merged: {} {}\n", all_paths.size(), all_paths[0].current_s);
+    //     // G_outer.info();
+    // }
+
+    // return last_G;
 }
 
-auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short* pt_2) -> s_graph
+auto findpath::process_int_loops(int_loops current_sections, std::vector<short> pt1,
+                                 std::vector<short> pt2) -> s_graph
 {
     // recursive processing of sections - findpath and merge calls below
 
-    bool Verbose = false;
-    // bool Verbose = true;
+    // bool Verbose = false;
+    bool Verbose = true;
 
-    // fmt::print ("start\n");
+    fmt::print("start\n");
     int bp_dist = 0;
 
     size_t moves_hash = 0;
 
     std::vector<move_ij> move_list{};
 
-    for (int i = 1; i <= pt_1[0]; i++) {
-        if (pt_1[i] != pt_2[i]) {
-            if (i < pt_1[i]) {  // need to delete this pair
-                move_list.push_back({static_cast<short>(-i), static_cast<short>(-pt_1[i])});
+    for (int i = 1; i <= pt1[0]; i++) {
+        if (pt1[i] != pt2[i]) {
+            if (i < pt1[i]) {  // need to delete this pair
+                move_list.push_back({static_cast<short>(-i), static_cast<short>(-pt1[i])});
 
                 size_t current_hash = int_hash(-i);
-                current_hash *= (-pt_1[i]);
-                current_hash += (-pt_1[i]) * 13;
+                current_hash *= (-pt1[i]);
+                current_hash += (-pt1[i]) * 13;
                 moves_hash += current_hash;
                 bp_dist++;
             }
-            if (i < pt_2[i]) {  // need to insert this pair
-                move_list.push_back({static_cast<short>(i), static_cast<short>(pt_2[i])});
+            if (i < pt2[i]) {  // need to insert this pair
+                move_list.push_back({static_cast<short>(i), static_cast<short>(pt2[i])});
 
                 size_t current_hash = int_hash(i);
-                current_hash *= (pt_2[i]);
-                current_hash += (pt_2[i]) * 13;
+                current_hash *= (pt2[i]);
+                current_hash += (pt2[i]) * 13;
                 moves_hash += current_hash;
                 bp_dist++;
             }
@@ -788,8 +781,8 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
         // fmt::print("return\n");
         // s_graph temp;
 
-        temp.pt_1 = pt_1;
-        temp.pt_2 = pt_2;
+        temp.pt_1 = pt1.data();
+        temp.pt_2 = pt2.data();
         // fmt::print("return2\n");
 
         return temp;
@@ -811,20 +804,22 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
         int search_width = current_sections.bp_dist * search_width_multiplier;
         if (search_width == 0) { search_width = 1; }
         single_findpath fp_call;
-        auto            result = fp_call.init(fc, pt_1, pt_2, search_width, true);
+        auto            result = fp_call.init(fc, pt1.data(), pt2.data(), search_width, true);
 
         // postprocess paths into graph
         // s_graph G_inner{fc, pt_1, pt_2, current_sections.bp_dist, result};
-        s_graph G_inner{fc, vrna_ptable_copy(pt_1), vrna_ptable_copy(pt_2), current_sections.bp_dist, result};
-        
-        
-        G_inner.max_en = result[0].max_en;
+        s_graph G_inner{fc, pt1.data(), pt2.data(), current_sections.bp_dist, result, result[0].max_en};
+
+        // G_inner.max_en = result[0].max_en;
 
         // G_inner.info();
-        if (Verbose) print_moves(result[0], fc, vrna_db_from_ptable(pt_1), true);
+        if (Verbose) print_moves(result[0], fc, pt1.data(), true);
 
         // G_inner.info();
         if (cache) { G_cache[moves_hash] = G_inner; }
+
+        fmt::print("return G_inner\n");
+
         return G_inner;
     }
 
@@ -836,12 +831,17 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
     int outer_bp_dist = current_sections.bp_dist;
 
     // generate pairing table for outer sections  from X to Y: [X, [39, 64], [124, 134], Y]
-    short* outer_pt_1 = vrna_ptable_copy(pt_1);
-    short* outer_pt_2 = vrna_ptable_copy(pt_2);
-    for (int i = 1; i <= pt_1[0]; i++) {
+    // short* outer_pt_1 = vrna_ptable_copy(pt_1);
+    // short* outer_pt_2 = vrna_ptable_copy(pt_2);
+
+    // this is a memcpy
+    std::vector<short> outer_pt1 = pt1;
+    std::vector<short> outer_pt2 = pt2;
+
+    for (int i = 1; i <= pt1[0]; i++) {
         if (i < current_sections.start or i > current_sections.end) {
-            outer_pt_1[i] = 0;
-            outer_pt_2[i] = 0;
+            outer_pt1[i] = 0;
+            outer_pt2[i] = 0;
         }
     }
 
@@ -850,16 +850,16 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
     for (const auto& nested_section : current_sections.nested_sections) {
         outer_bp_dist -= nested_section.bp_dist;
 
-        for (int i = 1; i <= pt_1[0]; i++) {
+        for (int i = 1; i <= pt1[0]; i++) {
             if (i > nested_section.start and i < nested_section.end) {
-                outer_pt_1[i] = 0;
-                outer_pt_2[i] = 0;
+                outer_pt1[i] = 0;
+                outer_pt2[i] = 0;
             }
         }
     }
 
-    // fmt::print ("s1: {}\n", vrna_db_from_ptable(outer_pt_1));
-    // fmt::print ("s2: {}\n", vrna_db_from_ptable(outer_pt_2));
+    fmt::print("s1: {}\n", vrna_db_from_ptable(outer_pt1.data()));
+    fmt::print("s2: {}\n", vrna_db_from_ptable(outer_pt2.data()));
 
     // findpath call for outer section
     int search_width = outer_bp_dist * search_width_multiplier;
@@ -867,18 +867,18 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
     // intermission:
 
     size_t moves_hash_outer = 0;
-    for (int i = 1; i <= outer_pt_1[0]; i++) {
-        if (outer_pt_1[i] != pt_2[i]) {
-            if (i < outer_pt_1[i]) {  // need to delete this pair
+    for (int i = 1; i <= outer_pt1[0]; i++) {
+        if (outer_pt1[i] != pt2[i]) {
+            if (i < outer_pt1[i]) {  // need to delete this pair
                 size_t current_hash = int_hash(-i);
-                current_hash *= (-outer_pt_1[i]);
-                current_hash += (-outer_pt_1[i]) * 13;
+                current_hash *= (-outer_pt1[i]);
+                current_hash += (-outer_pt1[i]) * 13;
                 moves_hash_outer += current_hash;
             }
-            if (i < outer_pt_2[i]) {  // need to insert this pair
+            if (i < outer_pt2[i]) {  // need to insert this pair
                 size_t current_hash = int_hash(i);
-                current_hash *= (outer_pt_2[i]);
-                current_hash += (outer_pt_2[i]) * 13;
+                current_hash *= (outer_pt2[i]);
+                current_hash += (outer_pt2[i]) * 13;
                 moves_hash_outer += current_hash;
             }
         }
@@ -892,52 +892,78 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
     } else {
         if (search_width == 0) { search_width = 1; }
         single_findpath fp_call;
-        auto            result = fp_call.init(fc, outer_pt_1, outer_pt_2, search_width, true);
+        auto result = fp_call.init(fc, outer_pt1.data(), outer_pt2.data(), search_width, true);
         // postprocessing: outer paths into graph
-        G_outer = s_graph{fc, outer_pt_1, outer_pt_2, outer_bp_dist, result};
+        G_outer = s_graph{fc, outer_pt1.data(), outer_pt2.data(), outer_bp_dist, result, result[0].max_en};
 
-        if (Verbose) print_moves(result[0], fc, vrna_db_from_ptable(outer_pt_1), true);
+        if (Verbose) print_moves(result[0], fc, outer_pt1.data(), true);
     }
     // G_outer.info();
 
     // iterate over nested inner sections and merge them one by one into the outer section
     for (const auto& nested_section : current_sections.nested_sections) {
-        short* inner_pt_1 = vrna_ptable_copy(pt_1);
-        short* inner_pt_2 = vrna_ptable_copy(pt_2);
-        for (int i = 1; i <= pt_1[0]; i++) {
+        // short* inner_pt_1 = vrna_ptable_copy(pt_1);
+        // short* inner_pt_2 = vrna_ptable_copy(pt_2);
+        std::vector<short> inner_pt1 = pt1;
+        std::vector<short> inner_pt2 = pt2;
+
+        for (int i = 1; i <= pt1[0]; i++) {
             if (i < nested_section.start or i > nested_section.end) {
-                inner_pt_1[i] = 0;
-                inner_pt_2[i] = 0;
+                inner_pt1[i] = 0;
+                inner_pt2[i] = 0;
             }
         }
-        // fmt::print("inner section 1:\n{}\n", vrna_db_from_ptable(inner_pt_1));
-        // fmt::print("inner section 2:\n{}\n", vrna_db_from_ptable(inner_pt_2));
+        fmt::print("inner section 1:\n{}\n", vrna_db_from_ptable(inner_pt1.data()));
+        fmt::print("inner section 2:\n{}\n", vrna_db_from_ptable(inner_pt2.data()));
 
         // recursive call to build up the current inner graph
-        s_graph G_inner = process_int_loops(nested_section, inner_pt_1, inner_pt_2);
+        s_graph G_inner = process_int_loops(nested_section, inner_pt1, inner_pt2);
 
         // merge pairing tables (outer and current inner)
-        short* merged_pt_1 = vrna_ptable_copy(outer_pt_1);
-        short* merged_pt_2 = vrna_ptable_copy(outer_pt_2);
+        // short* merged_pt_1 = vrna_ptable_copy(outer_pt_1);
+        // short* merged_pt_2 = vrna_ptable_copy(outer_pt_2);
+        std::vector<short> merged_pt1 = outer_pt1;
+        std::vector<short> merged_pt2 = outer_pt2;
 
-        for (int i = 1; i < merged_pt_1[0]; i++) {
+        // for (int i = 1; i < merged_pt1[0]; i++) {
+        //     // fmt::print("i {}\n", i);
+        //     if ((merged_pt1[i] == 0 and G_inner.pt_1 != 0) or
+        //         (merged_pt1[i] != 0 and G_inner.pt_1 == 0)) {
+        //         merged_pt1[i] = G_inner.pt_1[i];
+        //     }
+        //     if ((merged_pt2[i] == 0 and G_inner.pt_2 != 0) or
+        //         (merged_pt2[i] != 0 and G_inner.pt_2 == 0)) {
+        //         merged_pt2[i] = G_inner.pt_2[i];
+        //     }
+        // }
+
+        // if ptB has base pairs which are not present in ptA, add them
+        for (int i = 1; i < merged_pt1[0]; i++) {
             // fmt::print("i {}\n", i);
-            if ((merged_pt_1[i] == 0 and G_inner.pt_1 != 0) or
-                (merged_pt_1[i] != 0 and G_inner.pt_1 == 0)) {
-                merged_pt_1[i] = G_inner.pt_1[i];
-            }
-            if ((merged_pt_2[i] == 0 and G_inner.pt_2 != 0) or
-                (merged_pt_2[i] != 0 and G_inner.pt_2 == 0)) {
-                merged_pt_2[i] = G_inner.pt_2[i];
-            }
+            if (merged_pt1[i] == 0 and inner_pt1[i] != 0) { merged_pt1[i] = inner_pt1[i]; }
+            if (merged_pt2[i] == 0 and inner_pt2[i] != 0) { merged_pt2[i] = inner_pt2[i]; }
         }
 
-        int s1_en = vrna_eval_structure_pt(fc, merged_pt_1);
-        int s2_en = vrna_eval_structure_pt(fc, merged_pt_2);
+        fmt::print("inner1 {}\n", vrna_db_from_ptable(inner_pt1.data()));
+        fmt::print("outer1 {}\n", vrna_db_from_ptable(outer_pt1.data()));
+        fmt::print("merge1 {}\n", vrna_db_from_ptable(merged_pt1.data()));
+        fmt::print("inner2 {}\n", vrna_db_from_ptable(inner_pt2.data()));
+        fmt::print("outer2 {}\n", vrna_db_from_ptable(outer_pt2.data()));
+        fmt::print("merge2 {}\n", vrna_db_from_ptable(merged_pt2.data()));
 
-        // fmt::print("starting merge:\n{} {} {}\n", vrna_db_from_ptable(merged_pt_1), G_outer.bp_dist,
-        //            s1_en);
-        // fmt::print("{} {} {}\n", vrna_db_from_ptable(merged_pt_2), G_inner.bp_dist, s2_en);
+
+
+        // for (int i = 1; i < merged_pt1[0]; i++) { fmt::print("{} ", pt2test[i]); }
+        // fmt::print("\n");
+
+        int s1_en = vrna_eval_structure_pt(fc, merged_pt1.data());
+        int s2_en = vrna_eval_structure_pt(fc, merged_pt2.data());
+
+        fmt::print("to2p\n");
+
+        fmt::print("starting merge:\n{} {} {}\n", vrna_db_from_ptable(merged_pt1.data()),
+                   G_outer.bp_dist, s1_en);
+        fmt::print("{} {} {}\n", vrna_db_from_ptable(merged_pt2.data()), G_inner.bp_dist, s2_en);
 
         int total_bp_dist = G_inner.bp_dist + G_outer.bp_dist;
 
@@ -947,28 +973,31 @@ auto findpath::process_int_loops(int_loops current_sections, short* pt_1, short*
         auto start = std::chrono::high_resolution_clock::now();
 
         // G_inner.bp_dist = b;
-        int c           = bp_distance(outer_pt_1, outer_pt_2);
+        int c           = bp_distance(outer_pt1, outer_pt2);
         G_outer.bp_dist = c;
 
         // this is the only merge call
-        auto G_merged = merge_method(G_outer, G_inner, merged_pt_1, s1_en, merged_pt_2, s2_en,
-                                     total_bp_dist, max_en, merge_search_width, fc, true);
+        auto G_merged = merge_method(G_outer, G_inner, merged_pt1.data(), s1_en, merged_pt2.data(),
+                                     s2_en, total_bp_dist, max_en, merge_search_width, fc, true);
 
         auto                          finish  = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = finish - start;
 
-        // fmt::print("merged: {} \n", G_merged.max_en);
+        fmt::print("merged: {} \n", G_merged.max_en);
 
+        // free(inner_pt_1);
+        // free(inner_pt_2);
+        // free(outer_pt_1);
+        // free(outer_pt_2);
 
-        free(inner_pt_1);
-        free(inner_pt_2);
-        free(outer_pt_1);
-        free(outer_pt_2);        // adjustments to merge the next inner section into the outer section + current inner
+        // adjustments to merge the next inner section into the outer section +
+        // current inner
+
         // section
         outer_bp_dist += G_inner.bp_dist;
-        outer_pt_1 = merged_pt_1;
-        outer_pt_2 = merged_pt_2;
-        G_outer    = G_merged;
+        outer_pt1 = merged_pt1;
+        outer_pt2 = merged_pt2;
+        G_outer   = G_merged;
 
         // if (Verbose) print_moves(all_paths[0], fc, vrna_db_from_ptable(merged_pt_1), true);
         // print_moves(all_paths[0], fc, vrna_db_from_ptable(merged_pt_1), false);

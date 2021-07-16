@@ -63,3 +63,16 @@ print(fp.return_sections())
 path = fp.return_path()
 print (path) 
 print_moves(sequence, s1, s2, path, convert_to_float=True)
+
+# merge findpath call
+result = fp.init(s1, s2, search_width_multiplier)
+result = result/100.0
+print ("~~~~~~~~~~~")
+print (f'merge findpath')
+print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+ 
+# return paths from merge call
+# print(fp.return_sections())
+# path = fp.return_path()
+# print (path)
+# print_moves(sequence, s1, s2, path, convert_to_float=True)

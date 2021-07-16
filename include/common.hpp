@@ -46,8 +46,8 @@ struct merge_path;
 struct int_loops;
 
 // exterior & interior loop related functions
-auto bp_distance(short* pt_a, short* pt_b, int min_pos, int max_pos) -> std::tuple<int, int>;
-auto bp_distance(short* pt_a, short* pt_b) -> int;
+auto bp_distance(std::vector<short> pt_a, std::vector<short> pt_b, int min_pos, int max_pos) -> std::tuple<int, int>;
+auto bp_distance(std::vector<short> pt_a, std::vector<short> pt_b) -> int;
 
 // ----
 
@@ -162,7 +162,7 @@ auto operator<<(std::ostream& os, const ext_loops& s) -> std::ostream&
     return os;
 }
 
-auto find_interior_loops(short* pt_1, short* pt_2, int min_pos, int max_pos)
+auto find_interior_loops(std::vector<short> pt_1, std::vector<short> pt_2, int min_pos, int max_pos)
     -> std::vector<int_loops>
 {
     // todo: this should be done much simpler...
@@ -235,7 +235,7 @@ auto find_interior_loops(short* pt_1, short* pt_2, int min_pos, int max_pos)
     return nested_sections;
 }
 
-auto find_exterior_loops(short* pt_1, short* pt_2) -> std::vector<int_loops>
+auto find_exterior_loops(std::vector<short> pt_1, std::vector<short> pt_2) -> std::vector<int_loops>
 {
     ext_loops ext_loops{};
     int       i = 1;
@@ -293,6 +293,55 @@ auto find_exterior_loops(short* pt_1, short* pt_2) -> std::vector<int_loops>
     return ext_loops;
 }
 
+auto bp_distance(std::vector<short> pt_a, std::vector<short> pt_b, int min_pos, int max_pos) -> std::tuple<int, int>
+{
+    /*
+    basepair distance between 2 pairing tables, see vrna_bp_distance(), with boundaries
+     */
+    int inner_bp_dist = 0;
+    int outer_bp_dist = 0;
+    int length        = pt_a[0];
+    for (int i = 1; i <= length; i++)
+        if (pt_a[i] != pt_b[i]) {
+            if (pt_a[i] > i) {
+                if (i > min_pos and i < max_pos)
+                    inner_bp_dist++;
+                else
+                    outer_bp_dist++;
+            }
+            // both can happen at once...
+            if (pt_b[i] > i) {
+                if (i > min_pos and i < max_pos)
+                    inner_bp_dist++;
+                else
+                    outer_bp_dist++;
+            }
+        }
+    return {inner_bp_dist, outer_bp_dist};
+}
+
+auto bp_distance(std::vector<short> pt_a, std::vector<short> pt_b) -> int
+{
+    /*
+    basepair distance between 2 pairing tables, see vrna_bp_distance()
+     */
+    int bp_dist = 0;
+    int length  = pt_a[0];
+    for (int i = 1; i <= length; i++)
+        if (pt_a[i] != pt_b[i]) {
+            if (pt_a[i] > i) { bp_dist++; }
+            // both can happen at once...
+            if (pt_b[i] > i) { bp_dist++; }
+        }
+    return bp_dist;
+}
+
+
+
+
+
+// legacy
+
 auto bp_distance(short* pt_a, short* pt_b, int min_pos, int max_pos) -> std::tuple<int, int>
 {
     /*
@@ -336,6 +385,19 @@ auto bp_distance(short* pt_a, short* pt_b) -> int
     return bp_dist;
 }
 
+
+
+
+// auto merge_pairing_table(std::vector<short> pt_1, std::vector<short> pt_2) -> std::vector<short>
+// {
+//     // if pt_2 has base pairs which are not present in pt_1, add them
+//     for (int i = 1; i <= pt_1[0]; i++) {
+//         if (pt_1[i] == 0 and pt_2 != 0) { pt_1[i] = pt_2[i]; }
+//     }
+//     return pt_1;
+// }
+
+
 auto merge_pairing_table(short* pt_1, short* pt_2) -> short*
 {
     // if pt_2 has base pairs which are not present in pt_1, add them
@@ -345,12 +407,13 @@ auto merge_pairing_table(short* pt_1, short* pt_2) -> short*
     return pt_1;
 }
 
-auto print_moves(const auto& path, vrna_fold_compound_t* fc, const short* pt1, bool show_path = true)
+auto print_moves(const auto& path, vrna_fold_compound_t* fc, const short* pt1,
+                 bool show_path = true)
 {
     // this print path function is unused (?)
     auto const& moves = path.moves;
 
-    short* pt= vrna_ptable_copy(pt1);
+    short* pt = vrna_ptable_copy(pt1);
 
     char* s1 = vrna_db_from_ptable(pt);
 
@@ -384,13 +447,108 @@ auto print_moves(const auto& path, vrna_fold_compound_t* fc, const short* pt1, b
         if (en > max_en) { max_en = en; }
 
         if (show_path) fmt::print("{} {:7.2f} ({:4}/{:4})\n", s, en, move.i, move.j);
-
     }
 
     fmt::print("S: {:6.2f} kcal/mol\n", max_en);
 
     free(pt);
     free(s1);
+}
+
+// internal function structure_utils.c, unchanged
+int extract_pairs(short* pt, const char* structure, const char* pair)
+{
+    const char*  ptr;
+    char         open, close;
+    short*       stack;
+    unsigned int i, j, n;
+    int          hx;
+
+    n     = (unsigned int)pt[0];
+    stack = (short*)vrna_alloc(sizeof(short) * (n + 1));
+
+    open  = pair[0];
+    close = pair[1];
+
+    for (hx = 0, i = 1, ptr = structure; (i <= n) && (*ptr != '\0'); ptr++, i++) {
+        if (*ptr == open) {
+            stack[hx++] = i;
+        } else if (*ptr == close) {
+            j = stack[--hx];
+
+            if (hx < 0) {
+                vrna_message_warning(
+                    "%s\nunbalanced brackets '%2s' found while extracting base pairs", structure,
+                    pair);
+                free(stack);
+                return 0;
+            }
+
+            pt[i] = j;
+            pt[j] = i;
+        }
+    }
+
+    free(stack);
+
+    if (hx != 0) {
+        vrna_message_warning("%s\nunbalanced brackets '%2s' found while extracting base pairs",
+                             structure, pair);
+        return 0;
+    }
+
+    return 1; /* success */
+}
+
+// pairing table as std::vector
+auto ptable_from_string(std::string s) -> std::vector<short>
+{
+    char         pairs[3];
+    unsigned int i, n;
+    unsigned int options = VRNA_BRACKETS_RND;
+
+    n = s.length();
+    std::vector<short> pt(n+2);
+
+    if (n > SHRT_MAX) {
+        vrna_message_warning(
+            "vrna_ptable_from_string: "
+            "Structure too long to be converted to pair table (n=%d, max=%d)",
+            n, SHRT_MAX);
+        return pt;
+    }
+
+    // pt    = (short*)vrna_alloc(sizeof(short) * (n + 2));
+    pt[0] = (short)n;
+
+    if ((options & VRNA_BRACKETS_RND) && (!extract_pairs(pt.data(), s.c_str(), "()"))) {
+        return pt;
+    }
+
+    if ((options & VRNA_BRACKETS_ANG) && (!extract_pairs(pt.data(), s.c_str(), "<>"))) {
+        return pt;
+    }
+
+    if ((options & VRNA_BRACKETS_CLY) && (!extract_pairs(pt.data(), s.c_str(), "{}"))) {
+        return pt;
+    }
+
+    if ((options & VRNA_BRACKETS_SQR) && (!extract_pairs(pt.data(), s.c_str(), "[]"))) {
+        return pt;
+    }
+
+    if (options & VRNA_BRACKETS_ALPHA) {
+        for (i = 65; i < 91; i++) {
+            pairs[0] = (char)i;
+            pairs[1] = (char)(i + 32);
+            pairs[2] = '\0';
+            if (!extract_pairs(pt.data(), s.c_str(), pairs)) {
+                return pt;
+            }
+        }
+    }
+
+    return pt;
 }
 
 // Robert Jenkins' 32 bit integer hash function

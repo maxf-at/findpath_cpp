@@ -44,6 +44,9 @@ class s_graph
     vrna_fold_compound_t* fc;
     short*                pt_1;
     short*                pt_2;
+
+
+    
     int                   bp_dist;
     int                   max_en = -INT_MAX / 2;  // referencing the best path
 
@@ -56,7 +59,7 @@ class s_graph
     auto return_path() -> std::vector<std::tuple<int,int, int>>;
 
     // s_graph(); //Constructor of the class
-    s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths);
+    // s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths);
     s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en);
     s_graph();  // dummy init for empty graph
 
@@ -69,18 +72,16 @@ class s_graph
 };
 
 // Constructor
-s_graph::s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths)
-        : fc{fc}, pt_1{pt_1}, pt_2{pt_2}, bp_dist{bp_dist}
-{
-    // std::cout << "Graph object being created\n";
-    add_paths(paths);
-}
+// s_graph::s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths)
+//         : fc{fc}, pt_1{pt_1}, pt_2{pt_2}, bp_dist{bp_dist}
+// {
+//     add_paths(paths);
+// }
 
 // Constructor
 s_graph::s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en)
         : fc{fc}, pt_1{pt_1}, pt_2{pt_2}, bp_dist{bp_dist}, max_en{max_en}
 {
-    // std::cout << "Graph object being created\n";
     add_paths(paths);
 }
 
