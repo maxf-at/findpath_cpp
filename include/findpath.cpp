@@ -21,6 +21,14 @@ int init_single_findpath(std::string sequence, std::string s1, std::string s2,
     // md.noGU = args.noGU
     // md.noGUclosure = args.noClosingGU
 
+//   8     vrna_md.noLP = 1
+//   7     vrna_md.logML = 0
+//   6     vrna_md.temperature = args.temp
+//   5     vrna_md.dangles = args.dangles
+//   4     vrna_md.special_hp = not args.noTetra
+//   3     vrna_md.noGU = args.noGU
+//   2     vrna_md.noGUclosure = args.noClosingGU
+
 
     set_model_details(&md);
     vrna_fold_compound_t* fc = vrna_fold_compound(c_sequence, &md, VRNA_OPTION_EVAL_ONLY);
@@ -161,13 +169,23 @@ PYBIND11_MODULE(findpath, m)
 {
     m.doc() = "pybind11 findpath";  // optional module docstring
 
+    // findpath(std::string sequence, bool mp = true, const py::dict &model_dict = {});
+
     py::class_<findpath>(m, "findpath_class")
-        .def(py::init<std::string, bool>())
-        .def("return_path", &findpath::return_path)
-        .def("return_sections", &findpath::return_sections)
+        .def(py::init<std::string, bool, py::dict>(), py::arg("sequence"), py::arg("mp"), py::arg("model_details") = py::dict())
+        .def("get_en", &findpath::get_en)
+        .def("get_path", &findpath::get_path)
+        .def("get_sections", &findpath::get_sections)
         .def("init", &findpath::init_python);
-    // .def("init_ext", &findpath::init_ext);
-    // .def("getName", &Pet::getName);
+
+    py::class_<single_findpath>(m, "findpath_single")
+        .def(py::init<std::string, std::string, std::string, int, float, int, bool, py::dict>(), 
+            py::arg("sequence"), py::arg("s1"), py::arg("s2"), py::arg("search_width") = 0, 
+            py::arg("search_width_multiplier") = 0, py::arg("mp") = true, py::arg("en_limit") = INT_MAX - 1,
+            py::arg("model_details") = py::dict())
+        .def("get_en", &single_findpath::get_en)
+        .def("get_path", &single_findpath::get_path);
+
 
     m.def("init_single_findpath", &init_single_findpath, "single_findpath", py::arg("sequence"),
           py::arg("s1"), py::arg("s2"), py::arg("sw"), py::arg("mp") = true,

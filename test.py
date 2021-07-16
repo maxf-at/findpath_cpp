@@ -65,7 +65,7 @@ def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
     result = round(result/100.0,2)
 
     path = fp.return_path()
-    print (path) 
+    # print (path) 
     
     return end_findpath, result
 def launch_new_merge_ext_fp(sequence, s1, s2, swm=None, mp=True):

@@ -26,7 +26,7 @@ class s_graph
    private:
     void add_edge(int node1, int node2);
     void add_paths(const auto& paths);  // sorted_paths or merged_paths template function
-    void add_node(short* p_table, int i, int j, int en);
+    void add_node(std::vector<short> &pt, int i, int j, int en);
 
     // this dictionary is used to populate the node_list vector
     // during the graph initialization, then it is no longer used.
@@ -42,9 +42,10 @@ class s_graph
     std::vector<s_node> node_list = {};
 
     vrna_fold_compound_t* fc;
-    short*                pt_1;
-    short*                pt_2;
-
+    // short*                pt_1;
+    // short*                pt_2;
+    std::vector<short>    pt1;
+    std::vector<short>    pt2;
 
     
     int                   bp_dist;
@@ -60,7 +61,10 @@ class s_graph
 
     // s_graph(); //Constructor of the class
     // s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths);
-    s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en);
+    // s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en);
+
+    s_graph(vrna_fold_compound_t* fc, std::vector<short> pt1, std::vector<short> pt2, int bp_dist, const auto& paths, int max_en);
+
     s_graph();  // dummy init for empty graph
 
 
@@ -79,8 +83,14 @@ class s_graph
 // }
 
 // Constructor
-s_graph::s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en)
-        : fc{fc}, pt_1{pt_1}, pt_2{pt_2}, bp_dist{bp_dist}, max_en{max_en}
+// s_graph::s_graph(vrna_fold_compound_t* fc, short* pt_1, short* pt_2, int bp_dist, const auto& paths, int max_en)
+//         : fc{fc}, pt_1{pt_1}, pt_2{pt_2}, bp_dist{bp_dist}, max_en{max_en}
+// {
+//     add_paths(paths);
+// }
+
+s_graph::s_graph(vrna_fold_compound_t* fc, std::vector<short> pt1, std::vector<short> pt2, int bp_dist, const auto& paths, int max_en)
+        : fc{fc}, pt1{pt1}, pt2{pt2}, bp_dist{bp_dist}, max_en{max_en}
 {
     add_paths(paths);
 }
@@ -95,18 +105,18 @@ void s_graph::reset()
 {
     // unused
     fc      = nullptr;
-    pt_1    = nullptr;
-    pt_2    = nullptr;
+    // pt_1    = nullptr;
+    // pt_2    = nullptr;
     bp_dist = 0;
     node_list.clear();
     node_map.clear();
 }
 
-void s_graph::add_node(short* p_table, int i, int j, int en)
+void s_graph::add_node(std::vector<short> &pt, int i, int j, int en)
 {
     // generating a unique hashable string, consisting of the structure
     // and the current basepair distance concatenated
-    std::string structure = vrna_db_from_ptable(p_table);
+    std::string structure = vrna_db_from_ptable(pt.data());
     structure += std::to_string(current_bp_dist);
 
     
@@ -168,7 +178,7 @@ void s_graph::add_paths(const auto& paths)
         paths_count++;
 
         auto const& moves          = path.moves;
-        short*      current_ptable = vrna_ptable_copy(pt_1);
+        std::vector<short>      current_ptable = pt1; // deep copy
         
         // fmt::print("S: {} / ({} {})\n", vrna_db_from_ptable(current_ptable), 0,0);
 
@@ -176,7 +186,7 @@ void s_graph::add_paths(const auto& paths)
 
         for (auto const& move : moves) {
 
-            int en = vrna_eval_move_pt(fc, current_ptable, move.i, move.j);
+            int en = vrna_eval_move_pt(fc, current_ptable.data(), move.i, move.j);
             
             if (move.j < 0) {  // delete a basepair
                 current_ptable[-move.i] = 0;
@@ -191,7 +201,7 @@ void s_graph::add_paths(const auto& paths)
             add_node(current_ptable, move.i, move.j, en);
         }
 
-        free(current_ptable);
+        // free(current_ptable);
 
         // path_number++;
     }
@@ -211,10 +221,11 @@ void s_graph::info()
             std::cout << "node: " << node.id << " final node\n";  // << std::endl;
     }
 
-    auto current_ptable = vrna_ptable_copy(pt_1);  // short*
+    // auto current_ptable = vrna_ptable_copy(pt_1);  // short*
+    std::vector<short>      current_ptable = pt1; // deep copy
 
-    std::string s  = vrna_db_from_ptable(current_ptable);
-    float       en = vrna_eval_structure_pt(fc, current_ptable) / 100.0;
+    std::string s  = vrna_db_from_ptable(current_ptable.data());
+    float       en = vrna_eval_structure_pt(fc, current_ptable.data()) / 100.0;
 }
 
 void s_graph::display_path(bool result_only)
@@ -222,10 +233,10 @@ void s_graph::display_path(bool result_only)
     
         
     // prints the best path
-    auto current_ptable = vrna_ptable_copy(pt_1);
+    std::vector<short>      current_ptable = pt1; // deep copy
 
-    std::string s  = vrna_db_from_ptable(current_ptable);
-    float       en = vrna_eval_structure_pt(fc, current_ptable) / 100.0;
+    std::string s  = vrna_db_from_ptable(current_ptable.data());
+    float       en = vrna_eval_structure_pt(fc, current_ptable.data()) / 100.0;
 
     if (not result_only) { fmt::print("{} {:7.2f} ({:4}/{:4})\n", s, en, 0, 0); }
 
@@ -246,8 +257,8 @@ void s_graph::display_path(bool result_only)
             current_ptable[m.i] = m.j;
             current_ptable[m.j] = m.i;
         }
-        s  = vrna_db_from_ptable(current_ptable);
-        en = vrna_eval_structure_pt(fc, current_ptable) / 100.0;
+        s  = vrna_db_from_ptable(current_ptable.data());
+        en = vrna_eval_structure_pt(fc, current_ptable.data()) / 100.0;
         if (en > max_en) { max_en = en; }
 
         if (not result_only) { fmt::print("{} {:7.2f} ({:4}/{:4})\n", s, en, m.i, m.j); }
@@ -258,7 +269,7 @@ void s_graph::display_path(bool result_only)
     // fmt::print("S:{:7.2f} best path in G\n", max_en);
     fmt::print("{:7.2f}\n", max_en);
 
-    free(current_ptable);
+    // free(current_ptable);
 }
 
 auto s_graph::return_path() -> std::vector<std::tuple<int,int, int>>
@@ -269,9 +280,9 @@ auto s_graph::return_path() -> std::vector<std::tuple<int,int, int>>
 
     std::vector<std::tuple<int,int, int>> result;
 
-
-    auto current_ptable = vrna_ptable_copy(pt_1);
-    int       en = vrna_eval_structure_pt(fc, current_ptable);
+    std::vector<short>      current_ptable = pt1; // deep copy
+    // auto current_ptable = vrna_ptable_copy(pt_1);
+    int       en = vrna_eval_structure_pt(fc, current_ptable.data());
     result.push_back({0, 0, en});
 
 
@@ -295,7 +306,7 @@ auto s_graph::return_path() -> std::vector<std::tuple<int,int, int>>
         }
 
 
-        en = vrna_eval_structure_pt(fc, current_ptable);
+        en = vrna_eval_structure_pt(fc, current_ptable.data());
 
         result.push_back({m.i, m.j, en});
 

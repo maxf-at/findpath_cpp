@@ -30,30 +30,70 @@ class findpath
     vrna_fold_compound_t* fc;
 
     auto init(std::string s1, std::string s2, float sw = 2) -> s_graph;
-    auto init_python(std::string s1, std::string s2, float sw = 2) -> int;
-    auto return_path() -> std::vector<std::tuple<int, int, int>>;
-    auto return_sections() -> void;
+    auto init_python(std::string s1, std::string s2, float sw = 2) -> void;
+
+    // result getters
+    auto get_path() -> std::vector<std::tuple<int, int, int>>;
+    auto get_sections() -> void;
+    auto get_en() -> int; 
 
     auto init_ext(std::string s1, std::string s2, float sw = 2) -> s_graph;
 
     // various constructors (with fold compound or sequence)
 
-    findpath(std::string sequence, bool mp = true);
+    findpath(std::string sequence, bool mp = true, const py::dict &model_details = {});
 
     ~findpath() { vrna_fold_compound_free(fc); }
 };
 
-findpath::findpath(std::string sequence, bool mp) : mp{mp}
+findpath::findpath(std::string sequence, bool mp, const py::dict &model_details) : mp{mp}
 {
     vrna_md_t md;
-    set_model_details(&md);
+    
+    vrna_md_set_default(&md); // copy global settings
+    // set_model_details(&md);
+    
+
+    // key and values of the dict are pybind11 objects, with included cast function to convert them as needed.
+
+    if (model_details.contains("noLP")){ 
+        // Only consider canonical structures, i.e. no 'lonely' base pairs. 
+        md.noLP = model_details["noLP"].cast<int>();
+    }
+    if (model_details.contains("logML")){ 
+        // Use logarithmic scaling for multiloops. 
+        md.logML = model_details["logML"].cast<int>();
+    }
+    if (model_details.contains("temperature")){
+        // The temperature used to scale the thermodynamic parameters. 
+        // py::print("set T to", model_details["temperature"]);
+        md.temperature = model_details["temperature"].cast<double>();
+    }
+    if (model_details.contains("dangles")){
+        // Specifies the dangle model used in any energy evaluation (0,1,2 or 3) 
+        md.dangles = model_details["dangles"].cast<int>();
+    }
+    if (model_details.contains("special_hp")){
+        // Include special hairpin contributions for tri, tetra and hexaloops. 
+        md.special_hp = model_details["special_hp"].cast<int>();
+    }
+    if (model_details.contains("noGU")){
+        // Do not allow GU pairs. 
+        md.noGU = model_details["noGU"].cast<int>();
+    }
+    if (model_details.contains("noGUclosure")){
+        // Do not allow loops to be closed by GU pair. 
+        md.noGUclosure = model_details["noGUclosure"].cast<int>();
+    }
+    
+    
     fc = vrna_fold_compound(sequence.c_str(), &md, VRNA_OPTION_EVAL_ONLY);
 
     // s1          = vrna_db_from_ptable(pt_1);
     // s2          = vrna_db_from_ptable(pt_2);
 }
 
-auto findpath::init_python(std::string s1, std::string s2, float sw) -> int
+auto findpath::init_python(std::string s1, std::string s2, float sw) -> void
 {
     // class member function, exported to Python
 
@@ -75,10 +115,14 @@ auto findpath::init_python(std::string s1, std::string s2, float sw) -> int
     // recursively process nested sections
     G = process_int_loops(all_sections, pt1, pt2);
 
+    // return G.max_en;
+}
+
+auto findpath::get_en() -> int {
     return G.max_en;
 }
 
-auto findpath::return_path() -> std::vector<std::tuple<int, int, int>>
+auto findpath::get_path() -> std::vector<std::tuple<int, int, int>>
 {
     std::vector<std::tuple<int, int, int>> path = G.return_path();
 
@@ -86,7 +130,7 @@ auto findpath::return_path() -> std::vector<std::tuple<int, int, int>>
     // class member function, exported to Python
 }
 
-auto findpath::return_sections() -> void { std::cout << all_sections << "\n"; }
+auto findpath::get_sections() -> void { std::cout << all_sections << "\n"; }
 
 auto findpath::init(std::string s1, std::string s2, float sw) -> s_graph
 {
@@ -520,7 +564,7 @@ auto merge_once(const s_graph G1, const s_graph G2, short* pt, int en_start, boo
     return all_paths;
 }
 
-auto merge_method(auto& G1, auto& G2, short* pt_1, int s1_en, short* pt_2, int s2_en,
+auto merge_method(auto& G1, auto& G2, std::vector<short> pt1, int s1_en, std::vector<short> pt2, int s2_en,
                   int total_bp_dist, int max_en, int final_merge_search_width,
                   vrna_fold_compound_t* fc, bool merge_constant_sections)
 {
@@ -531,14 +575,14 @@ auto merge_method(auto& G1, auto& G2, short* pt_1, int s1_en, short* pt_2, int s
         // we might merge constant sections, ignore them
         if (G1.bp_dist == 0) {
             // fmt::print("ignore merge \n");
-            G2.pt_1 = pt_1;
-            G2.pt_2 = pt_2;
+            G2.pt1 = pt1;
+            G2.pt2 = pt2;
             return G2;
         }
         if (G2.bp_dist == 0) {
             // fmt::print("ignore merge \n");
-            G1.pt_1 = pt_1;
-            G1.pt_2 = pt_2;
+            G1.pt1 = pt1;
+            G1.pt2 = pt2;
             return G1;
         }
     }
@@ -577,12 +621,12 @@ auto merge_method(auto& G1, auto& G2, short* pt_1, int s1_en, short* pt_2, int s
         //     fc);
 
         std::future<std::vector<merge_path>> ret1 =
-            std::async(std::launch::async, &merge_once, G1, G2, pt_1, s1_en, true, total_bp_dist,
+            std::async(std::launch::async, &merge_once, G1, G2, pt1.data(), s1_en, true, total_bp_dist,
                        max_en, current_merge_search_width, fc);
         auto                                 G1_copy = G1;
         auto                                 G2_copy = G2;
         std::future<std::vector<merge_path>> ret2 =
-            std::async(std::launch::async, &merge_once, G1_copy, G2_copy, pt_2, s2_en, false,
+            std::async(std::launch::async, &merge_once, G1_copy, G2_copy, pt2.data(), s2_en, false,
                        total_bp_dist, max_en, current_merge_search_width, fc);
         std::vector<merge_path> fwd_paths = ret1.get();
         std::vector<merge_path> bwd_paths = ret2.get();
@@ -604,7 +648,13 @@ auto merge_method(auto& G1, auto& G2, short* pt_1, int s1_en, short* pt_2, int s
     // postprocessing: transform paths into graph without redundancy
     max_en = all_paths[0].current_s;
 
-    s_graph G_merged{fc, pt_1, pt_2, total_bp_dist, all_paths, max_en};
+    // std::vector<short> pt1(total_bp_dist+2);
+    // std::vector<short> pt2(total_bp_dist+2);
+
+    // pt1
+
+
+    s_graph G_merged{fc, pt1, pt2, total_bp_dist, all_paths, max_en};
 
     return G_merged;
 }
@@ -737,10 +787,10 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
 {
     // recursive processing of sections - findpath and merge calls below
 
-    // bool Verbose = false;
-    bool Verbose = true;
+    bool Verbose = false;
+    // bool Verbose = true;
 
-    fmt::print("start\n");
+    if (Verbose) fmt::print("start\n");
     int bp_dist = 0;
 
     size_t moves_hash = 0;
@@ -781,8 +831,8 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
         // fmt::print("return\n");
         // s_graph temp;
 
-        temp.pt_1 = pt1.data();
-        temp.pt_2 = pt2.data();
+        temp.pt1 = pt1;
+        temp.pt2 = pt2;
         // fmt::print("return2\n");
 
         return temp;
@@ -808,7 +858,7 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
 
         // postprocess paths into graph
         // s_graph G_inner{fc, pt_1, pt_2, current_sections.bp_dist, result};
-        s_graph G_inner{fc, pt1.data(), pt2.data(), current_sections.bp_dist, result, result[0].max_en};
+        s_graph G_inner{fc, pt1, pt2, current_sections.bp_dist, result, result[0].max_en};
 
         // G_inner.max_en = result[0].max_en;
 
@@ -818,7 +868,7 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
         // G_inner.info();
         if (cache) { G_cache[moves_hash] = G_inner; }
 
-        fmt::print("return G_inner\n");
+        if (Verbose) fmt::print("return G_inner\n");
 
         return G_inner;
     }
@@ -834,7 +884,7 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
     // short* outer_pt_1 = vrna_ptable_copy(pt_1);
     // short* outer_pt_2 = vrna_ptable_copy(pt_2);
 
-    // this is a memcpy
+    // this is a memcpy = deepcopy
     std::vector<short> outer_pt1 = pt1;
     std::vector<short> outer_pt2 = pt2;
 
@@ -858,8 +908,8 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
         }
     }
 
-    fmt::print("s1: {}\n", vrna_db_from_ptable(outer_pt1.data()));
-    fmt::print("s2: {}\n", vrna_db_from_ptable(outer_pt2.data()));
+    if (Verbose) fmt::print("s1: {}\n", vrna_db_from_ptable(outer_pt1.data()));
+    if (Verbose) fmt::print("s2: {}\n", vrna_db_from_ptable(outer_pt2.data()));
 
     // findpath call for outer section
     int search_width = outer_bp_dist * search_width_multiplier;
@@ -894,7 +944,7 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
         single_findpath fp_call;
         auto result = fp_call.init(fc, outer_pt1.data(), outer_pt2.data(), search_width, true);
         // postprocessing: outer paths into graph
-        G_outer = s_graph{fc, outer_pt1.data(), outer_pt2.data(), outer_bp_dist, result, result[0].max_en};
+        G_outer = s_graph{fc, outer_pt1, outer_pt2, outer_bp_dist, result, result[0].max_en};
 
         if (Verbose) print_moves(result[0], fc, outer_pt1.data(), true);
     }
@@ -913,8 +963,8 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
                 inner_pt2[i] = 0;
             }
         }
-        fmt::print("inner section 1:\n{}\n", vrna_db_from_ptable(inner_pt1.data()));
-        fmt::print("inner section 2:\n{}\n", vrna_db_from_ptable(inner_pt2.data()));
+        if (Verbose) fmt::print("inner section 1:\n{}\n", vrna_db_from_ptable(inner_pt1.data()));
+        if (Verbose) fmt::print("inner section 2:\n{}\n", vrna_db_from_ptable(inner_pt2.data()));
 
         // recursive call to build up the current inner graph
         s_graph G_inner = process_int_loops(nested_section, inner_pt1, inner_pt2);
@@ -944,13 +994,12 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
             if (merged_pt2[i] == 0 and inner_pt2[i] != 0) { merged_pt2[i] = inner_pt2[i]; }
         }
 
-        fmt::print("inner1 {}\n", vrna_db_from_ptable(inner_pt1.data()));
-        fmt::print("outer1 {}\n", vrna_db_from_ptable(outer_pt1.data()));
-        fmt::print("merge1 {}\n", vrna_db_from_ptable(merged_pt1.data()));
-        fmt::print("inner2 {}\n", vrna_db_from_ptable(inner_pt2.data()));
-        fmt::print("outer2 {}\n", vrna_db_from_ptable(outer_pt2.data()));
-        fmt::print("merge2 {}\n", vrna_db_from_ptable(merged_pt2.data()));
-
+        // fmt::print("inner1 {}\n", vrna_db_from_ptable(inner_pt1.data()));
+        // fmt::print("outer1 {}\n", vrna_db_from_ptable(outer_pt1.data()));
+        // fmt::print("merge1 {}\n", vrna_db_from_ptable(merged_pt1.data()));
+        // fmt::print("inner2 {}\n", vrna_db_from_ptable(inner_pt2.data()));
+        // fmt::print("outer2 {}\n", vrna_db_from_ptable(outer_pt2.data()));
+        // fmt::print("merge2 {}\n", vrna_db_from_ptable(merged_pt2.data()));
 
 
         // for (int i = 1; i < merged_pt1[0]; i++) { fmt::print("{} ", pt2test[i]); }
@@ -959,11 +1008,11 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
         int s1_en = vrna_eval_structure_pt(fc, merged_pt1.data());
         int s2_en = vrna_eval_structure_pt(fc, merged_pt2.data());
 
-        fmt::print("to2p\n");
+        // fmt::print("to2p\n");
 
-        fmt::print("starting merge:\n{} {} {}\n", vrna_db_from_ptable(merged_pt1.data()),
-                   G_outer.bp_dist, s1_en);
-        fmt::print("{} {} {}\n", vrna_db_from_ptable(merged_pt2.data()), G_inner.bp_dist, s2_en);
+        // fmt::print("starting merge:\n{} {} {}\n", vrna_db_from_ptable(merged_pt1.data()),
+        //            G_outer.bp_dist, s1_en);
+        // fmt::print("{} {} {}\n", vrna_db_from_ptable(merged_pt2.data()), G_inner.bp_dist, s2_en);
 
         int total_bp_dist = G_inner.bp_dist + G_outer.bp_dist;
 
@@ -977,13 +1026,13 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
         G_outer.bp_dist = c;
 
         // this is the only merge call
-        auto G_merged = merge_method(G_outer, G_inner, merged_pt1.data(), s1_en, merged_pt2.data(),
+        auto G_merged = merge_method(G_outer, G_inner, merged_pt1, s1_en, merged_pt2,
                                      s2_en, total_bp_dist, max_en, merge_search_width, fc, true);
 
         auto                          finish  = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = finish - start;
 
-        fmt::print("merged: {} \n", G_merged.max_en);
+        if (Verbose) fmt::print("merged: {} \n", G_merged.max_en);
 
         // free(inner_pt_1);
         // free(inner_pt_2);
