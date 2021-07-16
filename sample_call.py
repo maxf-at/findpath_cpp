@@ -100,7 +100,7 @@ runtime = time.time()-start_findpath
 result = fp.get_en()/100.0
 path = fp.get_path()
 print_moves(sequence, s1, s2, path, convert_to_float=True)
-# print(fp.return_sections())
+# print(fp.get_sections())
 print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
 
@@ -116,5 +116,5 @@ runtime = time.time()-start_findpath
 result = fp.get_en()/100.0
 path = fp.get_path()
 print_moves(sequence, s1, s2, path, convert_to_float=True)
-# print(fp.return_sections())
+# print(fp.get_sections())
 print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
