@@ -59,12 +59,13 @@ def launch_new_fp(sequence, s1, s2, swm=None, mp=True):
 def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
     fp = findpath.findpath_class(sequence, mp)
-    result = fp.init(s1, s2, swm)
+    fp.init(s1, s2, swm)
+    result = fp.get_en()
     # result = findpath.init_merge_findpath(sequence, s1, s2, swm, mp)
     end_findpath = round(time.time()-start_findpath, 4)
     result = round(result/100.0,2)
 
-    path = fp.return_path()
+    path = fp.get_path()
     # print (path) 
     
     return end_findpath, result

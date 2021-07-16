@@ -40,7 +40,7 @@ bp_dist = RNA.bp_distance(s1, s2)
 
 
 
-
+# single section findpath
 print("~~~~~~~~~~~")
 print(f'single section')
 start_findpath = time.time()
@@ -56,7 +56,6 @@ fp = findpath.findpath_single(sequence, s1, s2, search_width_multiplier=search_w
 #     mp=mp, model_details={"temperature": -14.5,})
 
 runtime = time.time()-start_findpath
-
 result = fp.get_en()/100.0
 path = fp.get_path()
 print_moves(sequence, s1, s2, path, convert_to_float=True)
@@ -65,7 +64,7 @@ print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f
 
 # ---------------
 
-# Schema
+# model dict schema
 # "noLP":        int,
 # "logML":       int,
 # "temperature": float,
@@ -98,12 +97,13 @@ fp = findpath.findpath_class(sequence, mp=mp, model_details=model_details)
 fp.init(s1, s2, search_width_multiplier)
 
 runtime = time.time()-start_findpath
-
 result = fp.get_en()/100.0
 path = fp.get_path()
 print_moves(sequence, s1, s2, path, convert_to_float=True)
 # print(fp.return_sections())
 print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+
+
 
 # second merge findpath call
 print("~~~~~~~~~~~")
@@ -113,7 +113,6 @@ start_findpath = time.time()
 fp.init(s1, s2, search_width_multiplier)
 
 runtime = time.time()-start_findpath
-
 result = fp.get_en()/100.0
 path = fp.get_path()
 print_moves(sequence, s1, s2, path, convert_to_float=True)
