@@ -18,50 +18,17 @@ import random
 import string
 import time
 
-import pathfinder_python
-import pathfinder
-import pathfinder_cpp
 import helper
-import merge_composition
-import merge_recursive
-import merge_dp
 
 import pandas as pd
 
 # generate X random sequences ~ x nt for merge join
 
-# target_count = 1000
-# min_bp_dist = 60
-# max_bp_dist = 120
-# x = 200
-# target_count = 500
-# min_bp_dist = 40
-# max_bp_dist = 80
-# x = 150
-# target_count = 400
-# min_bp_dist = 10
-# max_bp_dist = 30
-# x = 60
 
-# indirect generation
-# target_count = 100
-# min_bp_dist = 10
-# max_bp_dist = 20
-# x = 70
-# target_count = 100
-# min_bp_dist = 20
-# max_bp_dist = 30
-# x = 100
-# target_count = 100
-# min_bp_dist = 40
-# max_bp_dist = 60
-# x = 150
-
-
-target_count = 1000
+target_count = 1
 min_bp_dist = 10
 max_bp_dist = float("inf")
-x = 200
+x = 50
 
 Verbose = False
 
@@ -124,12 +91,7 @@ while (len(results) < target_count):
         continue
     if bp_dist > max_bp_dist:
         continue
-    l = merge_composition.merge_check(sequence, s1, s2, Debug=False)
 
-    # ignore the case where sections provide no benefit
-    if len(l) == 1 or l==[0,x]:
-        useless_sections += 1
-        # continue
 
 
     pt1 = RNA.ptable(s1)
@@ -148,7 +110,7 @@ while (len(results) < target_count):
 
 
 df = pd.DataFrame(results, columns=['sequence','s1', 'i_move', 'j_move']).set_index('sequence') 
-filename = f'../sample_seqs/eval_move_dataset.csv'
+filename = f'eval_move_dataset.csv'
 df.to_csv(filename)
 
 print (df)

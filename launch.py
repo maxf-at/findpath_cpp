@@ -29,9 +29,9 @@ s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((.
 
 # this example requires suboptimal paths for merging
 # S: -2.50, barrier: 1.90, runtime: 0.0023 s
-# sequence = "UGAAGACCCAUUGAGUAACGACACCGCACGGCGCAUGGCGUCAGAGUAGCACUGCCUCGU"
-# s1 =       "....(((((((.(.(...((....)).....).))))).)))((.((......))))..."
-# s2 =       "....(((((((...((..((........))..)))))).))).(((..((...))))).."
+sequence = "UGAAGACCCAUUGAGUAACGACACCGCACGGCGCAUGGCGUCAGAGUAGCACUGCCUCGU"
+s1 =       "....(((((((.(.(...((....)).....).))))).)))((.((......))))..."
+s2 =       "....(((((((...((..((........))..)))))).))).(((..((...))))).."
 
 # no sections 300
 # sequence = "UCACGACACCCCUCAACUAUAACAACGGUCCGUACAUACUAGCCCUGCAAUGGAACGGGCAGGGCCAGCACAGGUGGGGCGCCCGCUUGGGGGAUCAAAUGUGUGAUCCAGAUACUUUAGACGCGUGCAGAACUUUUUAGAUCGAUCAGUGGGAACAGGCAUUGAUUAUGAAAUCAAUUAGGGGGUUUAGGACCGCACCACAAACUGCGGGAGGGCACGCUUUGGUUCCUGUGUUACGCUAAUCCUCUAGCCACGGAGGGCUUCUUCGUACAAUGAUUGGGUUACCAGGGUUCCAGUGUG"
@@ -43,9 +43,9 @@ s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((.
 # s1 =       "....(((.(.....).))).(((((((............((.(((((((.(((((((.....((((..((.(((.((.((..........)))).))))).)))).......))))).)).............(((((...........))))).(((...(((.(((..(((((((((((((((((((....))))))))....))).....)))))))).))))))..)))........))))))).))...)))))))...(((((...)))))(((((...........))))).."
 # s2 =       "....(((.(.....).))).(((((((............((.(((((((.(((((((...((((((..((.(((.((.((..........)))).))))).))))....)).)))).))).((((....))))(((((...........))))).(((...((.((((..(((((((((((((((((((....)))))))))....)).....)))))))).))))))..)))........))))))).))...)))))))((((.((((((....((......))...)))))).))))"
 
-# sequence = "UGAAGACCCAUUGAGUAAAA"
-# s1       = "(((((((.....)))).)))"
-# s2       = "(((((.........)).)))"
+sequence = "UGAAGACCCAUUGAGUAAAA"
+s1       = "(((((((.....)))).)))"
+s2       = "(((((.........)).)))"
 
 # sequence = "AAGAAGACCUCAAUCGAAUCACGGGCAAGUCCGACGAGGAACGCCUAGGCGAGGUGAUCGGCCCGAUCUUAAUGUAGGAUCCCCGGAGUCGCAUGACGACAGCUUAAUGUUCGUCCAGGGGGCAUACCCUUGGUGACUGUAAGCCGUGCCUGGUCCUUUUCUCGAAUGAGUCCACAGAUUAGCAAAUUUAAAAAGUGCGG"
 # s1 = ".....((.((((.((((....(((......)))..(((((....(((((((.(((.(((((((((((((((...)))))))...)).)))).)).))....(((((..((.((.(((((((.....)))))))))))..)))))).))))))))))))...)))).)))))).........(((...........))).."
@@ -85,24 +85,33 @@ print ("~~~~~~~~~~~")
 print (f'single section')
 print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
-
 start_findpath = time.time()
-fp = findpath.findpath_class(sequence, mp)
-fp.init(s1, s2, search_width_multiplier)
-result = fp.get_en()/100.0
+fp = findpath.findpath_single(sequence, s1, s2, search_width_multiplier=search_width_multiplier, mp=mp)
+# fp = findpath.findpath_single(sequence, s1, s2, search_width=50, mp=mp)
 runtime = time.time()-start_findpath
-print ("~~~~~~~~~~~")
-print (f'merge findpath')
-print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+result = fp.get_en()/100.0
+# path = fp.get_path()
+# print_moves(sequence, s1, s2, path, convert_to_float=True)
+print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
 
-start_findpath = time.time()
-fp.init(s1, s2, search_width_multiplier)
-result = fp.get_en()/100.0
-runtime = time.time()-start_findpath
-print ("~~~~~~~~~~~")
-print (f'cached merge findpath call')
-print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+# start_findpath = time.time()
+# fp = findpath.findpath_class(sequence, mp)
+# fp.init(s1, s2, search_width_multiplier)
+# result = fp.get_en()/100.0
+# runtime = time.time()-start_findpath
+# print ("~~~~~~~~~~~")
+# print (f'merge findpath')
+# print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+
+
+# start_findpath = time.time()
+# fp.init(s1, s2, search_width_multiplier)
+# result = fp.get_en()/100.0
+# runtime = time.time()-start_findpath
+# print ("~~~~~~~~~~~")
+# print (f'cached merge findpath call')
+# print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
 
 # path = fp.return_path()
@@ -126,12 +135,12 @@ print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4
 # print (f'merge findpath (+ext loops)')
 # print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
-start_findpath = time.time()
-result = findpath_librna.pathfinder(sequence, s1, s2, search_width=search_width_multiplier*bp_dist)
-runtime = time.time()-start_findpath
-print ("~~~~~~~~~~~")
-print (f'librna findpath (orig SWIG bindings)')
-print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+# start_findpath = time.time()
+# result = findpath_librna.pathfinder(sequence, s1, s2, search_width=search_width_multiplier*bp_dist)
+# runtime = time.time()-start_findpath
+# print ("~~~~~~~~~~~")
+# print (f'librna findpath (orig SWIG bindings)')
+# print (f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
 # start_findpath = time.time()
 # result = findpath.init_vrna_findpath(sequence, s1, s2, search_width_multiplier, True)

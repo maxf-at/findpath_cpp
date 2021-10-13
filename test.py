@@ -69,7 +69,7 @@ def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
 
     path = fp.get_path()
     # print (path) 
-    print (f"'{sequence}', '{s1}', '{s2}', '{path}'")
+    # print (f"'{sequence}', '{s1}', '{s2}', '{path}'")
     
     return end_findpath, result
 def launch_new_merge_ext_fp(sequence, s1, s2, swm=None, mp=True):
@@ -106,7 +106,7 @@ for index, row in df.iterrows():
     result = round(result-s1_eval,2)
     ref_result = reference_fp_results[index]
     offset = result - ref_result
-    # print (index, "reference result:", ref_result, "now:", result, "offset:", offset)
+    print (index, "reference result:", ref_result, "now:", result, "offset:", offset)
     all_offset_values += offset
 
     # if offset != 0.0:
@@ -132,7 +132,7 @@ for index, row in df.iterrows():
 
 end = round(time.time()-start, 4)
 
-# print ("all deviations:", all_offset_values, "time:", end)
+print ("all deviations:", all_offset_values, "time:", end)
 
 
 
