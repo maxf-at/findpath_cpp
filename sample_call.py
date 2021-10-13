@@ -19,15 +19,19 @@ from pretty_print_path import print_moves
 # s1 = ".(((((((..(((.((((((....)))))).))).))))....)))(((...)))..(((...((((....(((((((.....))))))))))).))).."
 # s2 = "....((.((.(((.((((((....)))))).))).))))......((((...)))).(((...(((((....((((((.....))))))))))).))).."
 
-sequence = "UCUACUAUUCCGGCUUGACAUAAAUAUCGAGUGCUCGACCGCUAUUAUGGUACUUUCCAGCGUUUUGAUUGGUGGAUAAUAUCCCCCAAAAACGCGAGUC"
-s1 = "............(((((..........)))))((((..((........)).........((((((...((((.((((...)))).))))))))))))))."
-s2 = "..((((((..(((.(((((((.........))).))))))).....)))))).....(..(((((...((((.((((...)))).))))))))).)...."
+# sequence = "UCUACUAUUCCGGCUUGACAUAAAUAUCGAGUGCUCGACCGCUAUUAUGGUACUUUCCAGCGUUUUGAUUGGUGGAUAAUAUCCCCCAAAAACGCGAGUC"
+# s1 = "............(((((..........)))))((((..((........)).........((((((...((((.((((...)))).))))))))))))))."
+# s2 = "..((((((..(((.(((((((.........))).))))))).....)))))).....(..(((((...((((.((((...)))).))))))))).)...."
 
+sequence = "UGAAGACCCAUUGAGUAAAA"
+s1       = "(((((((.....)))).)))"
+# s2       = "(((((.........)).)))"
+s2       = "(((((((....)).)).)))"
 
 # settings
 search_width_multiplier = 4
-# mp = False
-mp = True
+mp = False
+# mp = True
 Verbose = True
 
 # for debug
@@ -89,32 +93,32 @@ model_details = {
     "temperature": 37.0,
 }
 
-# first merge findpath call
-print("~~~~~~~~~~~")
-print(f'first merge findpath')
-start_findpath = time.time()
-fp = findpath.findpath_class(sequence, mp=mp, model_details=model_details)
-fp.init(s1, s2, search_width_multiplier)
-
-runtime = time.time()-start_findpath
-result = fp.get_en()/100.0
-path = fp.get_path()
-print_moves(sequence, s1, s2, path, convert_to_float=True)
-# print(fp.get_sections())
-print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
-
-
-
-# second merge findpath call
-print("~~~~~~~~~~~")
-print(f'second merge findpath')
-start_findpath = time.time()
+# # first merge findpath call
+# print("~~~~~~~~~~~")
+# print(f'first merge findpath')
+# start_findpath = time.time()
 # fp = findpath.findpath_class(sequence, mp=mp, model_details=model_details)
-fp.init(s1, s2, search_width_multiplier)
+# fp.init(s1, s2, search_width_multiplier)
 
-runtime = time.time()-start_findpath
-result = fp.get_en()/100.0
-path = fp.get_path()
-print_moves(sequence, s1, s2, path, convert_to_float=True)
-# print(fp.get_sections())
-print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+# runtime = time.time()-start_findpath
+# result = fp.get_en()/100.0
+# path = fp.get_path()
+# print_moves(sequence, s1, s2, path, convert_to_float=True)
+# # print(fp.get_sections())
+# print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+
+
+
+# # second merge findpath call
+# print("~~~~~~~~~~~")
+# print(f'second merge findpath')
+# start_findpath = time.time()
+# # fp = findpath.findpath_class(sequence, mp=mp, model_details=model_details)
+# fp.init(s1, s2, search_width_multiplier)
+
+# runtime = time.time()-start_findpath
+# result = fp.get_en()/100.0
+# path = fp.get_path()
+# print_moves(sequence, s1, s2, path, convert_to_float=True)
+# # print(fp.get_sections())
+# print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')

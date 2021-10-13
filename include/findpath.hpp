@@ -13,7 +13,10 @@
 // #include <single_findpath_s4hash.hpp>
 // #include <single_findpath_h.hpp>
 // #include <single_findpath_h2.hpp>
-#include <single_findpath_h25.hpp>
+
+// #include <single_findpath_h25.hpp>
+#include <single_findpath_new_eval.hpp>
+
 // #include <single_findpath_h3.hpp>
 
 // #include <single_findpath_h2_bench.hpp>

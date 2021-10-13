@@ -164,8 +164,14 @@ class single_findpath
             if (search_width < 2) { search_width = 2; }
         }
         
+        en_limit = INT_MAX - 1; // workaround?
 
         result = init(fc, pt1, pt2, search_width, mp, en_limit);
+
+        // fmt::print("init: {} {}\n", search_width, result.size());
+
+        // free(pt1);
+        // free(pt2);
 
     };
 };
@@ -178,8 +184,9 @@ inline auto single_findpath::init(vrna_fold_compound_t* fc, short* pt1, short* p
                                   int final_search_width, bool mp, int en_limit)
     -> std::vector<sorted_path>
 {
-    // fmt::print("{}\n", vrna_db_from_ptable(pt1));
-    // fmt::print("{}\n", vrna_db_from_ptable(pt2));
+    // fmt::print("init s1: {}\n", vrna_db_from_ptable(pt1));
+    // fmt::print("init s2: {}\n", vrna_db_from_ptable(pt2));
+    // fmt::print("options: {} / {} / {}\n", final_search_width, en_limit, mp);
 
     // mp = false;
     // char* temp_s = vrna_db_from_ptable(pt1);
@@ -200,7 +207,6 @@ inline auto single_findpath::init(vrna_fold_compound_t* fc, short* pt1, short* p
     // for (const auto& path : result) {
     //     for (const auto m : path.moves) { fmt::print("({}/{}) ", m.i, m.j); }
     //         fmt::print("| max_en: {}\n", path.max_en);
-
     // }
 
     return result;

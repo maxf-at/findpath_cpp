@@ -65,8 +65,11 @@ def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
     end_findpath = round(time.time()-start_findpath, 4)
     result = round(result/100.0,2)
 
+
+
     path = fp.get_path()
     # print (path) 
+    print (f"'{sequence}', '{s1}', '{s2}', '{path}'")
     
     return end_findpath, result
 def launch_new_merge_ext_fp(sequence, s1, s2, swm=None, mp=True):
@@ -95,7 +98,7 @@ for index, row in df.iterrows():
     fc = RNA.fold_compound(sequence)
     s1_eval = round(fc.eval_structure(s1), 2)
     
-    print(index, "current sw:", search_width_multiplier)
+    # print(index, "current sw:", search_width_multiplier)
 
     time_fp, result = launch_new_fp(
         sequence, s2, s1, swm=search_width_multiplier, mp=True)
@@ -103,8 +106,9 @@ for index, row in df.iterrows():
     result = round(result-s1_eval,2)
     ref_result = reference_fp_results[index]
     offset = result - ref_result
-    print (index, "reference result:", ref_result, "now:", result, "offset:", offset)
+    # print (index, "reference result:", ref_result, "now:", result, "offset:", offset)
     all_offset_values += offset
+
     # if offset != 0.0:
         # print(f"sequence = \"{sequence}\"")
         # print(f"s1 = \"{s1}\"")
@@ -117,7 +121,8 @@ for index, row in df.iterrows():
     result = round(result-s1_eval,2)
     ref_result = reference_merge_results[index]
     offset = result - ref_result
-    print (index, "reference result:", ref_result, "now:", result, "offset:", offset)
+    # print (index, "reference result:", ref_result, "now:", result, "offset:", offset)
+
     # if offset != 0.0:
         # print(f"sequence = \"{sequence}\"")
         # print(f"s1 = \"{s1}\"")
@@ -127,7 +132,7 @@ for index, row in df.iterrows():
 
 end = round(time.time()-start, 4)
 
-print ("all deviations:", all_offset_values, "time:", end)
+# print ("all deviations:", all_offset_values, "time:", end)
 
 
 
