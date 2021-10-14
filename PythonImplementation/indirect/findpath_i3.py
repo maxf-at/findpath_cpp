@@ -61,6 +61,7 @@ class Intermediate:
     energies:     list
     opt:          float
     add_moves:    list
+    distance:     int
 
 
 class Fp_class():
@@ -75,7 +76,7 @@ class Fp_class():
         self.evals = key_dependent_dict(
             lambda x: round(self.fc.eval_structure(x), 2))
         self.p_tables = key_dependent_dict(
-            lambda x: RNA.ptable_from_string(x))
+            lambda x: RNA.ptable(x))
         self.l_tables = lambda x: RNA.loopidx_from_ptable(x)
         self.bp_dist = lambda x, y: RNA.bp_distance(x, y)
 
@@ -361,22 +362,109 @@ class Fp_class():
         s1_en = round(evals[s1], 2)
         end_p_table = self.p_tables[s2]
         init_intermediate = Intermediate(p_table=list(p_tables[s1]), mode=mode, saddle_e=float(
-            "-inf"), current_e=evals[s1], moves=[(0, 0, s1_en)], energies=[0], opt=0, add_moves=[])
+            "-inf"), current_e=evals[s1], moves=[(0, 0, s1_en)], energies=[0], opt=0, add_moves=[], distance=current_bp_end)
         # initial path start with 1 intermediate
         init_path = [init_intermediate]
         # paths start with 1 initial path
         paths = [init_path]
 
-        # dont stop at current_bp_end, consider potential indirect moves
-        while (current_bp != current_bp_end+2*len(self.moves_add)):
 
+        # Ivos variation: define the largest distance, 
+        # next iteration will only ever iterate over the longest distances
+
+        longest_distance = current_bp_end
+
+        queue = []
+
+        # dont stop at current_bp_end, consider potential indirect moves
+        while (len(paths)!=0):
+
+            # copy all paths from the queue into 'paths' which have the longest distance
+
+
+            # iterate over all queue items for longest distance first
+
+            longest_distance = 0
+            for p in queue:
+                if p[-1].distance > longest_distance:
+                    longest_distance = p[-1].distance
+            for p in paths:
+                if p[-1].distance > longest_distance:
+                    longest_distance = p[-1].distance
+
+            print ('longest d', longest_distance, 'paths:', len(paths), 'queue:', len(queue))
+
+            # all elements in paths, which dont have the longest distance, get onto the queue.
+            # from the queue, all items with the longest distance get to paths
+
+            if longest_distance==14:
+                print('before')
+                for p in paths:
+                    print(p[-1].distance)
+
+            for p in queue:
+                if p[-1].distance == longest_distance:
+                    # print ('add back')
+                    paths.append(p)
+                    queue.remove(p)
+
+            for p in paths:
+                if p[-1].distance != longest_distance:
+                    # print ('add back')
+                    queue.append(p)
+                    paths.remove(p)
+                    if longest_distance==14:
+                        print('remove', len(paths))
+                else:
+                    if longest_distance==14:
+                        print('stay', p[-1].distance, len(paths))
+                    
+            
+            if longest_distance==14:
+                for i in range(len(paths)):
+
+                    print (i, len(paths), paths[i][-1].distance)
+
+            new_paths = [i for i in paths if i[-1].distance == longest_distance]
+            
+
+
+
+            if longest_distance==14:
+                print('after')
+                for p in new_paths:
+                    print(p[-1].distance)
+
+            test = []
+            for p in paths:
+                test.append(p[-1].distance)
+
+                if longest_distance==14:
+                    print(p[-1].distance)
+
+            print ('longest d', longest_distance, 'paths:', len(paths), 'queue:', len(queue),
+             'avg', np.mean(test), np.max(test), np.min(test))
+         
+
+
+
+            next_longest_distance = 0
+            
             # collect all new paths here (next iteration)
             collect_paths = []
 
             for current_path in paths:
+
+                current_distance = current_path[-1].distance
+                # if current_distance < longest_distance:
+                #     print ('ignore', current_distance)
+                # else:
+                #     print ("accept", current_distance)
+
                 current_p_table = current_path[-1].p_table
-                current_e = current_path[-1].current_e
+               
                 current_s = current_path[-1].saddle_e
+                current_e = current_path[-1].current_e
                 current_string = p_to_s(current_p_table)
                 current_moves = current_path[-1].moves
                 current_energies = current_path[-1].energies
@@ -423,8 +511,16 @@ class Fp_class():
                         # unused?
                         en_moves = [x[2] for x in next_moves]
 
+                        distance_s2 = RNA.bp_distance(RNA.db_from_ptable(next_p_table), s2)
+
+                        if distance_s2 > next_longest_distance:
+                            next_longest_distance = distance_s2
+
+                        # print (distance_s2, end=" ")
+
                         new_intermediate = Intermediate(p_table=next_p_table, mode=mode, saddle_e=next_s, current_e=next_e,
-                                                        moves=next_moves, energies=next_energies, opt=[], add_moves=current_add_moves)
+                                                        moves=next_moves, energies=next_energies, opt=[],
+                                                        add_moves=current_add_moves, distance=distance_s2)
 
                         new_path = current_path.copy() + [new_intermediate]
                         collect_paths.append(new_path)
@@ -468,8 +564,22 @@ class Fp_class():
                         yield collect_paths[i][-1]
 
             # next iteration
-            paths = collect_paths
+
+            # for the next iteration, copy only those intermediates into paths, which have 
+            # the longest distance. the rest gets appended to a queue.
+
+            paths = []
+            for path in collect_paths:
+                paths.append(path)
+                               
+
+
+            # paths = collect_paths
             current_bp += 1
+
+            longest_distance = next_longest_distance
+            # end while loop, get to the next distance class
+
 
         # return remaining paths
         if paths:
@@ -713,7 +823,7 @@ if __name__ == '__main__':
     # s1, s2 = s2, s1
 
     section = ()
-    search_width = 500
+    search_width = 30
     Verbose = True
     # Debug = True
     Debug = False
@@ -728,12 +838,17 @@ if __name__ == '__main__':
     # add_moves = [(1, 43), (2, 42), (3, 41), (4, 40)]
     # indirect_iterations = 1
 
-    add_moves = []
-    # indirect_iterations = 2
-    indirect_iterations = 2
+    add_moves = {(9, 15)}
 
+    # add_moves = []
+    # indirect_iterations = 2
+    indirect_iterations = 1
     paths = find_path(sequence, s1, s2, indirect_iterations=indirect_iterations, add_moves=add_moves,
                       search_width=search_width, Debug=Debug, Verbose=Verbose)
+
+
+    
+
 
     # print (se)
     print('orig findpath:')

@@ -21,6 +21,10 @@ from sklearn.decomposition import PCA
 
 import hdbscan
 
+sys.path.append('../../')
+import findpath_librna
+import findpath
+
 import findpath
 import pathfinder
 import pathfinder_i_2

@@ -21,14 +21,17 @@ from sklearn.decomposition import PCA
 
 import hdbscan
 
+sys.path.append('../../')
+import findpath_librna
 import findpath
+
 import pathfinder
 import pathfinder_i_2
 import pathfinder_i_cache
 
 
 import RNA
-import RNAxplorer
+# import RNAxplorer
 
 
 # coloredlogs
@@ -307,9 +310,12 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
     # print (f"s1       = '{s1}'")
     # print (f"s2       = '{s2}'")
 
-    fp_call = findpath.findpath_class(sequence, True)
-    max_en = fp_call.init(s1, s2, search_width_multiplier)
 
+    # fp_call = findpath.findpath_class(sequence, True)
+    # max_en = fp_call.init(s1, s2, search_width_multiplier)
+
+    fp = findpath.findpath_single(sequence, s1, s2, search_width_multiplier=search_width_multiplier, mp=True)
+    max_en = fp.get_en()/1.0
 
     
     bp_dist_total = RNA.bp_distance(s1, s2)
@@ -357,8 +363,8 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
     intermediates = list(set(intermediates))
     intermediates.sort()
 
-    pt1 = list(RNA.ptable_from_string(s1))
-    pt2 = list(RNA.ptable_from_string(s2))
+    pt1 = list(RNA.ptable(s1))
+    pt2 = list(RNA.ptable(s2))
 
     direct_moves = set()
     indirect_moves = set()
@@ -382,7 +388,7 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
     # every intermediate gets its move set, store in dict
     for i, intermediate in enumerate(intermediates):
 
-        pt = RNA.ptable_from_string(intermediate)
+        pt = RNA.ptable(intermediate)
         # print (intermediate, pt)
         det, moves_pt1, moves_pt2 = detour(pt, pt1, pt2)
         
@@ -498,14 +504,14 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
                     lowest_bp = a
 
 
-            pt = list(RNA.ptable_from_string(intermediate))
+            pt = list(RNA.ptable(intermediate))
             det, m1, m2 = detour(pt, pt1, pt2)
 
             en_improvement = []
             en_improvement_inc = []
             add_moves = det.copy()
             for s in worst_s:                        
-                temp_pt = list(RNA.ptable_from_string(s))
+                temp_pt = list(RNA.ptable(s))
                 
                 # print (s, add_moves)
 
@@ -586,10 +592,13 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
             # max_en_s1 = fp_call.init(s1, intermediate, search_width_multiplier)
             # max_en_s2 = fp_call.init(intermediate, s2, search_width_multiplier)
 
-            max_en_s1 = findpath.init_single_findpath(sequence, s1, intermediate, search_width_multiplier, True)
-            max_en_s2 = findpath.init_single_findpath(sequence, intermediate, s2, search_width_multiplier, True)
-            combined_en = max(max_en_s1, max_en_s2)
+            fp = findpath.findpath_single(sequence, s1, intermediate, search_width_multiplier=search_width_multiplier, mp=True)
+            max_en_s1 = fp.get_en()/1.0
 
+            fp = findpath.findpath_single(sequence, intermediate, s2, search_width_multiplier=search_width_multiplier, mp=True)
+            max_en_s2 = fp.get_en()/1.0
+
+            combined_en = max(max_en_s1, max_en_s2)
             candidates1.append((combined_en, intermediate, pt, add_moves))
 
 

@@ -96,8 +96,8 @@ def generate_structures(length=150):
 
     fc = RNA.fold_compound(sequence)
 
-    # pt1 = RNA.ptable_from_string(s1)
-    # pt2 = RNA.ptable_from_string(s2)
+    # pt1 = RNA.ptable(s1)
+    # pt2 = RNA.ptable(s2)
     # print (pt1)
     # test = fc.path_gradient(fc, (1,pt1))
 
@@ -131,7 +131,7 @@ def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, 
 
     if Verbose: print(sequence)
     s = s1
-    pt = list(RNA.ptable_from_string(s))
+    pt = list(RNA.ptable(s))
 
     move_color='\033[92m'
 
