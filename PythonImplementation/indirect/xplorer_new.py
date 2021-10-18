@@ -29,6 +29,11 @@ import pathfinder
 import pathfinder_i_2
 import pathfinder_i_cache
 
+# from findpath_i_sorted import find_path
+from findpath_i_unsorted import find_path as find_path_unsorted
+from findpath_i_sorted import find_path as find_path_sorted
+
+from helper import print_moves
 
 import RNA
 # import RNAxplorer
@@ -256,6 +261,8 @@ def remove_incompatible_bps(pt, l, i, j):
     return adjusted_bps
 
 
+
+
 def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
 
 
@@ -286,23 +293,11 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
     intermediates2.sort(key=lambda x: x.en)
     intermediates = [i.structure for i in intermediates2]
 
-    # limit intermediates to 1/2 or less
-    # intermediates = intermediates[0:int(len(intermediates)/5)]
-
-    # for s in intermediates2[0:30]:
-    #     print_d (s)
 
 
 
-
-
-
-
-
-
-
-    # search_width_multiplier = 2
-    search_width_multiplier = 10
+    search_width_multiplier = 2
+    # search_width_multiplier = 10
 
 
 
@@ -316,11 +311,12 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
 
     fp = findpath.findpath_single(sequence, s1, s2, search_width_multiplier=search_width_multiplier, mp=True)
     max_en = fp.get_en()/1.0
+    max_en_d = max_en
 
     
     bp_dist_total = RNA.bp_distance(s1, s2)
-    Verbose = True
-    # Verbose = False
+    # Verbose = True
+    Verbose = False
     direct_path = pathfinder.pathfinder(sequence, s1, s2, verbose=Verbose, search_width=bp_dist_total*search_width_multiplier)
 
 
@@ -587,7 +583,8 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
             # continue
 
             # search_width_multiplier = 0.4
-            search_width_multiplier = 10
+            # search_width_multiplier = 10
+            search_width_multiplier = 2
 
             # max_en_s1 = fp_call.init(s1, intermediate, search_width_multiplier)
             # max_en_s2 = fp_call.init(intermediate, s2, search_width_multiplier)
@@ -599,8 +596,8 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
             max_en_s2 = fp.get_en()/1.0
 
             combined_en = max(max_en_s1, max_en_s2)
-            candidates1.append((combined_en, intermediate, pt, add_moves))
-
+            # candidates1.append((combined_en, intermediate, pt, add_moves))
+            candidates1.append((combined_en, intermediate, pt, det))
 
             
 
@@ -625,6 +622,7 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
             
             max_en_i = 0
             candidates2.append((max_en_i, intermediate, pt, add_moves))
+            
 
 
             
@@ -709,13 +707,15 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
 
 
 
-        # print ("~~~~~~~~")
+        
         print_d ("~~~~~~~~")
         # break
 
     # return
 
-    search_width_multiplier = 100
+    
+
+    search_width_multiplier = 2
 
     candidates1.sort(key=lambda x: x[0])
     candidates2.sort(key=lambda x: x[0])
@@ -729,16 +729,46 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
     for i, (en, intermediate, pt, add_moves) in enumerate(candidates1[0:5]):        
         # max_en_s1 = findpath.init_single_findpath_i(sequence, s1, intermediate, search_width_multiplier, [], True, Verbose=Verbose)
         # max_en_s2 = findpath.init_single_findpath_i(sequence, intermediate, s2, search_width_multiplier, [], True, Verbose=Verbose)        
-        pathfinder.pathfinder(sequence, s1, intermediate, verbose=Verbose, search_width=bp_dist_total*search_width_multiplier)
-        pathfinder.pathfinder(sequence, intermediate, s2, verbose=Verbose, search_width=bp_dist_total*search_width_multiplier)
         
-        Verbose = False
+        # Verbose = False
+        # pathfinder.pathfinder(sequence, s1, intermediate, verbose=Verbose, search_width=bp_dist_total*search_width_multiplier)
+        # pathfinder.pathfinder(sequence, intermediate, s2, verbose=Verbose, search_width=bp_dist_total*search_width_multiplier)
         
+        
+        # break
+        # combined_en = max(max_en_s1, max_en_s2)        
+        # print(i, en, "->", combined_en, intermediate, "/", add_moves)
+        # if combined_en < max_en_1:
+        #     max_en_1 = combined_en
+
+        
+        
+
+
+        add_moves2 = []
+        for (i,j) in add_moves:
+            add_moves2.append(i)
+            add_moves2.append(j)
+        max_en_i = findpath.init_single_findpath_i(sequence, intermediate, s2, search_width_multiplier, add_moves2, True, Verbose=False)  
+
+
+
+        print ("direct path:", max_en_d, "indirect path", en, "add_moves:", add_moves, "cpp_i", max_en_i)
+
+        indirect_paths = find_path_unsorted(sequence, s1, s2, add_moves=add_moves,
+                        search_width=bp_dist_total*search_width_multiplier, Debug=False, Verbose=Verbose)
+        s, sw, mode, moves = indirect_paths[0] 
+        print_moves(sequence, s1, s2, moves, Verbose=True)
+
+        indirect_paths = find_path_sorted(sequence, s1, s2, add_moves=add_moves,
+                        search_width=bp_dist_total*search_width_multiplier, Debug=False, Verbose=Verbose)
+        s, sw, mode, moves = indirect_paths[0] 
+        print_moves(sequence, s1, s2, moves, Verbose=True)
+
+
         break
-        combined_en = max(max_en_s1, max_en_s2)        
-        print_d(i, en, "->", combined_en, intermediate)
-        if combined_en < max_en_1:
-            max_en_1 = combined_en
+
+
 
     # print_d ("~~~~~~~~")
 
@@ -864,11 +894,10 @@ if __name__ == "__main__":
     # init(sequence, s1, s2, True)
 
 
-    Debug = True
+    # Debug = True
+    Debug = False
 
-    # Debug = False
-
-    # filename = f'./sample_seqs/indirect_new_150.csv'
+    # filename = f'./sample_seqs/indirect_new_150.csv'R
     filename = f'./sample_seqs/indirect_new_120.csv'
 
     df = pd.read_csv(filename)
@@ -883,10 +912,10 @@ if __name__ == "__main__":
 
     # 5 check out
 
-        if index!=11:
-            continue
-        # if index>14:
-        #     break
+        # if index!=1:
+        #     continue
+        if index>14:
+            break
 
 
         sequence = row.sequence
@@ -917,10 +946,4 @@ if __name__ == "__main__":
     print ("time elapsed:", round(time.time()-start,4))
 
 
-    import helper
-    pt1 = RNA.ptable(s1)
-    pt2 = RNA.ptable(s2)
-    helper.print_tables(s1, s2, pt1, pt2)
-
-    print (pt1)
-    print (pt2)
+    # todo: finish benchmark, comparison variations Python, cpp results, results like Pathfinder

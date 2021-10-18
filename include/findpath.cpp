@@ -95,6 +95,12 @@ int init_single_findpath_i(std::string sequence, std::string s1, std::string s2,
     } else {
         return INT_MAX - 1;
     }
+
+
+    // single_findpath_i(std::string sequence, std::string s1, std::string s2, std::vector<int> add_moves = {}, int search_width = 0, float search_width_multiplier=0,
+    //                 bool mp = true, int en_limit = INT_MAX - 1, const py::dict& model_details = {})
+
+
 }
 
 int init_multi_findpath(std::string sequence, std::string s, std::vector<std::string> destinations,
@@ -180,12 +186,22 @@ PYBIND11_MODULE(findpath, m)
 
     py::class_<single_findpath>(m, "findpath_single")
         .def(py::init<std::string, std::string, std::string, int, float, int, bool, py::dict>(), 
-            py::arg("sequence"), py::arg("s1"), py::arg("s2"), py::arg("search_width") = 0, 
+            py::arg("sequence"), py::arg("s1"), py::arg("s2"),             
+            py::arg("search_width") = 0, 
             py::arg("search_width_multiplier") = 0, py::arg("mp") = true, py::arg("en_limit") = INT_MAX - 1,
             py::arg("model_details") = py::dict())
         .def("get_en", &single_findpath::get_en)
         .def("get_path", &single_findpath::get_path);
 
+    py::class_<single_findpath_i>(m, "findpath_single_i")
+        .def(py::init<std::string, std::string, std::string, std::vector<int>, int, float, int, bool, py::dict>(), 
+            py::arg("sequence"), py::arg("s1"), py::arg("s2"),    
+            py::arg("add_moves") = std::vector<int>{},         
+            py::arg("search_width") = 0, 
+            py::arg("search_width_multiplier") = 0, py::arg("mp") = true, py::arg("en_limit") = INT_MAX - 1,
+            py::arg("model_details") = py::dict())
+        .def("get_en", &single_findpath_i::get_en)
+        .def("get_path", &single_findpath_i::get_path);
 
     m.def("init_single_findpath", &init_single_findpath, "single_findpath", py::arg("sequence"),
           py::arg("s1"), py::arg("s2"), py::arg("sw"), py::arg("mp") = true,

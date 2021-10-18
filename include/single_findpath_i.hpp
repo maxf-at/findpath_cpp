@@ -20,6 +20,11 @@ class single_findpath_i
     static auto compare_moves_when(const void* A, const void* B) -> int;
     static auto ptable_from_string(short* pt, short* loop, const char* s, short* stack) -> void;
 
+    vrna_fold_compound_t* fc;
+    std::string sequence; 
+    std::string s1; 
+    std::string s2;
+    std::vector<sorted_path> result; // results are stored here
 
    public:
 
@@ -29,6 +34,121 @@ class single_findpath_i
               bool mp = true, int en_limit = INT_MAX - 1, bool Verbose = false) -> std::vector<sorted_path>;
 
     single_findpath_i(){};
+
+    // result getters
+    auto get_en() -> int {
+        if (result.size() > 0) {
+            return result[0].max_en;
+        } else {
+            return INT_MAX - 1;
+        }
+    }
+    auto get_path() -> std::vector<std::tuple<int,int, int>> {
+        
+        // get list of moves, e.g.
+        // [(0, 0, -18), (-33, -99, -17), (-34, -98, -14), ... ]
+
+        std::vector<std::tuple<int,int, int>> path;
+        auto const& moves = result[0].moves;
+        short* pt = vrna_ptable(s1.c_str());
+        float en     = vrna_eval_structure_pt(fc, pt);
+        
+        path.push_back({0, 0, en});
+
+        for (auto const& move : moves) {
+            if (move.i == 0)
+                break; // any trailing (0,0) indicate we're done (unused indirect moves)
+
+            if (move.j < 0) {
+                pt[-move.i] = 0;
+                pt[-move.j] = 0;
+            } else {
+                pt[move.i] = move.j;
+                pt[move.j] = move.i;
+            }
+            en            = vrna_eval_structure_pt(fc, pt);
+            path.push_back({move.i, move.j, en});
+        }
+
+        free(pt);
+        return path;
+    }
+
+    // alternative constructor for Python export with combined init
+    single_findpath_i(std::string sequence, std::string s1, std::string s2, std::vector<int> add_moves = {}, int search_width = 0, float search_width_multiplier=0,
+                    bool mp = true, int en_limit = INT_MAX - 1, const py::dict& model_details = {}) : sequence{sequence}, s1{s1}, s2{s2} {
+        
+
+
+        vrna_md_t md;
+
+        vrna_md_set_default(&md); // copy global settings
+        // set_model_details(&md);
+
+        if (model_details.contains("noLP")){ 
+            // Only consider canonical structures, i.e. no 'lonely' base pairs. 
+            md.noLP = model_details["noLP"].cast<int>();
+        }
+        if (model_details.contains("logML")){ 
+            // Use logarithmic scaling for multiloops. 
+            md.logML = model_details["logML"].cast<int>();
+        }
+        if (model_details.contains("temperature")){
+            // The temperature used to scale the thermodynamic parameters. 
+            // py::print("set T to", model_details["temperature"]);
+            md.temperature = model_details["temperature"].cast<double>();
+        }
+        if (model_details.contains("dangles")){
+            // Specifies the dangle model used in any energy evaluation (0,1,2 or 3) 
+            md.dangles = model_details["dangles"].cast<int>();
+        }
+        if (model_details.contains("special_hp")){
+            // Include special hairpin contributions for tri, tetra and hexaloops. 
+            md.special_hp = model_details["special_hp"].cast<int>();
+        }
+        if (model_details.contains("noGU")){
+            // Do not allow GU pairs. 
+            md.noGU = model_details["noGU"].cast<int>();
+        }
+        if (model_details.contains("noGUclosure")){
+            // Do not allow loops to be closed by GU pair. 
+            md.noGUclosure = model_details["noGUclosure"].cast<int>();
+        }
+
+
+
+
+
+        fc = vrna_fold_compound(sequence.c_str(), &md, VRNA_OPTION_EVAL_ONLY);
+
+        short* pt1 = vrna_ptable(s1.c_str());
+        short* pt2 = vrna_ptable(s2.c_str());
+
+        int bp_dist            = vrna_bp_distance(s1.c_str(), s2.c_str());
+
+        // if we have a valid search width multiplier or nothing selected, use it:
+        if (search_width_multiplier>0 or search_width==0){
+
+            if (search_width_multiplier==0) {
+                search_width_multiplier=2;
+            }
+
+            search_width = bp_dist * search_width_multiplier;
+            if (search_width < 2) { search_width = 2; }
+        }
+        
+        en_limit = INT_MAX - 1; // workaround?
+
+        result = init(fc, pt1, pt2, add_moves, search_width, mp, en_limit, false);
+
+        // fmt::print("init: {} {}\n", search_width, result.size());
+
+        // free(pt1);
+        // free(pt2);
+
+    };
+
+
 };
 
 

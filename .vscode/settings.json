@@ -73,7 +73,11 @@
         "any": "cpp",
         "codecvt": "cpp",
         "scoped_allocator": "cpp",
-        "fold_compound.h": "c"
+        "fold_compound.h": "c",
+        "csignal": "cpp",
+        "strstream": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp"
     },
     "python.pythonPath": "/usr/bin/python",
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
