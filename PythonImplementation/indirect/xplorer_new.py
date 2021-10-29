@@ -296,8 +296,8 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
 
 
 
-    search_width_multiplier = 2
-    # search_width_multiplier = 10
+    # search_width_multiplier = 2
+    search_width_multiplier = 10
 
 
 
@@ -583,8 +583,8 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
             # continue
 
             # search_width_multiplier = 0.4
-            # search_width_multiplier = 10
-            search_width_multiplier = 2
+            search_width_multiplier = 10
+            # search_width_multiplier = 2
 
             # max_en_s1 = fp_call.init(s1, intermediate, search_width_multiplier)
             # max_en_s2 = fp_call.init(intermediate, s2, search_width_multiplier)
@@ -725,6 +725,10 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
     Verbose = True
     # Verbose = False
 
+    best_indirect_moves = []
+    best_en_indirect = 0
+    best_intermediate = 0
+
     max_en_1 = 999
     for i, (en, intermediate, pt, add_moves) in enumerate(candidates1[0:5]):        
         # max_en_s1 = findpath.init_single_findpath_i(sequence, s1, intermediate, search_width_multiplier, [], True, Verbose=Verbose)
@@ -749,41 +753,32 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
         for (i,j) in add_moves:
             add_moves2.append(i)
             add_moves2.append(j)
-        max_en_i = findpath.init_single_findpath_i(sequence, intermediate, s2, search_width_multiplier, add_moves2, True, Verbose=False)  
+
+        # max_en_i = findpath.init_single_findpath_i(sequence, s1, s2, search_width_multiplier, add_moves2, True, Verbose=False)  
+
+        best_indirect_moves = add_moves2
+        best_en_indirect = en
+        best_intermediate = intermediate
+
+        # print ("direct path:", max_en_d, "indirect path", en, "add_moves:", add_moves, "cpp_i", max_en_i)
 
 
 
-        print ("direct path:", max_en_d, "indirect path", en, "add_moves:", add_moves, "cpp_i", max_en_i)
+        # indirect_paths = find_path_unsorted(sequence, s1, s2, add_moves=add_moves,
+        #                 search_width=bp_dist_total*search_width_multiplier, Debug=False, Verbose=Verbose)
+        # s, sw, mode, moves = indirect_paths[0] 
+        # print_moves(sequence, s1, s2, moves, Verbose=True)
 
-        indirect_paths = find_path_unsorted(sequence, s1, s2, add_moves=add_moves,
-                        search_width=bp_dist_total*search_width_multiplier, Debug=False, Verbose=Verbose)
-        s, sw, mode, moves = indirect_paths[0] 
-        print_moves(sequence, s1, s2, moves, Verbose=True)
-
-        indirect_paths = find_path_sorted(sequence, s1, s2, add_moves=add_moves,
-                        search_width=bp_dist_total*search_width_multiplier, Debug=False, Verbose=Verbose)
-        s, sw, mode, moves = indirect_paths[0] 
-        print_moves(sequence, s1, s2, moves, Verbose=True)
+        # indirect_paths = find_path_sorted(sequence, s1, s2, add_moves=add_moves,
+        #                 search_width=bp_dist_total*search_width_multiplier, Debug=False, Verbose=Verbose)
+        # s, sw, mode, moves = indirect_paths[0] 
+        # print_moves(sequence, s1, s2, moves, Verbose=True)
 
 
         break
 
 
-
-    # print_d ("~~~~~~~~")
-
-
-    max_en_2 = 999
-    # for i, (en, intermediate, pt, add_moves) in enumerate(candidates2[0:5]):        
-    #     combined_en = findpath.init_single_findpath_i(sequence, s1, s2, search_width_multiplier, add_moves, True, Verbose=Verbose)
-    #     print_d(add_moves)
-    #     print_d(i, en, "->", combined_en, intermediate)
-
-    #     if combined_en < max_en_2:
-    #         max_en_2 = combined_en
-
-
-    return return_max_en, max_en_1, max_en_2
+    return max_en_d, best_en_indirect, best_indirect_moves, intermediate
 
 
 
@@ -791,63 +786,63 @@ def cluster_intermediates(sequence, s1, s2, intermediates, Debug=False):
 
 
 
-def init(sequence, s1, s2, search_width_multiplier, Debug=False):
+# def init(sequence, s1, s2, search_width_multiplier, Debug=False):
 
 
-    if Debug:
-        coloredlogs.DEFAULT_LOG_FORMAT = '%(levelname)s \033[96m %(message)s \033[0m'
-        # coloredlogs.install(level='VERBOSE')
-        coloredlogs.install(level='INFO')
+#     if Debug:
+#         coloredlogs.DEFAULT_LOG_FORMAT = '%(levelname)s \033[96m %(message)s \033[0m'
+#         # coloredlogs.install(level='VERBOSE')
+#         coloredlogs.install(level='INFO')
 
 
-    fc = RNA.fold_compound(sequence)
-    s1_eval = fc.eval_structure(s1)
-    s2_eval = fc.eval_structure(s2)
+#     fc = RNA.fold_compound(sequence)
+#     s1_eval = fc.eval_structure(s1)
+#     s2_eval = fc.eval_structure(s2)
 
 
-    max_en = findpath.init_single_findpath(
-        sequence, s1, s2, search_width_multiplier, True)
-    max_en_float = round(max_en/100.0,2)
+#     max_en = findpath.init_single_findpath(
+#         sequence, s1, s2, search_width_multiplier, True)
+#     max_en_float = round(max_en/100.0,2)
 
 
-    bp_dist_total = RNA.bp_distance(s1, s2)
+#     bp_dist_total = RNA.bp_distance(s1, s2)
 
-    # intermediates = callRNAxplorer(sequence, s1, s2, s1, s2, 4)
-    # intermediates += callRNAxplorer(sequence, s1, s2, s1, s2, 2)
-    # intermediates += callRNAxplorer(sequence, s1, s2, s1, s2, 2)
+#     # intermediates = callRNAxplorer(sequence, s1, s2, s1, s2, 4)
+#     # intermediates += callRNAxplorer(sequence, s1, s2, s1, s2, 2)
+#     # intermediates += callRNAxplorer(sequence, s1, s2, s1, s2, 2)
 
-    cmd = f'RNAxplorer -M RSH -n 200 --sequence {sequence}'
-    result = subprocess.check_output(cmd, shell=True, encoding="utf8")
-    result = result.split("\n")
-    intermediates = []
-    for line in result:
-        line = line.split()
-        if len(line) != 4: continue
-        structure = line[1]
-        energy = int(RNA.energy_of_struct(sequence, structure)*100)
-        intermediates.append(structure_node(structure, RNA.bp_distance(structure, s1), RNA.bp_distance(structure, s2), energy))
+#     cmd = f'RNAxplorer -M RSH -n 200 --sequence {sequence}'
+#     result = subprocess.check_output(cmd, shell=True, encoding="utf8")
+#     result = result.split("\n")
+#     intermediates = []
+#     for line in result:
+#         line = line.split()
+#         if len(line) != 4: continue
+#         structure = line[1]
+#         energy = int(RNA.energy_of_struct(sequence, structure)*100)
+#         intermediates.append(structure_node(structure, RNA.bp_distance(structure, s1), RNA.bp_distance(structure, s2), energy))
 
-    # print_d ("RNAxplorer done")
-    # intermediates.sort(key=lambda x: x.en)
+#     # print_d ("RNAxplorer done")
+#     # intermediates.sort(key=lambda x: x.en)
 
-    # intermediates = intermediates[0:int(len(intermediates)/3)]
+#     # intermediates = intermediates[0:int(len(intermediates)/3)]
 
-    # for s in intermediates[0:10]:
-    #     print_d (s)
-
-
-    intermediate_structures = [i.structure for i in intermediates]
-
-    Debug = True
-    # Debug = False
+#     # for s in intermediates[0:10]:
+#     #     print_d (s)
 
 
-    new_en = cluster_intermediates(sequence, s1, s2, intermediate_structures, Debug=Debug)
+#     intermediate_structures = [i.structure for i in intermediates]
+
+#     Debug = True
+#     # Debug = False
 
 
-    print_d ("best result direct:", max_en_float, "indirect:", new_en)
+#     new_en = cluster_intermediates(sequence, s1, s2, intermediate_structures, Debug=Debug)
 
-    return max_en_float, new_en, intermediate_structures
+
+#     print_d ("best result direct:", max_en_float, "indirect:", new_en)
+
+#     return max_en_float, new_en, intermediate_structures
 
 
 
@@ -897,12 +892,28 @@ if __name__ == "__main__":
     # Debug = True
     Debug = False
 
-    # filename = f'./sample_seqs/indirect_new_150.csv'R
-    filename = f'./sample_seqs/indirect_new_120.csv'
+
+    # these are stored lists of s1, s2 with associated potential intermediate structures. 
+
+    # o_filename = f'indirect_new_150.csv'
+    o_filename = f'indirect_new_120.csv'
+
+    filename = r"./sample_seqs/" + o_filename
 
     df = pd.read_csv(filename)
 
     start = time.time()
+
+
+    sequences = []
+    s1s = []
+    s2s = []
+    indices = []
+    seq_lengths = []
+    en1 = []
+    en2 = []
+    add_moves = []
+
 
     for index, row in df.iterrows():
         # break
@@ -914,8 +925,8 @@ if __name__ == "__main__":
 
         # if index!=1:
         #     continue
-        if index>14:
-            break
+        # if index>10:
+        #     break
 
 
         sequence = row.sequence
@@ -923,6 +934,12 @@ if __name__ == "__main__":
         s2 = row.s2
         e1 = int(row.e1*100)
         e2 = int(row.e2*100)
+
+        indices.append(index)
+        sequences.append(sequence)
+        seq_lengths.append(len(sequence))
+        s1s.append(s1)
+        s2s.append(s2)
 
         intermediate_structures = row.intermediate_structures.replace('\'', '"')
         intermediate_structures = json.loads(intermediate_structures)
@@ -933,12 +950,25 @@ if __name__ == "__main__":
             print (f"s2       = '{s2}'")
 
         # init(sequence, s1, s2, True)
-        new_en_all, en1, en2 = cluster_intermediates(sequence, s1, s2, intermediate_structures, Debug=Debug)
+        max_en_d, best_en_indirect, best_indirect_moves, best_intermediate = cluster_intermediates(sequence, s1, s2, intermediate_structures, Debug=Debug)
 
-        # en1 = en1 - e2
-        # en2 = en2 - e2
+        en1.append(max_en_d)
+        en2.append(best_en_indirect)
+        add_moves.append(best_indirect_moves)
 
-        print ("i:", index, "/", e1, e2, "/", new_en_all, en1, en2)
+
+
+        print ('index:', index, max_en_d, best_en_indirect, best_indirect_moves)
+
+
+    df = pd.DataFrame([indices, sequences, s1s, s2s, seq_lengths, en1, en2, add_moves, best_intermediate]).transpose()
+    df.columns = ["i", "sequence", "s1", "s2", "seq_length", "en1", "en2", "add_moves", "best_intermediate"]
+
+    prefix = "indirect_results_x_"
+    savefile = r"./results/" + prefix + o_filename
+    df.to_csv(savefile)
+    
+    print (df)
 
     # max_en_s1 = findpath.init_single_findpath(sequence, s1, s2, 2, True)
     # print ("direct:", max_en_s1)

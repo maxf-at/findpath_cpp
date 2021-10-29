@@ -371,6 +371,12 @@ if __name__ == '__main__':
     # s1       = ".(((((.(.((((((((....((...............))....))).))))).).)))))........."
     # s2       = ".(((((..((((..(((..(.(((.((........))))).)..)))....)))).)))))........."
 
+
+    sequence = "GGUCUAUGCCUCACACGCAGCCUCCUAUUAGCAGCUCUCCUGGCCCACAAUUUUAUUAAAAGUCCAAGUUGGACUGACAAAACGCGUGCGGUGUCCUAGG"
+    s1 = "...(((.((((..(((((.(((...................)))................((((((...))))))........))))).)).).).)))."
+    s2 = "((...(((((...(((((.(((...................)))................((((((...))))))........))))).)))))))...."
+    add_moves = [(6, 97), (97, 8), (8, 94), (94, 5), (5, 98)]
+        
     # ~~~
 
     # Tabu paper example
@@ -437,7 +443,7 @@ if __name__ == '__main__':
     # s1, s2 = s2, s1
 
     section = ()
-    search_width = 50
+    search_width = 1
     Verbose = True
     # Debug = True
     Debug = False
@@ -452,7 +458,9 @@ if __name__ == '__main__':
     # add_moves = [(1, 43), (2, 42), (3, 41), (4, 40)]
     # indirect_iterations = 1
 
-    add_moves = [(9, 15), (36, 42)]
+    # add_moves = [(9, 15), (36, 42)]
+
+
 
     # add_moves = []
     # indirect_iterations = 2

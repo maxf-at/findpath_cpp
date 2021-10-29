@@ -332,7 +332,7 @@ def find_moves(sequence, s1, s2, search_width=0, sw=0, add_moves=[], Verbose=Tru
         if len(add_moves2) > 16:
             continue
 
-        
+
         print ("try", add_moves2)
         try:
             fp = findpath.findpath_single_i(sequence, s1, s2, add_moves=add_moves2, search_width_multiplier=sw, mp=True)
@@ -342,7 +342,7 @@ def find_moves(sequence, s1, s2, search_width=0, sw=0, add_moves=[], Verbose=Tru
             s = max_en_d
             indirect_paths = []
 
-        print ("try2")
+        # print ("try2")
         # print (s, add_moves2)
 
         for moves in indirect_paths:            
@@ -392,6 +392,9 @@ if __name__ == '__main__':
     s1 = "...(((.((((..(((((.(((...................)))................((((((...))))))........))))).)).).).)))."
     s2 = "((...(((((...(((((.(((...................)))................((((((...))))))........))))).)))))))...."
 
+    sequence = "GGUCUAUGCCUCACACGCAGCCUCCUAUUAGCAGCUCUCCUGGCCCACAAUUUUAUUAAAAGUCCAAGUUGGACUGACAAAACGCGUGCGGUGUCCUAGG"
+    s1 = "...(((.((((..(((((.(((...................)))................((((((...))))))........))))).)).).).)))."
+    s2 = "((...(((((...(((((.(((...................)))................((((((...))))))........))))).)))))))...."
 
     search_width = 500
     Verbose = True

@@ -25,6 +25,17 @@ add_moves = [53, 66, 54, 65, 10, 85, 19, 78, 14, 81, 20, 77, 15, 80, 55, 64, 18,
 add_moves = [53, 66, 54, 65, 10, 85, 19, 78, 14, 81, 20, 77, 15, 80, 55, 64]
 
 
+sequence = "GGUCUAUGCCUCACACGCAGCCUCCUAUUAGCAGCUCUCCUGGCCCACAAUUUUAUUAAAAGUCCAAGUUGGACUGACAAAACGCGUGCGGUGUCCUAGG"
+s1 = "...(((.((((..(((((.(((...................)))................((((((...))))))........))))).)).).).)))."
+s2 = "((...(((((...(((((.(((...................)))................((((((...))))))........))))).)))))))...."
+
+sequence = "GGUCUAUGCCUCACACGCAGCCUCCUAUUAGCAGCUCUCCUGGCCCACAAUUUUAUUAAAAGUCCAAGUUGGACUGACAAAACGCGUGCGGUGUCCUAGG"
+s1 = "...(((.((((..(((((.(((...................)))................((((((...))))))........))))).)).).).)))."
+s2 = "((...(((((...(((((.(((...................)))................((((((...))))))........))))).)))))))...."
+
+add_moves = [6, 97, 8, 94, 5, 98, 4, 99, 12, 90]
+
+
 # settings
 search_width_multiplier = 2
 mp = False
