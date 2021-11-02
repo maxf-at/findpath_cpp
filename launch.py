@@ -15,9 +15,14 @@ s1 =       "........(((((((((((((((((..((((.((.((((((((((...((.((((((((((....(((
 s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((..((((((.......))))))....))).....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((((.....))..((((......((((((......)))))).....))))....((((((((((((..((((........)))))))))...........))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..)))...((((((....))))))))...)))).))))))))............(((((((((((((.(((.((.(((((.((((..(((((((((.......(((...)))......))))))))))))).))))).))..............)))))..)))))))))))"
 
 #100 nt with 2 inner sections
-# sequence = "CGCAUCUCUUUAGGGUAUGAAAUGUUAUAUGCUACGGGAACAAUGCCGACCUUCGGAGACCUAAGGAAUACGUCUUUCGAGCGGAAGGAUUCCUCGUUCA"
-# s1 =       ".(((((((..(((.((((((....)))))).))).))))....)))(((...)))..(((...((((....(((((((.....))))))))))).))).."
-# s2 =       "....((.((.(((.((((((....)))))).))).))))......((((...)))).(((...(((((....((((((.....))))))))))).))).."
+sequence = "CGCAUCUCUUUAGGGUAUGAAAUGUUAUAUGCUACGGGAACAAUGCCGACCUUCGGAGACCUAAGGAAUACGUCUUUCGAGCGGAAGGAUUCCUCGUUCA"
+s1 =       ".(((((((..(((.((((((....)))))).))).))))....)))(((...)))..(((...((((....(((((((.....))))))))))).))).."
+s2 =       "....((.((.(((.((((((....)))))).))).))))......((((...)))).(((...(((((....((((((.....))))))))))).))).."
+
+# 100 nt example, shows improvement from 0.5x to 2x search width multiplier
+sequence = 'UUGUACUAUAAUGGUGAGGGUUCGGCACUAUGGCGUGUGUUCAGUUAAUAAAGGGUACUGUAAUUCCGCGUGGACGGCGCCUCUCGCAUGCUAUUUAAAG'
+s1       = '.............((((((....(((.((.(.(((((.(((((((...........)))).)))..))))).)..)).))))))))).............'
+s2       = '.............(((((((((((...((((.(((.(.(((((((...........)))).))).)))))))).))).))).))))).............'
 
 # sequence = "GUUGGGGUAGGGGCCCGACUAAUAGCAGUUCUUUGACAAUUCUUCUGCGUUAUUCAUUUUGAUAACAAUUAUUAUAUAAGUGCUGGAAAGCCAACCAUAUCGGCCUUAAUCCCCAACAGAAAACCUUCACGAGUGGGGUCGGUUUCGCAAUUCCUUGCGUGAGAGCCGAGGUUGGUUACAUGAGAAUAACCACGCCGAAC"
 # s1 = "(((((((..((((((.((.((((.((((................)))))))).))((((..((((......))))..))))..(((....)))........))))))...))))))).......((.((((...((((..............)))).))))))...((..((.(((((........)))))))..))..."
@@ -29,9 +34,9 @@ s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((.
 
 # this example requires suboptimal paths for merging
 # S: -2.50, barrier: 1.90, runtime: 0.0023 s
-sequence = "UGAAGACCCAUUGAGUAACGACACCGCACGGCGCAUGGCGUCAGAGUAGCACUGCCUCGU"
-s1 =       "....(((((((.(.(...((....)).....).))))).)))((.((......))))..."
-s2 =       "....(((((((...((..((........))..)))))).))).(((..((...))))).."
+# sequence = "UGAAGACCCAUUGAGUAACGACACCGCACGGCGCAUGGCGUCAGAGUAGCACUGCCUCGU"
+# s1 =       "....(((((((.(.(...((....)).....).))))).)))((.((......))))..."
+# s2 =       "....(((((((...((..((........))..)))))).))).(((..((...))))).."
 
 # no sections 300
 # sequence = "UCACGACACCCCUCAACUAUAACAACGGUCCGUACAUACUAGCCCUGCAAUGGAACGGGCAGGGCCAGCACAGGUGGGGCGCCCGCUUGGGGGAUCAAAUGUGUGAUCCAGAUACUUUAGACGCGUGCAGAACUUUUUAGAUCGAUCAGUGGGAACAGGCAUUGAUUAUGAAAUCAAUUAGGGGGUUUAGGACCGCACCACAAACUGCGGGAGGGCACGCUUUGGUUCCUGUGUUACGCUAAUCCUCUAGCCACGGAGGGCUUCUUCGUACAAUGAUUGGGUUACCAGGGUUCCAGUGUG"
@@ -43,9 +48,9 @@ s2 =       "....(((((((...((..((........))..)))))).))).(((..((...))))).."
 # s1 =       "....(((.(.....).))).(((((((............((.(((((((.(((((((.....((((..((.(((.((.((..........)))).))))).)))).......))))).)).............(((((...........))))).(((...(((.(((..(((((((((((((((((((....))))))))....))).....)))))))).))))))..)))........))))))).))...)))))))...(((((...)))))(((((...........))))).."
 # s2 =       "....(((.(.....).))).(((((((............((.(((((((.(((((((...((((((..((.(((.((.((..........)))).))))).))))....)).)))).))).((((....))))(((((...........))))).(((...((.((((..(((((((((((((((((((....)))))))))....)).....)))))))).))))))..)))........))))))).))...)))))))((((.((((((....((......))...)))))).))))"
 
-sequence = "UGAAGACCCAUUGAGUAAAA"
-s1       = "(((((((.....)))).)))"
-s2       = "(((((.........)).)))"
+# sequence = "UGAAGACCCAUUGAGUAAAA"
+# s1       = "(((((((.....)))).)))"
+# s2       = "(((((.........)).)))"
 
 # sequence = "AAGAAGACCUCAAUCGAAUCACGGGCAAGUCCGACGAGGAACGCCUAGGCGAGGUGAUCGGCCCGAUCUUAAUGUAGGAUCCCCGGAGUCGCAUGACGACAGCUUAAUGUUCGUCCAGGGGGCAUACCCUUGGUGACUGUAAGCCGUGCCUGGUCCUUUUCUCGAAUGAGUCCACAGAUUAGCAAAUUUAAAAAGUGCGG"
 # s1 = ".....((.((((.((((....(((......)))..(((((....(((((((.(((.(((((((((((((((...)))))))...)).)))).)).))....(((((..((.((.(((((((.....)))))))))))..)))))).))))))))))))...)))).)))))).........(((...........))).."
@@ -57,7 +62,7 @@ s2       = "(((((.........)).)))"
 
 
 # 4
-search_width_multiplier = 4
+search_width_multiplier = 1
 # mp = False
 mp = True
 Verbose = True
@@ -90,8 +95,8 @@ fp = findpath.findpath_single(sequence, s1, s2, search_width_multiplier=search_w
 # fp = findpath.findpath_single(sequence, s1, s2, search_width=50, mp=mp)
 runtime = time.time()-start_findpath
 result = fp.get_en()/100.0
-# path = fp.get_path()
-# print_moves(sequence, s1, s2, path, convert_to_float=True)
+path = fp.get_path()
+print_moves(sequence, s1, s2, path, convert_to_float=True)
 print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
 
 
