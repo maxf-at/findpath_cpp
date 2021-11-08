@@ -81,5 +81,7 @@
     },
     "python.pythonPath": "/usr/bin/python",
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
-    "jupyter.jupyterServerType": "local"
+    "jupyter.jupyterServerType": "local",
+    "jupyter.maxOutputSize": 40,
+    "notebook.outline.showCodeCells": true
 }

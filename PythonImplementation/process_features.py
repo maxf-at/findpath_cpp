@@ -79,9 +79,7 @@ def process(sequence, s1, s2, search_width_multiplier = 20):
 
     for e, (a,b, en) in enumerate(path):
         if (a,b) == (0,0):
-            continue  
-
-        
+            continue         
 
         # check where we can go, compare with our best move. 
         pt = list(RNA.ptable(s))
@@ -99,7 +97,6 @@ def process(sequence, s1, s2, search_width_multiplier = 20):
             ij_moves.append((abs(i),abs(j)))
 
         # sort moves independent of delete insert moves
-
         ij_moves.sort(key=lambda x: (x[0], x[1]))
 
 
