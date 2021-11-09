@@ -83,5 +83,6 @@
     "C_Cpp.intelliSenseEngineFallback": "Enabled",
     "jupyter.jupyterServerType": "local",
     "jupyter.maxOutputSize": 40,
-    "notebook.outline.showCodeCells": true
+    "notebook.outline.showCodeCells": true,
+    "cmake.configureOnOpen": false
 }
