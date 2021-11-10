@@ -8,27 +8,15 @@ from dataclasses import dataclass
 
 import matplotlib.pyplot as plt
 
+def str_compare(s1, s2):
+    for i, (c1, c2) in enumerate(zip(s1, s2)):
+        if c1 != c2:
+            if c1 == ".":
+                yield i
+            else:
+                yield -i
 
-
-def pathfinder(sequence, s1, s2, verbose=False, output=False, search_width = None, section = None):
-
-    # prune off sections which will currently not be regarded / later merged
-    if section:
-        if len(section)==2:
-            start = section[0]
-            end = section[1]
-            s1 = '.'*start + s1[start:end] + '.'*(len(s1)-end)
-            s2 = '.'*start + s2[start:end] + '.'*(len(s1)-end)
-        if len(section)==4:
-            # print ('section 4', section)
-            start = section[0]
-            mid1 = section[1]
-            mid2 = section[2]
-            end = section[3]
-            s1 = '.'*start + s1[start:mid1] + '.'*(mid2-mid1) + s1[mid2:end] + '.'*(len(s1)-end)
-            s2 = '.'*start + s2[start:mid1] + '.'*(mid2-mid1) + s2[mid2:end] + '.'*(len(s1)-end)
-            # print (s1)
-            # print (s2)
+def pathfinder(sequence, s1, s2, verbose=False, output=False, search_width = None, return_paths=False, return_s=False):
 
     start = time.time()
     # Set model details (by Stefan)
@@ -64,11 +52,33 @@ def pathfinder(sequence, s1, s2, verbose=False, output=False, search_width = Non
     s_pos = 0
     en_min = float('inf')  # minimum, assuming we get below E1
 
-    for i, step in enumerate(paths):
+    moves_pos = []
+
+    current_structure = ""
+
+    for i, step in enumerate(paths):    
+
+        if return_paths:
+            moves = [i for i in str_compare('.'+current_structure, '.'+step.s)]
+            if moves==[]:
+                if return_s:
+                    moves_pos.append((0,0,step.en, step.s))
+                else:
+                    moves_pos.append((0,0,step.en))
+            else:
+                if return_s:
+                    moves_pos.append((moves[0],moves[1],step.en, step.s))
+                else:
+                    moves_pos.append((moves[0],moves[1],step.en))
+
         current_structure = step.s
+
         if step.en > sE:
             sE = step.en
             s_pos = i
+
+    if return_paths:
+        return sE, moves_pos
 
     return sE
 

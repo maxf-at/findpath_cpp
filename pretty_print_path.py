@@ -3,7 +3,7 @@
 
 import RNA
 
-def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, exclude=None, include=None, convert_to_float=False):
+def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, exclude=None, include=None, convert_to_float=False, add_column=False):
 
     """
     print a folding path with colour coding
@@ -61,12 +61,21 @@ def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, 
 
         output_rows.append((s, i, j, en))
 
-    for s, i, j, en in output_rows:
+    for pos, (s, i, j, en) in enumerate(output_rows):
+
+        if add_column:
+            add = ' ' + f'{add_column[pos]:.4}'
+        else:
+            add = ''
+
 
         # print initial row with move (0,0)
         if i == 0:
-            info = f'{move_color}[{i:4}, {j:4} ]{c.ENDC} {en:6.2f}'
-            if Verbose: print(f"{s} {info}")
+            info = f'{move_color}[{i:4}, {j:4} ]{c.ENDC}'
+            info_en = f' {en:6.2f}'
+
+            if Verbose:               
+                print(f"{info} {s} {info_en}{add}")
             continue
 
         pos_i = abs(i)-1
@@ -90,19 +99,22 @@ def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, 
         # colored_s = colored_s[0:x] + c.CYAN + colored_s[x:x+1] + c.ENDC + colored_s[x+1:]
 
         if en == max_en:
-            info += f' {c.RED}{c.BOLD}{en:6.2f}{c.ENDC}'
+            info_en = f' {c.RED}{c.BOLD}{en:6.2f}{c.ENDC}'
         else:
-            info += f' {en:6.2f}'
+            info_en = f' {en:6.2f}'
 
-        if Verbose:
-            if include != None:
-                if abs(i) in include:
-                    print(f"{info}")
-            elif exclude != None:
-                if abs(i) not in exclude:
-                    print(f"{info}")
-            else:
-                print(f"{colored_s} {info}")
+        print(f"{info} {colored_s} {info_en}{add}")
+
+        # if Verbose:
+        #     if include != None:
+        #         if abs(i) in include:
+        #             print(f"{info}")
+        #     elif exclude != None:
+        #         if abs(i) not in exclude:
+        #             print(f"{info}")
+        #     else:
+        #         print(f"{info} {colored_s} {info_en}")
+                
 
     barrier = max_en - e1
     if Verbose: print(

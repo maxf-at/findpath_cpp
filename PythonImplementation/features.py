@@ -24,10 +24,8 @@ def ij_distance(last_move, this_move, ij_moves):
     pos_new = ijmoves.index(this_move)
 
     distance = abs(pos_old-pos_new)/len(ijmoves)
-    
-    
+        
     # moves left in vicinity out of total moves
-    
     thisi, thisj = this_move
     lasti, lastj = last_move
     thisclose = 0
@@ -39,7 +37,6 @@ def ij_distance(last_move, this_move, ij_moves):
         if (abs(i-lasti) < 5) and (abs(j-lastj) < 5):
             lastclose += 1
     
-
     thisclose /= len(ij_moves)
     lastclose /= len(ij_moves)
 
