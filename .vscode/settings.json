@@ -84,5 +84,6 @@
     "jupyter.jupyterServerType": "local",
     "jupyter.maxOutputSize": 40,
     "notebook.outline.showCodeCells": true,
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "notebook.output.textLineLimit": 60
 }

@@ -3,6 +3,7 @@
 
 # generic Python libraries
 import numpy as np
+import pandas as pd
 import subprocess
 import matplotlib.pyplot as plt
 from PIL import Image
@@ -25,6 +26,17 @@ import coloredlogs
 # custom
 import RNA
 from helper import p_to_s, print_moves
+
+from sklearn.cluster import DBSCAN
+import tensorflow as tf
+from tensorflow import feature_column
+from tensorflow.keras import layers
+
+reloaded_model = tf.keras.models.load_model('dnn_model')
+
+# import feature_generation
+from features import ij_distance, new_move_dist, plt_moves, config_distance, balance_in_all_things, return_shift_moves
+from process_features import fp_call, find_moves, process
 
 
 
@@ -62,6 +74,138 @@ class Intermediate:
     opt:          float
     add_moves:    list
     # distance:     int
+
+
+
+
+
+
+
+
+def next_vicinity(lastmove, avail_moves):
+
+    """
+    percentage of moves which can continue in the vicinity of the last move
+    """
+    lasti = lastmove[0]
+    lastj = lastmove[1]
+    moves = len(avail_moves)
+    cntr = 0
+
+    for a in avail_moves:
+        i=a[0]
+        j=a[1]      
+        if lasti + 1 == i or lasti - 1 == i or\
+           lastj + 1 == j or lastj - 1 == j:
+           cntr += 1
+    return cntr
+
+
+def last_vs_best(lastmove, avail_moves, lensequence):
+    lasti = abs(lastmove[0])
+    lastj = abs(lastmove[1])
+    i = abs(avail_moves[0][0])
+    j = abs(avail_moves[0][1])
+
+    dist = abs(lasti - i) + abs(lastj - j)
+    return dist/(lensequence*2) #, dist, lensequence
+
+
+def cluster_moves(moves):
+    moves = np.array([(abs(i[0]), abs(i[1])) for i in moves])
+    clustering = DBSCAN(eps=2, min_samples=1).fit(moves)
+    unique_labels = len(set(clustering.labels_))
+    # normalize to 1
+    return 1/unique_labels
+
+
+# def structure_evaluation(sequence, s, s2):
+def structure_evaluation(fc, pt1, pt2, lastmove):
+    avail_moves = []
+    fp_results = []
+    en_contrib = []
+
+    available_add = set()
+    available_delete = set()
+    lensequence = pt1[0]
+
+    # pt1 = list(RNA.ptable(s))
+    # pt2 = list(RNA.ptable(s2))
+    for pos, (i,j) in enumerate(find_moves(pt1, pt2)):    
+        next_en = fc.eval_move_pt(pt1, i, j)
+        # mark where we found our move    
+        # map energies somehow to [0,1] such that the network will understand.  
+        en = np.interp(next_en/100, [-10,10], [0,1]) 
+        en_contrib.append(en)
+        avail_moves.append((i, j, next_en))
+
+        if i>0:
+            available_add.add((i,j))
+        elif i<0:
+            available_delete.add((i,j))
+
+    if len(avail_moves)==0:
+        add_delete = 0
+    else:
+        add_delete = len(available_delete)/len(avail_moves)
+
+    # print ('best', en_contrib[0], 'avg', en_mean)
+
+    avail_moves.sort(key=lambda x: x[2])
+
+
+    vic = next_vicinity(lastmove, avail_moves)
+    vic_best = next_vicinity(lastmove, avail_moves[0:1])
+
+    distlast = last_vs_best(lastmove, avail_moves, lensequence)
+
+    unique_moves = cluster_moves(avail_moves)
+
+    # print ("vicinity", vic, lastmove, "->", avail_moves)
+
+    # print ('avail add', available_add)
+    # print ('avail del', available_delete)
+
+    if len(avail_moves) == 0:
+        en_mean = 0
+        en_std = 0
+        best_en = 0
+
+
+    else:
+        en_mean = np.mean(en_contrib)
+        en_std = np.std(en_contrib)
+        en_contrib.sort(key=lambda x: x)
+        en_diff = en_contrib[0] / en_mean # best en, relative
+
+        best_en = en_contrib[0]
+
+
+    # compare with prediction
+    data = {'en_mean': [en_mean],
+            'en_std': en_std,
+            'best_en': best_en,
+            'vic': vic,
+            'vic_best': vic_best,
+            'unique_moves': unique_moves,
+            'distlast': distlast}
+    test_features = pd.DataFrame.from_dict(data)  
+    y = reloaded_model.predict(test_features)[0][0]
+    # print ("pred:", y)
+    # distlast = ("pred", round(y,4))
+    distlast = round(y,4)
+
+    
+    return distlast
+
+
+
+
+
+
+
+
+
 
 
 class Fp_class():
@@ -136,6 +280,7 @@ class Fp_class():
         # s1 = fp_class.s1
         # s2 = fp_class.s2
 
+
         e1 = self.evals[s1]
         e2 = self.evals[s2]
 
@@ -152,6 +297,8 @@ class Fp_class():
         init_path = [init_intermediate]
         # paths start with 1 initial path
         paths = [init_path]
+
+        eval_counter = 0
 
         # dont stop at current_bp_end, consider potential indirect moves
         while (current_bp != current_bp_end+2*len(self.moves_add)):
@@ -172,6 +319,8 @@ class Fp_class():
                 current_moves = current_path[-1].moves
                 current_energies = current_path[-1].energies
 
+                avail_moves = []
+
                 # "try_moves"
                 for i, j in self.find_moves(current_p_table, end_p_table):
 
@@ -179,6 +328,8 @@ class Fp_class():
                         delete_moves += 1
                     else:
                         add_moves += 1
+
+                    
 
                     current_add_moves = current_path[-1].add_moves.copy()
 
@@ -192,6 +343,9 @@ class Fp_class():
                     next_e = self.fc.eval_move(
                         current_string, i, j) + current_e
                     next_e = round(next_e, 2)
+
+                    avail_moves.append((i,j, self.fc.eval_move(current_string, i, j)))
+                    eval_counter += 1
 
                     next_p_table = current_p_table.copy()
                     if i < 0:
@@ -230,19 +384,21 @@ class Fp_class():
 
                 collect_paths_per_move.sort(key=lambda x: x[-1].saddle_e)
 
-                # if current_bp == 3:
-                #     collect_paths_per_move = collect_paths_per_move[0:2]
-                # if current_bp >=4 and current_bp <=6:
-                #     collect_paths_per_move = collect_paths_per_move[0:2]
-                # if current_bp >=12:
-                #     collect_paths_per_move = collect_paths_per_move[0:3]
+                avail_moves.sort(key=lambda x: x[2])
 
-                # print (current_bp, add_moves, delete_moves)
+                lastmove = collect_paths_per_move[0][-1].moves[-2]
+                selected = collect_paths_per_move[0][-1].moves[-1]
 
-                # if add_moves>delete_moves:
-                #     collect_paths_per_move = collect_paths_per_move[0:3]
+                seval = structure_evaluation(self.fc, current_p_table, end_p_table, lastmove)
+                if seval < 0.05:
+                    collect_paths_per_move = collect_paths_per_move[0:1]
 
-                # collect_paths_per_move = collect_paths_per_move[0:5]
+
+                # if current_bp>15:
+                #     collect_paths_per_move = collect_paths_per_move[0:1]
+                # print ("here", lastmove, seval)
+
+
 
                 collect_paths += collect_paths_per_move
 
@@ -277,14 +433,15 @@ class Fp_class():
             # second sorting step
             collect_paths.sort(key=lambda x: (x[-1].saddle_e, x[-1].current_e))
 
-            print("iteration", current_bp, len(collect_paths))
+            print("iteration", current_bp, len(collect_paths), "evals:", eval_counter)
 
             # discard paths
             # if current_bp == 6:                 
             #     width = 1
 
-            info = [0.125, 0.1875, 0.0, 0.058823529411764705, 0.0, 0.0, 0.0, 0.07692307692307693, 0.08333333333333333, 0.16666666666666666, 0.0, 0.16666666666666666, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
             
+
+
             # if info[current_bp] == 0:
             #     width = 1
 
@@ -397,9 +554,14 @@ if __name__ == '__main__':
     s1       = '.(((................))).((((((....(((((((((.(((((((.(......).)))))))...))).)).))))..))))))..........'
     s2       = '...(((.........)))..((((((((((.(((((((((....(((((((.(......).)))))))...)).))))).).).))))))....))))..'
 
+    sequence = "GACCGACUUACUACCCGCAGACGCAAAGUAAUCAAGACACCGUAUACCAAUGCCGUCCUAUAUUGGGAAGCCAGUUAAAGCGUACUAUUUCGGACCAAGA"
+    # s1       = "..((((..........((....))..............((.((((....)))).)).....(((((....)))))..............))))......."
+    s1       = "..((((.(((((....((....))..))))).......((.((((....)))).))..((.(((((....)))))))............))))......."
+    s2       = "..((((..((.(((..((.((((((..(((..(........)..)))...)).))))....(((((....)))))....))))).))..))))......."
+
 
     section = ()
-    search_width = 60
+    search_width = 30
     Verbose = True
     # Debug = True
     Debug = False
