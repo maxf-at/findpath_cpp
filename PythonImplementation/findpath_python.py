@@ -182,17 +182,20 @@ def structure_evaluation(fc, pt1, pt2, lastmove):
 
 
     # compare with prediction
-    data = {'en_mean': [en_mean],
-            'en_std': en_std,
-            'best_en': best_en,
-            'vic': vic,
-            'vic_best': vic_best,
-            'unique_moves': unique_moves,
-            'distlast': distlast}
-    test_features = pd.DataFrame.from_dict(data)  
-    y = reloaded_model.predict(test_features)[0][0]
-    # print ("pred:", y)
-    # distlast = ("pred", round(y,4))
+    # data = {'en_mean': [en_mean],
+    #         'en_std': en_std,
+    #         'best_en': best_en,
+    #         'vic': vic,
+    #         'vic_best': vic_best,
+    #         'unique_moves': unique_moves,
+    #         'distlast': distlast}
+    # test_features = pd.DataFrame.from_dict(data)  
+
+    return (en_mean, en_std, best_en, vic, vic_best, unique_moves, distlast)
+
+    # y = reloaded_model.predict(test_features)[0][0]
+    y = 1
+    
     distlast = round(y,4)
 
     
@@ -263,7 +266,8 @@ class Fp_class():
                     s_ptable[i] != t_ptable[i] and s_ptable[j] != t_ptable[j]:
                 yield -i, -j
 
-    def find_path_once(self, s1, s2, max_energy, width, mode=True, sort_min=False, Debug=False, Verbose=False):
+    def find_path_once(self, s1, s2, max_energy, width, mode=True, sort_min=False,\
+        Debug=False, Verbose=False, limit=False):
         """
         main findpath algorithm (bounded BFS)
         """
@@ -305,6 +309,8 @@ class Fp_class():
 
             # collect all new paths here (next iteration)
             collect_paths = []
+            collect_paths2 = []
+            collect_seval = []
 
             for current_path in paths:
 
@@ -390,27 +396,44 @@ class Fp_class():
                 selected = collect_paths_per_move[0][-1].moves[-1]
 
                 seval = structure_evaluation(self.fc, current_p_table, end_p_table, lastmove)
-                if seval < 0.05:
-                    collect_paths_per_move = collect_paths_per_move[0:1]
+                collect_seval.append(seval)
 
-
-                # if current_bp>15:
+                # if seval < 0.05:
                 #     collect_paths_per_move = collect_paths_per_move[0:1]
-                # print ("here", lastmove, seval)
 
+                collect_paths2.append(collect_paths_per_move)
 
+            collect_seval = pd.DataFrame(collect_seval, columns=['en_mean', 'en_std',\
+                 'best_en', 'vic', 'vic_best', 'unique_moves', 'distlast'])
+            
+            if limit:
+                y = reloaded_model.predict(collect_seval).T[0]
+            
+            # print (collect_seval)
+            # print (y)
 
-                collect_paths += collect_paths_per_move
+            if (current_bp == 19 or current_bp == 20) and limit:
+                print_d(y)
 
+            for i in range(len(collect_seval)):
+                
+                
+                # if limit and y[i] < 0.05:
+                # if limit and y[i] < 0.05 and (current_bp < 19 or current_bp > 20):
+                #     collect_paths2[i] = collect_paths2[i][0:1]
+                
+                # if limit and y[i] < 0.05 and y[i] > 0.00040:
+                #     collect_paths2[i] = collect_paths2[i][0:1]
+                
+                collect_paths += collect_paths2[i]
 
 
             # first sorting step
             collect_paths.sort(key=lambda x: (x[-1].p_table, x[-1].saddle_e))
 
+
             last_ptable = []
-            # last_ptable = collect_paths[-1][0].p_table
-            # last_ptable = collect_paths[0][-1].p_table
-            print_d("sort done", last_ptable, init_intermediate.p_table)
+            # print_d("sort done", last_ptable, init_intermediate.p_table)
 
             # remove duplicates ptables
             if current_bp+1 != current_bp_end:
@@ -433,7 +456,7 @@ class Fp_class():
             # second sorting step
             collect_paths.sort(key=lambda x: (x[-1].saddle_e, x[-1].current_e))
 
-            print("iteration", current_bp, len(collect_paths), "evals:", eval_counter)
+            print_d("iteration", current_bp, len(collect_paths), "evals:", eval_counter)
 
             # discard paths
             # if current_bp == 6:                 
@@ -468,7 +491,8 @@ class Fp_class():
                     yield path[-1]
 
 
-def find_path(sequence, s1, s2, add_moves=[], results=1, indirect_iterations=2, search_width=1000, Debug=False, Verbose=False):
+def find_path(sequence, s1, s2, add_moves=[], results=1, indirect_iterations=2,\
+    search_width=1000, Debug=False, Verbose=False, limit=False):
     """
     indirect findpath, main function
 
@@ -503,7 +527,8 @@ def find_path(sequence, s1, s2, add_moves=[], results=1, indirect_iterations=2, 
 
         # fwd path
         for path in fp_class.find_path_once(
-                s1, s2, max_energy, search_width, mode=True, sort_min=False, Debug=Debug, Verbose=Verbose):
+                s1, s2, max_energy, search_width, mode=True, sort_min=False,\
+                Debug=Debug, Verbose=Verbose, limit=limit):
 
                 if path.saddle_e < saddle_en1:
                     saddle_en1 = path.saddle_e
@@ -549,10 +574,17 @@ if __name__ == '__main__':
     sequence   = "CCAGCGUAUUAGUUAUGGCCUGGAGGUAGAAGCGUUAGAGCAAUACUUCUACAGAGACCACGUGAGGUAG"
     s1         = "((((..((.......))..))))..(((((((.............))))))).................."
     s2         = "((((((((.....))).)).)))..(((((((.((.......)).)))))))....(((......))).."
+    search_width = 30
+
+    sequence = "CCCGUUUCAGCGUCUGGGUCGUAAUCGUCUUGUCUCUGGGCGAAUCGAUAACUGAUCCGUCACUACAGCCGAAGCCAAAGCCAAUGACGGUCCCACCUAU"
+    s1 = "...(((((.((((.((((((((.((((..(((((....)))))..)))).)).))))))..))....)).)))))....(((......)))........."
+    s2 = "..(((....)))..(((((.(..((((((......(((((((.((((.....)))).))))....))).....((....))....))))))..))))))."
+    search_width = 50
 
     sequence = 'AGGUGUUAUAAAAGUGCAGAGCCAAGUCACCGCCUUGCCGUCGCUUCCGCUAUGCCUCAAAAGCGGAAUAUCGAGCGAGCGAUUGUGAUUCGAAUGGUCG'
     s1       = '.(((................))).((((((....(((((((((.(((((((.(......).)))))))...))).)).))))..))))))..........'
     s2       = '...(((.........)))..((((((((((.(((((((((....(((((((.(......).)))))))...)).))))).).).))))))....))))..'
+    # search_width = 30
 
     sequence = "GACCGACUUACUACCCGCAGACGCAAAGUAAUCAAGACACCGUAUACCAAUGCCGUCCUAUAUUGGGAAGCCAGUUAAAGCGUACUAUUUCGGACCAAGA"
     # s1       = "..((((..........((....))..............((.((((....)))).)).....(((((....)))))..............))))......."
@@ -561,20 +593,57 @@ if __name__ == '__main__':
 
 
     section = ()
-    search_width = 30
+    search_width = 100
     Verbose = True
-    # Debug = True
-    Debug = False
+    Debug = True
+    # Debug = False
 
+    limit=False
+    limit=0.003
 
-    add_moves = []
-    indirect_iterations = 1
-    paths = find_path(sequence, s1, s2, indirect_iterations=indirect_iterations, add_moves=add_moves,
-                      search_width=search_width, Debug=Debug, Verbose=Verbose)
+    # paths = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
+    #                   search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit)
+    # for s, sw, mode, moves in paths:
+    #     print_moves(sequence, s1, s2, moves, Verbose=Verbose)
+    #     break
 
-    for s, sw, mode, moves in paths:
-        print_moves(sequence, s1, s2, moves, Verbose=Verbose)
-        break
+    # print ([(i[0], i[1]) for i in paths])
 
-    print ([(i[0], i[1]) for i in paths])
+    filename_samples = f'./dataset_100_large.csv'
+    samples_df = pd.read_csv(filename_samples)
+    for index, row in samples_df.iterrows():
+        # if index != 809:
+        #     continue
+        if index != 13:
+            continue
+        # if index == 20:
+        #     break
+        sequence = row.sequence
+        s1 = row.s1
+        s2 = row.s2
+        en1, en2 = 0, 0
 
+        output_path = False
+        output_path = True
+
+        # limit=False
+        # paths = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
+        #                 search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit)
+        # for s, sw, mode, moves in paths:
+        #     en1 = print_moves(sequence, s1, s2, moves, Verbose=output_path)
+        #     break
+        en1 = 0
+
+        limit=0.05
+        paths = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
+                        search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit)
+        for s, sw, mode, moves in paths:
+            en2 = print_moves(sequence, s1, s2, moves, Verbose=output_path)
+            break
+
+        print(f"sequence = \"{sequence}\"")
+        print(f"s1 = \"{s1}\"")
+        print(f"s2 = \"{s2}\"")
+        print (RNA.bp_distance(s1, s2))
+
+        print ('regular', en1, 'with limit', en2)
