@@ -351,6 +351,9 @@ class Fp_class():
                         current_string, i, j) + current_e
                     next_e = round(next_e, 2)
 
+                    if limit:
+                        print_d(current_string, (i,j), current_e, next_e)
+
                     avail_moves.append((i,j, self.fc.eval_move(current_string, i, j)))
                     eval_counter += 1
 
@@ -396,16 +399,15 @@ class Fp_class():
 
                 avail_moves.sort(key=lambda x: x[2])
 
+    
                 lastmove = collect_paths_per_move[0][-1].moves[-2]
                 selected = collect_paths_per_move[0][-1].moves[-1]
 
                 seval = structure_evaluation(self.fc, current_p_table, end_p_table, lastmove)
                 collect_seval.append(seval)
 
-                print_d("seval", lastmove)
+                print_d(current_bp, "lastmove", lastmove, "avail moves", avail_moves)
 
-                # if seval < 0.05:
-                #     collect_paths_per_move = collect_paths_per_move[0:1]
 
                 collect_paths2.append(collect_paths_per_move)
 
@@ -427,7 +429,8 @@ class Fp_class():
                 
                 
                 if limit and y[i] < 0.05:
-                # if limit and y[i] < 0.05 and (current_bp < 19 or current_bp > 20):
+                # if limit and y[i] < 0.05 and (current_bp != 2):
+                # if limit and y[i] > 0.0 and y[i] < 0.05:
                     collect_paths2[i] = collect_paths2[i][0:1]
                 
                 # if limit and y[i] < 0.05 and y[i] > 0.00040:
