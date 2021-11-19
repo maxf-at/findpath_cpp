@@ -35,8 +35,8 @@ import findpath
 
 sys.path.append('./indirect')
 import helper
-target_count = 2000
-x = 100
+target_count = 1000
+x = 300
 min_bp_dist = 14
 
 def detect_local_minimum(fc, structure):
@@ -71,7 +71,8 @@ while (len(s_list) < target_count):
         result = fp.get_en()/100.0
         results.append(result)
         
-    if results[0] != results[1] and results[1] != results[2]:
+    # if results[0] != results[1] and results[1] != results[2]:
+    if results[0] != results[2]:
         
         # print(f"sequence = '{sequence}'")
         # print(f"s1       = '{s1}'")
@@ -85,7 +86,7 @@ while (len(s_list) < target_count):
 
             # save seqs every 10 iterations.
             df = pd.DataFrame(s_list, columns=['sequence', 's1', 's2']).set_index('sequence')
-            filename = f'./dataset_100E_large.csv'
+            filename = f'./dataset_{x}_large.csv'
             df.to_csv(filename)
 
         

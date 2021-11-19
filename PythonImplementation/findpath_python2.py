@@ -32,7 +32,7 @@ import tensorflow as tf
 from tensorflow import feature_column
 from tensorflow.keras import layers
 
-reloaded_model = tf.keras.models.load_model('dnn_model')
+reloaded_model = tf.keras.models.load_model('dnn_model4')
 
 # import feature_generation
 from features import ij_distance, new_move_dist, plt_moves, config_distance, balance_in_all_things, return_shift_moves
@@ -191,7 +191,9 @@ def structure_evaluation(fc, pt1, pt2, lastmove):
     #         'distlast': distlast}
     # test_features = pd.DataFrame.from_dict(data)  
 
-    return (en_mean, en_std, best_en, vic, vic_best, unique_moves, distlast)
+    # return (en_mean, en_std, best_en, vic, vic_best, unique_moves, distlast)
+    return (en_mean, en_std, best_en)
+
 
     # y = reloaded_model.predict(test_features)[0][0]
     y = 1
@@ -303,6 +305,7 @@ class Fp_class():
         paths = [init_path]
 
         eval_counter = 0
+        sorting_couter = 0
 
         # dont stop at current_bp_end, consider potential indirect moves
         while (current_bp != current_bp_end+2*len(self.moves_add)):
@@ -411,13 +414,15 @@ class Fp_class():
 
                 collect_paths2.append(collect_paths_per_move)
 
+            # collect_seval = pd.DataFrame(collect_seval, columns=['en_mean', 'en_std',\
+            #      'best_en', 'vic', 'vic_best', 'unique_moves', 'distlast'])
             collect_seval = pd.DataFrame(collect_seval, columns=['en_mean', 'en_std',\
-                 'best_en', 'vic', 'vic_best', 'unique_moves', 'distlast'])
+                 'best_en'])
             
             if limit:
                 y = reloaded_model.predict(collect_seval).T[0]
-                print (y)
-                print (collect_moves)
+                # print_d (y)
+                # print_d (collect_moves)
             
             # print (collect_seval)
             # print (y)
@@ -429,15 +434,17 @@ class Fp_class():
                 
                 
                 if limit and y[i] < 0.05:
+                    collect_paths2[i] = collect_paths2[i][0:3]
                 # if limit and y[i] < 0.05 and (current_bp != 2):
                 # if limit and y[i] > 0.0 and y[i] < 0.05:
-                    collect_paths2[i] = collect_paths2[i][0:1]
                 
                 # if limit and y[i] < 0.05 and y[i] > 0.00040:
                 #     collect_paths2[i] = collect_paths2[i][0:1]
                 
                 collect_paths += collect_paths2[i]
 
+    
+            sorting_couter += len(collect_paths)
 
             # first sorting step
             collect_paths.sort(key=lambda x: (x[-1].p_table, x[-1].saddle_e))
@@ -495,6 +502,7 @@ class Fp_class():
             paths = collect_paths
             current_bp += 1
 
+        print ('sorting', limit, sorting_couter)
         # return remaining paths
         if paths:
             for path in paths:
@@ -608,8 +616,8 @@ if __name__ == '__main__':
     section = ()
     search_width = 10
     Verbose = True
-    Debug = True
-    # Debug = False
+    # Debug = True
+    Debug = False
 
     limit=False
     limit=0.003
@@ -629,21 +637,21 @@ if __name__ == '__main__':
         #     continue
         # if index != 13:
         #     continue
-        if index != 417:
-            continue
+        # if index != 417:
+        #     continue
         # if bp_dist > 20:
         #     continue
 
-        # if index == 20:
-        #     break
+        if index == 20:
+            break
         sequence = row.sequence
         s1 = row.s1
         s2 = row.s2
 
-        sequence = "AACGGGGGCUUCAACUCGCUCAGAAUCAGCGGUAUAGAUAUCCGGGUAGCGGCUUAAAGCAGCACUUUACCAUCGAGGGGGCAAGGAACACUAGCCGACU"
-        s1       = "..((((...((..((.((((.......))))))..))...))))(((((.((((......))).).)))))....((..(((.((.....)).)))..))"
-        s1       = "..((((....((...(((((.......)))))....))..))))(((((.(.(........)..).)))))....((..(((.((.....)).)))..))"
-        s2       = "..((((....((...(((((.......)))))....))..))))((((.(.((.....)).).....))))....((..(((.((.....)).)))..))"
+        # sequence = "AACGGGGGCUUCAACUCGCUCAGAAUCAGCGGUAUAGAUAUCCGGGUAGCGGCUUAAAGCAGCACUUUACCAUCGAGGGGGCAAGGAACACUAGCCGACU"
+        # s1       = "..((((...((..((.((((.......))))))..))...))))(((((.((((......))).).)))))....((..(((.((.....)).)))..))"
+        # s1       = "..((((....((...(((((.......)))))....))..))))(((((.(.(........)..).)))))....((..(((.((.....)).)))..))"
+        # s2       = "..((((....((...(((((.......)))))....))..))))((((.(.((.....)).).....))))....((..(((.((.....)).)))..))"
 
         bp_dist = RNA.bp_distance(s1, s2)
 
@@ -653,7 +661,7 @@ if __name__ == '__main__':
         en1, en2 = 0, 0
 
         output_path = False
-        output_path = True
+        # output_path = True
         limit=False
 
 
@@ -671,7 +679,7 @@ if __name__ == '__main__':
             en2 = print_moves(sequence, s1, s2, moves, Verbose=output_path)
             break
         
-        print (moves)
+        # print (moves)
 
 
         print(f"sequence = \"{sequence}\"")
