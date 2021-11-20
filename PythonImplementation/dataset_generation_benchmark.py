@@ -42,7 +42,7 @@ from sklearn.cluster import DBSCAN
 sys.path.append('./indirect')
 import helper
 target_count = 200
-x = 200
+x = 300
 min_bp_dist = 14
 
 
