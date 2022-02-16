@@ -14,8 +14,8 @@ import findpath_librna
 
 
 # o_filename = r"local_min_100_multiple_sections_min10.csv"
-# o_filename = r"local_min_200_multiple_sections_min10.csv"
-o_filename = r"local_min_300_multiple_sections_min10.csv"
+o_filename = r"local_min_200_multiple_sections_min10.csv"
+# o_filename = r"local_min_300_multiple_sections_min10.csv"
 # o_filename = r"local_min_400_multiple_sections_min10.csv"
 # o_filename = r"local_min_500_multiple_sections_min10.csv"
 # o_filename = r"local_min_600_multiple_sections_min10.csv"
@@ -89,7 +89,7 @@ all_offset_values = 0
 
 for index, row in df.iterrows():
 
-    # if index!=5:
+    # if index!=2:
     #     continue
 
     sequence = row.sequence
@@ -129,6 +129,8 @@ for index, row in df.iterrows():
         # print(f"s2 = \"{s2}\"")
     #     break
     all_offset_values += offset
+
+    # break
 
 end = round(time.time()-start, 4)
 

@@ -4,6 +4,7 @@
 import sys
 import random
 import string
+from tabnanny import verbose
 import RNA
 import numpy as np
 import os
@@ -106,7 +107,7 @@ def generate_structures(length=150):
     return sequence, s1, s2
 
 
-def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, exclude=None, include=None):
+def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, exclude=None, include=None, midpoint=False):
 
     """
     print a folding path with colour coding
@@ -116,8 +117,6 @@ def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, 
 
     without verbosity, this just returns max_en
     """
-
-    # print (moves)
 
     # from stackexchange...
     class c:
@@ -141,8 +140,12 @@ def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, 
     output_rows = []
     moves_i_j = [(x[0],x[1]) for x in moves]
 
+    if midpoint:
+        bpd = RNA.bp_distance(s1, s2)
+        bpmid = int(bpd/2)
+
     # preprocessing - generate strings & energies if required
-    for move in moves:
+    for rowid, move in enumerate(moves):
         en = False
         if len(move) == 2:
             i, j = move
@@ -157,6 +160,9 @@ def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, 
         e2 = en
         if en > max_en:
             max_en = en
+
+        if midpoint and rowid == bpmid:
+            mp = s
         output_rows.append((s, i, j, en))
 
     for s, i, j, en in output_rows:
@@ -195,17 +201,20 @@ def print_moves(sequence, s1, s2, moves, move_color='\033[93m', Verbose = True, 
         if Verbose:
             if include != None:
                 if abs(i) in include:
-                    print(f"{info}")
+                    if Verbose: print(f"{info}")
             elif exclude != None:
                 if abs(i) not in exclude:
-                    print(f"{info}")
+                    if Verbose: print(f"{info}")
             else:
-                print(f"{colored_s} {info}")
+                if Verbose: print(f"{colored_s} {info}")
 
     barrier = max_en - e1
     if Verbose: print(
         f"S: {max_en:6.2f} kcal/mol | B: {barrier:6.2f} kcal/mol | E[start]:{e1:6.2f} E[end]:{e2:6.2f}")
     
+    if midpoint:
+        return mp
+
     return max_en
 
 

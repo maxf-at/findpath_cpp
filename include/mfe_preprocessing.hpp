@@ -85,6 +85,7 @@ auto mfe_findpath(std::string sequence, std::string s1, std::string s2,
     }
 
     // std::cout << "launch part 1 \n";
+    // std::cout << sequence << "\n";
 
     auto end     = std::chrono::system_clock::now();
     auto elapsed = end - start;
@@ -97,10 +98,9 @@ auto mfe_findpath(std::string sequence, std::string s1, std::string s2,
     auto elapsed2 = end - start;
     start         = std::chrono::system_clock::now();
 
-    // std::cout << "s1 -> mfe\n";
-    // std::cout << vrna_db_from_ptable(pt1) << "\n";
-    // std::cout << mfe_structure << " " << result_1.max_en << "\n";
-    // std::cout << vrna_db_from_ptable(pt2) << "\n";
+    // std::cout << "s1 -> mfe " << bp_dist_1 << "\n";
+    // std::cout << vrna_db_from_ptable(pt1) << " / " << vrna_eval_structure_pt(fc, pt1) << "\n";
+    // std::cout << mfe_structure << " / " << vrna_eval_structure_pt(fc, pt_mfe) << " " << result_1.max_en << "\n";
 
     auto part_2   = findpath(sequence, mp);
     auto result_2 = part_2.init(s_mfe, s2, search_width_multiplier);
@@ -109,10 +109,9 @@ auto mfe_findpath(std::string sequence, std::string s1, std::string s2,
     auto elapsed3 = end - start;
     start         = std::chrono::system_clock::now();
 
-    // std::cout << "mfe -> s2\n";
-    // std::cout << vrna_db_from_ptable(pt1) << "\n";
-    // std::cout << mfe_structure << " " << result_2.max_en << "\n";
-    // std::cout << vrna_db_from_ptable(pt2) << "\n";
+    // std::cout << "mfe -> s2 " << bp_dist_2 << "\n";
+    // std::cout << mfe_structure << " / " << vrna_eval_structure_pt(fc, pt_mfe) << " " << result_2.max_en << "\n";
+    // std::cout << vrna_db_from_ptable(pt2) << " / " << vrna_eval_structure_pt(fc, pt2) << "\n";
 
 
     // std::cout << "elapsed: " << elapsed.count() / 1000.0 << "/" << elapsed2.count() / 1000.0 <<

@@ -853,8 +853,11 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
 
         int search_width = current_sections.bp_dist * search_width_multiplier;
         if (search_width == 0) { search_width = 1; }
-        single_findpath fp_call;
-        auto            result = fp_call.init(fc, pt1.data(), pt2.data(), search_width, true);
+        single_findpath fp_call; 
+
+        
+        auto            result = fp_call.init(fc, pt1.data(), pt2.data(), search_width, true); // todo: add / disable multithreading
+        // auto            result = fp_call.init(fc, pt1.data(), pt2.data(), search_width, false);
 
         // postprocess paths into graph
         // s_graph G_inner{fc, pt_1, pt_2, current_sections.bp_dist, result};
@@ -942,7 +945,9 @@ auto findpath::process_int_loops(int_loops current_sections, std::vector<short> 
     } else {
         if (search_width == 0) { search_width = 1; }
         single_findpath fp_call;
-        auto result = fp_call.init(fc, outer_pt1.data(), outer_pt2.data(), search_width, true);
+
+        auto result = fp_call.init(fc, outer_pt1.data(), outer_pt2.data(), search_width, true); // todo: enable/disable multithreading
+        // auto result = fp_call.init(fc, outer_pt1.data(), outer_pt2.data(), search_width, false);
         // postprocessing: outer paths into graph
         G_outer = s_graph{fc, outer_pt1, outer_pt2, outer_bp_dist, result, result[0].max_en};
 

@@ -16,10 +16,7 @@ import findpath_librna
 import findpath
 
 
-sys.path.append('../../pathfinder/src')
-import merge_recursive
-import merge_composition
-import pathfinder
+
 
 # o_filename = r"local_min_100_multiple_sections_min10.csv"
 # o_filename = r"local_min_200_multiple_sections_min10.csv"
@@ -53,19 +50,18 @@ print("processing:", filename)
 
 
 
+# new api
 def launch_new_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
     result = findpath.init_single_findpath(sequence, s1, s2, swm, mp)
     end_findpath = round(time.time()-start_findpath, 4)
     result = round(result/100.0,2)
     return end_findpath, result
-
 def launch_new_merge_fp(sequence, s1, s2, swm=None, mp=True):
     start_findpath = time.time()
-    
     fp = findpath.findpath_class(sequence, mp)
-    result = fp.init(s1, s2, swm)
-    
+    fp.init(s1, s2, swm)
+    result = fp.get_en()
     end_findpath = round(time.time()-start_findpath, 4)
     result = round(result/100.0,2)
     return end_findpath, result
@@ -146,11 +142,12 @@ for index, row in df.iterrows():
 
 #     sws = [1,2,3,4,6,8,10,15,20]
     # sws = [1,2,3,4,6,8,10,15,20,30,40,60]
-    sws = [0.5, 0.75, 1,2,4,8,16,32] # up to 200
-    sws = [0.5, 0.75, 1,2,4,8] # up to 200
+    # sws = [0.5, 0.75, 1,2,4,8,16,32] # up to 200
+    # sws = [0.5, 0.75, 1,2,4,8] # up to 200
+    sws = [0.5, 1,2,4,7,10] # up to 200
     # sws = [1,2,3,4,6]
 
-    sections = merge_composition.merge_check(sequence, s1, s2, Debug=False)
+
     
     if index > 100: 
         break
@@ -213,13 +210,7 @@ for index, row in df.iterrows():
         py_runtimes.append(time_fp)
         py_results.append(round(result,2))
 
-        # old merge findpath
-        # try:
-        #     old_result = merge_recursive.recursive_merge(sequence, s1, s2, sections, search_width=1, search_width_multiplier=search_width_multiplier,
-        #                 Verbose=False, Debug=False, plot_graph=False, new=True,
-        #                 print_sections=True, max_rec_depth=99).max_en
-        # except:
-        #     old_result = 0        
+   
         old_result = 0
 
         old_merge_results.append(old_result)
@@ -240,7 +231,7 @@ df_save.columns = ["i", "sequence", "s1", "s2", "seq_length", "search_width_mult
 
 # prefix = "sw_scaling_fasthash_"
 # prefix = "sw_scaling_"
-prefix = "sw_scaling_h3_"
+prefix = "sw_scaling_final_"
 
 
 savefile = r"./results/" + prefix + o_filename

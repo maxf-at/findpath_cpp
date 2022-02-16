@@ -263,8 +263,8 @@ inline auto single_findpath::findpath_method(vrna_fold_compound_t* fc, short* pt
         } else {
             fwd_paths = find_path_once(fc, pt1, pt2, current_search_width, max_en, direction,
                                        final_search_width);
-            // bwd_paths = find_path_once(fc, pt2_bwd, pt1_bwd, current_search_width, max_en,
-                                    //    not direction, final_search_width);
+            bwd_paths = find_path_once(fc, pt2_bwd, pt1_bwd, current_search_width, max_en,
+                                       not direction, final_search_width);
         }
 
         // debug: discard bwd paths

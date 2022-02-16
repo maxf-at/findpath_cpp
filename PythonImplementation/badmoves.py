@@ -46,10 +46,10 @@ seqid = 0
 
 startid = 0
 
-filename_samples = f'./dataset_100_large.csv'
-# filename_samples = f'./dataset_200_large.csv'
+# filename_samples = f'./dataset_100_large.csv'
+filename_samples = f'./dataset_200_large.csv'
 
-debug = False
+# debug = False
 debug = True
 
 counter = []

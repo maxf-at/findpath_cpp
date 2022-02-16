@@ -15,9 +15,9 @@ from pretty_print_path import print_moves
 # s2 =       ".............((((((((((((.(((((.((.((((((((((...((.((((((((((...(((..((((((.......))))))....))).....))))..(((((...(((..(((((((....(((......((((.................((((((...))))))........((((((((((((.(((((((((((((.....))..((((......((((((......)))))).....))))....((((((((((((..((((........)))))))))...........))))))).........(((........))).))))))))))).)))..)))))))))....)))).......))))))).)))..))).))))).))))..)).))..))).))).)))).))..)))...((((((....))))))))...)))).))))))))............(((((((((((((.(((.((.(((((.((((..(((((((((.......(((...)))......))))))))))))).))))).))..............)))))..)))))))))))"
 
 # no sections 300
-sequence = "UCACGACACCCCUCAACUAUAACAACGGUCCGUACAUACUAGCCCUGCAAUGGAACGGGCAGGGCCAGCACAGGUGGGGCGCCCGCUUGGGGGAUCAAAUGUGUGAUCCAGAUACUUUAGACGCGUGCAGAACUUUUUAGAUCGAUCAGUGGGAACAGGCAUUGAUUAUGAAAUCAAUUAGGGGGUUUAGGACCGCACCACAAACUGCGGGAGGGCACGCUUUGGUUCCUGUGUUACGCUAAUCCUCUAGCCACGGAGGGCUUCUUCGUACAAUGAUUGGGUUACCAGGGUUCCAGUGUG"
-s1 = ".........(((((.(((........)))............(((((((..........))))))).....((((((((...))))))))..((((((......))))))......(((((((.(.(........(((((....((((((((........)))))))).))))).......).).))))))).(((((........))))))))))((((((..((.(((((.((.((.((((((........((((((.....)))))).....)))))))).)))))))..))))))))"
-s2 = ".(((...((((........((((..(((((.((((...((.(((((((..........))))))).))..((((((((...))))))))((((((.....(((((((.(((..((..((((.((((((.(((((((((((((.((((((((........)))))))).....)))...))))))))))....(((((........)))))....))))))))))))..))).)))))))..)))))).((((......)))).....))))...))))).))))...))))....))).."
+# sequence = "UCACGACACCCCUCAACUAUAACAACGGUCCGUACAUACUAGCCCUGCAAUGGAACGGGCAGGGCCAGCACAGGUGGGGCGCCCGCUUGGGGGAUCAAAUGUGUGAUCCAGAUACUUUAGACGCGUGCAGAACUUUUUAGAUCGAUCAGUGGGAACAGGCAUUGAUUAUGAAAUCAAUUAGGGGGUUUAGGACCGCACCACAAACUGCGGGAGGGCACGCUUUGGUUCCUGUGUUACGCUAAUCCUCUAGCCACGGAGGGCUUCUUCGUACAAUGAUUGGGUUACCAGGGUUCCAGUGUG"
+# s1 = ".........(((((.(((........)))............(((((((..........))))))).....((((((((...))))))))..((((((......))))))......(((((((.(.(........(((((....((((((((........)))))))).))))).......).).))))))).(((((........))))))))))((((((..((.(((((.((.((.((((((........((((((.....)))))).....)))))))).)))))))..))))))))"
+# s2 = ".(((...((((........((((..(((((.((((...((.(((((((..........))))))).))..((((((((...))))))))((((((.....(((((((.(((..((..((((.((((((.(((((((((((((.((((((((........)))))))).....)))...))))))))))....(((((........)))))....))))))))))))..))).)))))))..)))))).((((......)))).....))))...))))).))))...))))....))).."
 
 # 3 ext loops
 # sequence = "AACCCGCGAUAAGUUGGCGCUUGUCCCACUCCGUAAACCUGUGUCUCUCAGGCGGUUACCCGAUAGAAGGCAGUAGGAUGUAUCACCCCCCACCGACUCCACUAUACAACGAAACCGGCCCUUUGUGAAUAAACGCUCUCAGUUAGAUUGAGCGGCGCAACAGAACCAGAUCGAUUCCCGGGGCAGUAGUGUCCUACUGCCCAACCCGGUAGAGGGAUCGAGUGGUCUAGGCGAAUGAUACGAGAGGCUCACUGGGGACGAUGGGAGUGAUCUACUCGAUGUUGCGUCCGAUCACAUCCA"
@@ -26,9 +26,9 @@ s2 = ".(((...((((........((((..(((((.((((...((.(((((((..........))))))).))..((((
 
 
 # 100 nt with 2 inner sections
-# sequence = "CGCAUCUCUUUAGGGUAUGAAAUGUUAUAUGCUACGGGAACAAUGCCGACCUUCGGAGACCUAAGGAAUACGUCUUUCGAGCGGAAGGAUUCCUCGUUCA"
-# s1 = ".(((((((..(((.((((((....)))))).))).))))....)))(((...)))..(((...((((....(((((((.....))))))))))).))).."
-# s2 = "....((.((.(((.((((((....)))))).))).))))......((((...)))).(((...(((((....((((((.....))))))))))).))).."
+sequence = "CGCAUCUCUUUAGGGUAUGAAAUGUUAUAUGCUACGGGAACAAUGCCGACCUUCGGAGACCUAAGGAAUACGUCUUUCGAGCGGAAGGAUUCCUCGUUCA"
+s1 = ".(((((((..(((.((((((....)))))).))).))))....)))(((...)))..(((...((((....(((((((.....))))))))))).))).."
+s2 = "....((.((.(((.((((((....)))))).))).))))......((((...)))).(((...(((((....((((((.....))))))))))).))).."
 
 # sequence = "UCUACUAUUCCGGCUUGACAUAAAUAUCGAGUGCUCGACCGCUAUUAUGGUACUUUCCAGCGUUUUGAUUGGUGGAUAAUAUCCCCCAAAAACGCGAGUC"
 # s1 = "............(((((..........)))))((((..((........)).........((((((...((((.((((...)))).))))))))))))))."
@@ -41,6 +41,7 @@ s2 = ".(((...((((........((((..(((((.((((...((.(((((((..........))))))).))..((((
 
 # settings
 search_width_multiplier = 4
+search_width_multiplier = 0.01
 
 mp = False
 # mp = True
@@ -61,15 +62,15 @@ print("~~~~~~~~~~~")
 print(f'single section')
 start_findpath = time.time()
 
-# call with search width multiplier:
+# # call with search width multiplier:
 fp = findpath.findpath_single(sequence, s1, s2, search_width_multiplier=search_width_multiplier, mp=mp)
 
-# call with fixed search width integer:
-# fp = findpath.findpath_single(sequence, s1, s2, search_width=50, mp=mp)
+# # call with fixed search width integer:
+# # fp = findpath.findpath_single(sequence, s1, s2, search_width=50, mp=mp)
 
-# call with added model detail dictionary:
-# fp = findpath.findpath_single(sequence, s1, s2, search_width_multiplier=search_width_multiplier, 
-#     mp=mp, model_details={"temperature": -14.5,})
+# # call with added model detail dictionary:
+# # fp = findpath.findpath_single(sequence, s1, s2, search_width_multiplier=search_width_multiplier, 
+# #     mp=mp, model_details={"temperature": -14.5,})
 
 runtime = time.time()-start_findpath
 result = fp.get_en()/100.0
@@ -105,6 +106,7 @@ model_details = {
     "temperature": 37.0,
 }
 
+
 # # first merge findpath call
 # print("~~~~~~~~~~~")
 # print(f'first merge findpath')
@@ -115,9 +117,10 @@ model_details = {
 # runtime = time.time()-start_findpath
 # result = fp.get_en()/100.0
 # path = fp.get_path()
-# print_moves(sequence, s1, s2, path, convert_to_float=True)
+# # print_moves(sequence, s1, s2, path, convert_to_float=True)
 # # print(fp.get_sections())
 # print(f'S: {result:2.2f}, barrier: {result-s1_eval:2.2f}, runtime: {runtime:2.4f} s')
+
 
 
 

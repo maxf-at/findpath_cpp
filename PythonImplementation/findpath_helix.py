@@ -80,6 +80,11 @@ class Intermediate:
     energies:     list
     opt:          float
     cluster_counter:    list
+    lastaddcluster: int
+    lastaddleft: int
+    lastdelcluster: int
+    lastdelleft: int
+
     # distance:     int
 
 
@@ -322,7 +327,7 @@ class Fp_class():
                 yield -i, -j
 
     def find_path_once(self, s1, s2, max_energy, width, mode=True, sort_min=False,\
-        Debug=False, Verbose=False, limit=False):
+        Debug=False, Verbose=False, limit=False, hopp=False):
         """
         main findpath algorithm (bounded BFS)
         """
@@ -378,13 +383,20 @@ class Fp_class():
         
         # init_clusters = [0] * (clabels[-1]+1)
         # print (init_clusters)
+        # print (add_clusters)
 
-
+        lastaddcluster = -1
+        lastaddleft = -1
+        lastdelcluster = -1
+        lastdelleft = -1
 
         s1_en = round(evals[s1], 2)
         end_p_table = self.p_tables[s2]
         init_intermediate = Intermediate(p_table=list(p_tables[s1]), mode=mode, saddle_e=float(
-            "-inf"), current_e=evals[s1], moves=[(0, 0, s1_en)], energies=[0], opt=0, cluster_counter=init_clusters)
+            "-inf"), current_e=evals[s1], moves=[(0, 0, s1_en)], energies=[0], opt=0, cluster_counter=init_clusters,
+                                                        lastaddcluster=lastaddcluster, lastaddleft=lastaddleft, 
+                                                        lastdelcluster=lastdelcluster, lastdelleft=lastdelleft                                                        
+                                                        )
         # initial path start with 1 intermediate
         init_path = [init_intermediate]
         # paths start with 1 initial path
@@ -456,7 +468,6 @@ class Fp_class():
                         delete_moves += 1
 
 
-
                     # next energy calculations
                     next_e = self.fc.eval_move(
                         current_string, i, j) + current_e
@@ -476,7 +487,8 @@ class Fp_class():
                     #     continue
 
                     if limit and i<0:
-                        # helix removal
+                        # helix removal only from the sides
+                        
                         # print_d(current_string, (i,j), current_e, next_e)
                         a = next_clusters[next_cluster][0]
                         b = next_clusters[next_cluster][-1]
@@ -518,8 +530,8 @@ class Fp_class():
                                 continue
 
 
-                                # 
-                        else:
+
+                        if i>0: # greedy addition only
                             # start a new cluster
                             if best_per_cluster_id[next_cluster] != i:
                                 continue
@@ -550,6 +562,34 @@ class Fp_class():
 
                     # print (current_bp, diversity, len(add_clusters)+len(del_clusters))
 
+                    lastaddcluster = current_path[-1].lastaddcluster
+                    lastaddleft = current_path[-1].lastaddleft
+                    lastdelcluster = current_path[-1].lastdelcluster
+                    lastdelleft = current_path[-1].lastdelleft 
+
+                    if i < 0:
+                        nextaddcluster = current_path[-1].lastaddcluster
+                        nextaddleft = current_path[-1].lastaddleft
+                        nextdelcluster = next_cluster
+                        nextdelleft = len(next_clusters[next_cluster])
+                    if i > 0:
+                        nextaddcluster = next_cluster
+                        nextaddleft = len(add_clusters[next_cluster]) - len(next_clusters[next_cluster])
+                        nextdelcluster = current_path[-1].lastaddcluster
+                        nextdelleft = current_path[-1].lastaddleft
+
+
+                    # continue with current cluster if possible
+
+                    if hopp and i>0 and lastaddcluster!=-1 and lastaddleft!=0:
+                        if lastaddcluster != next_cluster: 
+                            continue
+
+                    # if hopp and i<0 and lastdelcluster!=-1 and lastdelleft!=0:
+                    #     if lastdelcluster != next_cluster: 
+                    #         continue
+
+                        # print (current_bp, (i,j), "last", lastaddcluster, "current", next_cluster)
 
                     # print (next_clusters, a, b)
 
@@ -583,7 +623,10 @@ class Fp_class():
                         en_moves = [x[2] for x in next_moves]
 
                         new_intermediate = Intermediate(p_table=next_p_table, mode=mode, saddle_e=next_s, current_e=next_e,
-                                                        moves=next_moves, energies=next_energies, opt=diversity, cluster_counter=next_clusters)
+                                                        moves=next_moves, energies=next_energies, opt=diversity, cluster_counter=next_clusters,
+                                                        lastaddcluster=nextaddcluster, lastaddleft=nextaddleft, 
+                                                        lastdelcluster=nextdelcluster, lastdelleft=nextdelleft                                                        
+                                                        )
 
                         new_path = current_path.copy() + [new_intermediate]
 
@@ -639,6 +682,8 @@ class Fp_class():
             rest = collect_paths[width:]
             collect_paths = collect_paths[:width]
 
+
+            # diversity add extra (questionable...)
             if limit == 2:
                 lcounter = 0
                 # print (current_bp, "len", len(rest))
@@ -683,7 +728,7 @@ class Fp_class():
                 for i in range(len(collect_paths)):
                     if collect_paths[i][-1].p_table == list(end_p_table):
                         # print("y")
-                        yield collect_paths[i][-1]
+                        yield collect_paths[i][-1], eval_counter
                     # yield collect_paths[i][-1]
 
 
@@ -697,11 +742,11 @@ class Fp_class():
         if paths:
             for path in paths:
                 if path:
-                    yield path[-1]
+                    yield path[-1], eval_counter
 
 
 def find_path(sequence, s1, s2, add_moves=[], results=1, indirect_iterations=2,\
-    search_width=1000, Debug=False, Verbose=False, limit=False, simple=False):
+    search_width=1000, Debug=False, Verbose=False, limit=False, simple=False, hopp=False):
     """
     indirect findpath, main function
 
@@ -732,12 +777,16 @@ def find_path(sequence, s1, s2, add_moves=[], results=1, indirect_iterations=2,\
 
     if simple: iterations = [search_width]
 
+
+    evf = 0
+    evb = 0
+
     for search_width in iterations:
 
         # fwd path
-        for path in fp_class.find_path_once(
+        for path, eval_counter in fp_class.find_path_once(
                 s1, s2, max_energy, search_width, mode=True, sort_min=False,\
-                Debug=Debug, Verbose=Verbose, limit=limit):
+                Debug=Debug, Verbose=Verbose, limit=limit, hopp=hopp):
 
                 if path.saddle_e < saddle_en1:
                     saddle_en1 = path.saddle_e
@@ -745,13 +794,16 @@ def find_path(sequence, s1, s2, add_moves=[], results=1, indirect_iterations=2,\
                 for pos, (i, j, e) in enumerate(path.moves):
                     current_moves.append((i, j, e))                
                 paths.append([path.saddle_e, search_width, True, current_moves])
+
+                if eval_counter>evf:
+                    evf = eval_counter
                 # print (path.saddle_e, max_energy)
 
         # bwd path
         if not simple:
-            for path in fp_class.find_path_once(
+            for path, eval_counter in fp_class.find_path_once(
                     s2, s1, max_energy, search_width, mode=False, sort_min=False,\
-                    Debug=Debug, Verbose=Verbose, limit=limit):
+                    Debug=Debug, Verbose=Verbose, limit=limit, hopp=hopp):
                     if path.saddle_e < saddle_en1:
                         saddle_en1 = path.saddle_e
                     current_moves = []
@@ -763,6 +815,9 @@ def find_path(sequence, s1, s2, add_moves=[], results=1, indirect_iterations=2,\
                     current_moves.insert(0, (0, 0))  
                     paths.append([path.saddle_e, search_width, False, current_moves])
 
+                    if eval_counter>evb:
+                        evb = eval_counter
+
         if max_energy > saddle_en1:
             max_energy = saddle_en1
         if max_energy > saddle_en2:
@@ -771,7 +826,7 @@ def find_path(sequence, s1, s2, add_moves=[], results=1, indirect_iterations=2,\
     # best path to 0
     paths.sort(key = lambda x: x[0])
 
-    return max_energy, paths
+    return max_energy, paths, evf+evb
     return paths
 
 
@@ -789,36 +844,40 @@ if __name__ == '__main__':
     s2         = "((((((((.....))).)).)))..(((((((.((.......)).)))))))....(((......))).."
     search_width = 30
 
-    sequence = "CCCGUUUCAGCGUCUGGGUCGUAAUCGUCUUGUCUCUGGGCGAAUCGAUAACUGAUCCGUCACUACAGCCGAAGCCAAAGCCAAUGACGGUCCCACCUAU"
-    s1 = "...(((((.((((.((((((((.((((..(((((....)))))..)))).)).))))))..))....)).)))))....(((......)))........."
-    s2 = "..(((....)))..(((((.(..((((((......(((((((.((((.....)))).))))....))).....((....))....))))))..))))))."
-    search_width = 50
+    # sequence = "CCCGUUUCAGCGUCUGGGUCGUAAUCGUCUUGUCUCUGGGCGAAUCGAUAACUGAUCCGUCACUACAGCCGAAGCCAAAGCCAAUGACGGUCCCACCUAU"
+    # s1 = "...(((((.((((.((((((((.((((..(((((....)))))..)))).)).))))))..))....)).)))))....(((......)))........."
+    # s2 = "..(((....)))..(((((.(..((((((......(((((((.((((.....)))).))))....))).....((....))....))))))..))))))."
+    # search_width = 50
 
-    sequence = 'AGGUGUUAUAAAAGUGCAGAGCCAAGUCACCGCCUUGCCGUCGCUUCCGCUAUGCCUCAAAAGCGGAAUAUCGAGCGAGCGAUUGUGAUUCGAAUGGUCG'
-    s1       = '.(((................))).((((((....(((((((((.(((((((.(......).)))))))...))).)).))))..))))))..........'
-    s2       = '...(((.........)))..((((((((((.(((((((((....(((((((.(......).)))))))...)).))))).).).))))))....))))..'
-    # search_width = 30
+    # sequence = 'AGGUGUUAUAAAAGUGCAGAGCCAAGUCACCGCCUUGCCGUCGCUUCCGCUAUGCCUCAAAAGCGGAAUAUCGAGCGAGCGAUUGUGAUUCGAAUGGUCG'
+    # s1       = '.(((................))).((((((....(((((((((.(((((((.(......).)))))))...))).)).))))..))))))..........'
+    # s2       = '...(((.........)))..((((((((((.(((((((((....(((((((.(......).)))))))...)).))))).).).))))))....))))..'
+    # # search_width = 30
 
-    sequence = "GACCGACUUACUACCCGCAGACGCAAAGUAAUCAAGACACCGUAUACCAAUGCCGUCCUAUAUUGGGAAGCCAGUUAAAGCGUACUAUUUCGGACCAAGA"
-    # s1       = "..((((..........((....))..............((.((((....)))).)).....(((((....)))))..............))))......."
-    s1       = "..((((.(((((....((....))..))))).......((.((((....)))).))..((.(((((....)))))))............))))......."
-    s2       = "..((((..((.(((..((.((((((..(((..(........)..)))...)).))))....(((((....)))))....))))).))..))))......."
+    # sequence = "GACCGACUUACUACCCGCAGACGCAAAGUAAUCAAGACACCGUAUACCAAUGCCGUCCUAUAUUGGGAAGCCAGUUAAAGCGUACUAUUUCGGACCAAGA"
+    # # s1       = "..((((..........((....))..............((.((((....)))).)).....(((((....)))))..............))))......."
+    # s1       = "..((((.(((((....((....))..))))).......((.((((....)))).))..((.(((((....)))))))............))))......."
+    # s2       = "..((((..((.(((..((.((((((..(((..(........)..)))...)).))))....(((((....)))))....))))).))..))))......."
 
-    sequence = "UUCUAGGAACCACCCAACGUCCUAAUAGCUCGAUGGAUGAUCAGGAUGCAUAUCACGCGACGUCCCGAACCUAUACAGACCGGGCAGAACACAGCCACUU"
-    s1 = ".................((((...((((.(((..(((((.((.((((....))).)..))))))))))..))))...)).))(((........)))...."
-    s2 = "...(((((.(........))))))...(((((.((..((.((.((((((.........).))))).))...))..))...)))))..............."
-    s2 = "...(((((.(........))))))..........................................................(((........)))...."
+    # sequence = "UUCUAGGAACCACCCAACGUCCUAAUAGCUCGAUGGAUGAUCAGGAUGCAUAUCACGCGACGUCCCGAACCUAUACAGACCGGGCAGAACACAGCCACUU"
+    # s1 = ".................((((...((((.(((..(((((.((.((((....))).)..))))))))))..))))...)).))(((........)))...."
+    # s2 = "...(((((.(........))))))...(((((.((..((.((.((((((.........).))))).))...))..))...)))))..............."
+    # s2 = "...(((((.(........))))))..........................................................(((........)))...."
 
 
-    sequence = "AUCUGACCUCAGCGGGAGGAGUUUACUGGACUAUAAUAUUGCCCUCCAUGCAACCCAAAAUCUCCAAUGAUUCCAACUAGCGCGAUCAUCACCAAGGAUC"
-    s1 = "...(((.(.(.((((..((((((...((((........((((.......)))).........))))..))))))..)).))).).)))............"
-    s2 = "...........((((((((.......((.....)).......))))).)))........((((...((((((.(.......).))))))......))))."
+    # sequence = "AUCUGACCUCAGCGGGAGGAGUUUACUGGACUAUAAUAUUGCCCUCCAUGCAACCCAAAAUCUCCAAUGAUUCCAACUAGCGCGAUCAUCACCAAGGAUC"
+    # s1 = "...(((.(.(.((((..((((((...((((........((((.......)))).........))))..))))))..)).))).).)))............"
+    # s2 = "...........((((((((.......((.....)).......))))).)))........((((...((((((.(.......).))))))......))))."
 
-    sequence = "GAAAUGGUCCUACUCCGUAGCUUAAUGAUCCGAAGUCAGUAUCUGAUACACUCUUCAGGCCGGUAGCCCACAUCGCGCAGCCUUGUCGAUGAUCCACGCU"
-    s1 = "...((((.......)))).(((...((..((((((...((((...))))...)))).)).))..)))...(((((.(((....))))))))........."
-    s2 = "....(((..(((((........((.((((.....)))).))(((((........)))))..))))).)))(((((.(((....))))))))........."
+    # sequence = "GAAAUGGUCCUACUCCGUAGCUUAAUGAUCCGAAGUCAGUAUCUGAUACACUCUUCAGGCCGGUAGCCCACAUCGCGCAGCCUUGUCGAUGAUCCACGCU"
+    # s1 = "...((((.......)))).(((...((..((((((...((((...))))...)))).)).))..)))...(((((.(((....))))))))........."
+    # s2 = "....(((..(((((........((.((((.....)))).))(((((........)))))..))))).)))(((((.(((....))))))))........."
 
-    search_width = 2
+    # sequence = "CAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACCAGACCACAAUGCAGGGCGGCACCGUUAGGCAA"
+    # s1 =       ".......(((((.........((((....(((.......))))))).....................................))))).((....))..."
+    # s2 =       ".......(((((.........((((....(((.......))))))).((((((.....))))))...................))))).((....))..."
+
+    search_width = 20
 
     # sws = 20
     sws = 2
@@ -830,8 +889,9 @@ if __name__ == '__main__':
     limit=0.003
 
 
-    Debug = False
-    # Debug = 80
+    # Debug = False
+    # Debug = 1
+    Debug = 1
     # Debug = 8
     # Debug = -1
 
@@ -845,11 +905,11 @@ if __name__ == '__main__':
 
     better = []
     worse = []
+    collect = []
 
-
-    # filename_samples = f'./dataset_100_large.csv'
-    # filename_samples = f'./dataset_200_large.csv'
-    filename_samples = f'./dataset_300_large.csv'
+    filename_samples = 'dataset_100_large.csv'
+    # filename_samples = 'dataset_200_large.csv'
+    # filename_samples = 'dataset_300_large.csv'
 
     # better [16, 25, 31, 57, 64, 66, 76, 78, 81, 91, 99, 128, 138, 146, 152, 165, 168, 171, 173, 175, 197, 203, 230, 231, 232, 237, 239, 242, 256, 270, 272, 283, 292, 303, 311, 319, 321, 331, 347, 364, 375, 377, 382, 396, 401, 409, 420, 423, 424, 436, 440, 451, 453, 463, 468, 469, 470, 475, 479, 481, 489, 490, 500, 518, 527, 532, 535, 545, 562, 583, 589, 595, 613, 615, 625, 631, 640, 646, 651, 675, 680, 682, 721, 725, 731, 739, 755, 761, 763, 773, 793, 799, 801, 803, 806, 814, 817, 818, 821, 832, 844, 850, 855, 858, 864, 870, 873, 882, 895, 912, 913, 925, 931, 947, 948, 950, 966, 974, 978, 981, 992]
     # worse [80, 297, 367, 616, 637, 693, 743, 777, 815, 904, 915]
@@ -861,12 +921,13 @@ if __name__ == '__main__':
     samples_df = pd.read_csv(filename_samples)
     for index, row in samples_df.iterrows():
         
-                
-        
-        if index == 100:
+
+        if index == 1000:
             break
-        # if index != 13:
+
+        # if index < 100:
         #     continue
+
         # if index != 417:
         #     continue
         # if bp_dist > 20:
@@ -891,7 +952,9 @@ if __name__ == '__main__':
                     break
 
 
-
+        sequence = "CAAUUGCGCCGCAUAAAACCAGAGAUUCUACCCUCAAUCGGUUCUUAAGACGUACUGCGCGUUUCACCAGACCACAAUGCAGGGCGGCACCGUUAGGCAA"
+        s1 =       ".......(((((.........((((....(((.......))))))).....................................))))).((....))..."
+        s2 =       ".......(((((.........((((....(((.......))))))).((((((.....))))))...................))))).((....))..."
 
         # sequence = "AACGGGGGCUUCAACUCGCUCAGAAUCAGCGGUAUAGAUAUCCGGGUAGCGGCUUAAAGCAGCACUUUACCAUCGAGGGGGCAAGGAACACUAGCCGACU"
         # s1       = "..((((...((..((.((((.......))))))..))...))))(((((.((((......))).).)))))....((..(((.((.....)).)))..))"
@@ -913,11 +976,15 @@ if __name__ == '__main__':
 
         output_path = False
         # output_path = True
-        limit=False
 
+        limit=False        
+        hopp=False
 
-        en1, paths1 = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
-                        search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit)
+        start = time.time()
+        en1, paths1, c1 = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
+                        search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit, hopp=hopp)
+        t1 = time.time()-start
+
         if Debug:
             for s, sw, mode, moves in paths1:
                 print_moves(sequence, s1, s2, moves, Verbose=output_path)
@@ -925,14 +992,31 @@ if __name__ == '__main__':
         # en1 = 0
 
         limit=0.05
-        en2, paths2 = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
-                        search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit)
+        hopp=False
+
+        start = time.time()
+        en2, paths2, c2 = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
+                        search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit, hopp=hopp)
+        t2 = time.time()-start
+
         if Debug:
             for s, sw, mode, moves in paths2:
-
                 print_moves(sequence, s1, s2, moves, Verbose=output_path)
                 break
         
+        limit=0.05
+        hopp=True
+
+        start = time.time()
+        en3, paths3, c3 = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
+                        search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit, hopp=hopp)
+        t3 = time.time()-start
+        
+        if Debug:
+            for s, sw, mode, moves in paths2:
+                print_moves(sequence, s1, s2, moves, Verbose=output_path)
+                break
+
         # limit=2
         # en3, paths2 = find_path(sequence, s1, s2, indirect_iterations=1, add_moves=[],
         #                 search_width=search_width, Debug=Debug, Verbose=Verbose, limit=limit)
@@ -947,13 +1031,19 @@ if __name__ == '__main__':
             better.append(index)
         if en1 < en2:
             worse.append(index)
+        collect.append((en1, c1, t1, en2, c2, t2, en3, c3, t3))
+
         print(f"sequence = \"{sequence}\"")
         print(f"s1 = \"{s1}\"")
         print(f"s2 = \"{s2}\"")
         print (bp_dist)
 
         # print ('regular', en1, 'with limit', en2, "limit2", en3)
-        print ('regular', en1, 'with limit', en2)
+        print ('regular', en1, 'with limit', en2, en3)
     
     print ("better", better)
     print ("worse", worse)
+
+    # df = pd.DataFrame(collect)
+    # df.to_csv(f"./results/{filename_samples}2")
+    # print (df)
